@@ -28,20 +28,20 @@ under the License.
     <version>7</version>
   </parent>
 
-  <groupId>com.github.nitayj.hive-io</groupId>
-  <artifactId>hive-io</artifactId>
+  <groupId>com.facebook.giraph.hive</groupId>
+  <artifactId>hive-io-experimental</artifactId>
   <packaging>jar</packaging>
   <version>0.1-SNAPSHOT</version>
 
   <name>Hive I/O</name>
-  <url>https://github.com/nitay/hive-io</url>
+  <url>https://github.com/facebook/hive-io-experimental</url>
   <description>Library for reading / writing to Hive</description>
   <inceptionYear>2013</inceptionYear>
 
   <scm>
-    <connection>scm:git:git://github.com/nitay/hive-io.git</connection>
-    <developerConnection>scm:git:git@github.com:nitay/hive-io.git</developerConnection>
-    <url>https://github.com/nitay/hive-io</url>
+    <connection>scm:git:git://github.com/facebook/hive-io-experimental.git</connection>
+    <developerConnection>scm:git:git@github.com:facebook/hive-io-experimental.git</developerConnection>
+    <url>https://github.com/facebook/hive-io-experimental</url>
   </scm>
 
   <licenses>
@@ -275,7 +275,6 @@ under the License.
   </build>
 
   <dependencies>
-    <!-- compile dependencies. sorted lexicographically. -->
     <dependency>
       <groupId>com.github.spullara.cli-parser</groupId>
       <artifactId>cli-parser</artifactId>
