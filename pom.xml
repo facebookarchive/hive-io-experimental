@@ -39,7 +39,7 @@ under the License.
   <inceptionYear>2013</inceptionYear>
 
   <scm>
-    <connection>scm:git:http://svn.apache.org/repos/asf/giraph</connection>
+    <connection>scm:git:git://github.com/nitay/hive-io.git</connection>
     <developerConnection>scm:git:git@github.com:nitay/hive-io.git</developerConnection>
     <url>https://github.com/nitay/hive-io</url>
   </scm>
