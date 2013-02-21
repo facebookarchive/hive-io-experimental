@@ -95,10 +95,12 @@ under the License.
             <manifest>
               <addDefaultImplementationEntries>true</addDefaultImplementationEntries>
               <addDefaultSpecificationEntries>true</addDefaultSpecificationEntries>
+              <addClasspath>true</addClasspath>
             </manifest>
             <manifestEntries>
               <Build-Jdk>${java.version}</Build-Jdk>
               <Build-Time>${maven.build.timestamp}</Build-Time>
+              <Giraph-Version>${giraph.version}</Giraph-Version>
               <Git-Commit-Branch>${mvngit.branch}</Git-Commit-Branch>
               <Git-Commit-Hash>${mvngit.commit.id}</Git-Commit-Hash>
               <Git-Commit-Date>${mvngit.commit.committer.date}</Git-Commit-Date>
@@ -113,6 +115,57 @@ under the License.
             <phase>compile</phase>
             <goals>
               <goal>single</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-checkstyle-plugin</artifactId>
+        <version>2.9</version>
+        <configuration>
+          <configLocation>${project.basedir}/checkstyle.xml</configLocation>
+          <headerLocation>${project.basedir}/license-header.txt</headerLocation>
+          <enableRulesSummary>false</enableRulesSummary>
+          <failOnError>true</failOnError>
+          <includeTestSourceDirectory>false</includeTestSourceDirectory>
+        </configuration>
+        <executions>
+          <execution>
+            <phase>verify</phase>
+            <goals>
+               <goal>check</goal>
+             </goals>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-jar-plugin</artifactId>
+        <version>2.3.2</version>
+        <configuration>
+          <archive>
+            <manifest>
+              <addDefaultImplementationEntries>true</addDefaultImplementationEntries>
+              <addDefaultSpecificationEntries>true</addDefaultSpecificationEntries>
+              <addClasspath>true</addClasspath>
+            </manifest>
+            <manifestEntries>
+              <Build-Jdk>${java.version}</Build-Jdk>
+              <Build-Time>${maven.build.timestamp}</Build-Time>
+              <Git-Commit-Branch>${mvngit.branch}</Git-Commit-Branch>
+              <Git-Commit-Hash>${mvngit.commit.id}</Git-Commit-Hash>
+              <Git-Commit-Date>${mvngit.commit.committer.date}</Git-Commit-Date>
+              <Git-Committer-Email>${mvngit.commit.committer.email}</Git-Committer-Email>
+              <Git-Committer-Name>${mvngit.commit.committer.name}</Git-Committer-Name>
+            </manifestEntries>
+          </archive>
+        </configuration>
+        <executions>
+          <execution>
+            <goals>
+              <goal>jar</goal>
+              <!--<goal>test-jar</goal>-->
             </goals>
           </execution>
         </executions>
@@ -143,6 +196,24 @@ under the License.
                 </requireMavenVersion>
               </rules>
             </configuration>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>findbugs-maven-plugin</artifactId>
+        <version>2.5.1</version>
+        <configuration>
+          <xmlOutput>true</xmlOutput>
+          <findbugsXmlOutput>false</findbugsXmlOutput>
+          <excludeFilterFile>${project.basedir}/findbugs-exclude.xml</excludeFilterFile>
+        </configuration>
+        <executions>
+          <execution>
+            <phase>verify</phase>
+            <goals>
+              <goal>check</goal>
+            </goals>
           </execution>
         </executions>
       </plugin>
@@ -284,6 +355,16 @@ under the License.
       <groupId>com.google.guava</groupId>
       <artifactId>guava</artifactId>
       <version>12.0</version>
+    </dependency>
+    <dependency>
+      <groupId>com.yammer.metrics</groupId>
+      <artifactId>metrics-core</artifactId>
+      <version>2.2.0</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.hadoop</groupId>
+      <artifactId>hadoop-core</artifactId>
+      <version>0.20.203.0</version>
     </dependency>
     <dependency>
       <groupId>org.apache.hive</groupId>
