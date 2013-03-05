@@ -32,6 +32,7 @@ import org.apache.thrift.transport.TTransportException;
 
 import java.lang.reflect.Field;
 import java.net.URI;
+import java.util.List;
 
 /**
  * Wrapper around Thrift MetasStore client with helper methods.
@@ -136,8 +137,8 @@ public class HiveMetastores {
    * @return Thrift Hive client, or null if could not make one out of URIs
    */
   private static ThriftHiveMetastore.Iface createFromURIs(HiveConf hiveConf) {
-    URI[] uris = HiveUtils.getURIs(hiveConf, HiveConf.ConfVars.METASTOREURIS);
-    if (uris.length == 0) {
+    List<URI> uris = HiveUtils.getURIs(hiveConf, HiveConf.ConfVars.METASTOREURIS);
+    if (uris.isEmpty()) {
       LOG.warn("No Hive Metastore URIs to connect to");
       return null;
     }

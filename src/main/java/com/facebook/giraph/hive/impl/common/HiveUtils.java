@@ -50,23 +50,25 @@ public class HiveUtils {
    *
    * @param conf Configuration to use
    * @param key String key to lookup
-   * @return URI[] from value
+   * @return URI list from value
    */
-  public static URI[] getURIs(HiveConf conf, HiveConf.ConfVars key) {
+  public static List<URI> getURIs(HiveConf conf, HiveConf.ConfVars key) {
     String[] parts = conf.getVar(key).split(",");
-    URI[] uris = new URI[parts.length];
+    List<URI> uris = Lists.newArrayList();
     for (int i = 0; i < parts.length; ++i) {
       URI uri;
       try {
         uri = new URI(parts[i]);
       } catch (URISyntaxException e) {
-        throw new IllegalArgumentException(e);
+        LOG.error("URI syntax error", e);
+        continue;
       }
       if (uri.getScheme() == null) {
-        throw new IllegalArgumentException("URI '" + parts[i] +
-            "' from key " + key + " does not have a scheme");
+        LOG.error("URI '" + parts[i] + "' from key " + key +
+            " does not have a scheme");
+      } else {
+        uris.add(uri);
       }
-      uris[i] = uri;
     }
     return uris;
   }
