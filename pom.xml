@@ -123,9 +123,10 @@ under the License.
         <version>2.9</version>
         <configuration>
           <configLocation>${project.basedir}/checkstyle.xml</configLocation>
-          <headerLocation>${project.basedir}/license-header.txt</headerLocation>
+          <consoleOutput>true</consoleOutput>
           <enableRulesSummary>false</enableRulesSummary>
-          <failOnError>true</failOnError>
+          <failOnViolation>true</failOnViolation>
+          <headerLocation>${project.basedir}/license-header.txt</headerLocation>
           <includeTestSourceDirectory>false</includeTestSourceDirectory>
         </configuration>
         <executions>
