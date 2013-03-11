@@ -40,6 +40,26 @@ public class HiveTableSchemas {
   protected HiveTableSchemas() { }
 
   /**
+   * Configure object with hive table schema, if it supports it
+   * @param obj Object
+   * @param schema Hive table schema
+   */
+  public static void configure(Object obj, HiveTableSchema schema) {
+    if (obj instanceof HiveTableSchemaAware) {
+      ((HiveTableSchemaAware) obj).setTableSchema(schema);
+    }
+  }
+
+  /**
+   * Configure object with hive table schema
+   * @param obj Object
+   * @param schema Hive table schema
+   */
+  public static void configure(HiveTableSchemaAware obj, HiveTableSchema schema) {
+    obj.setTableSchema(schema);
+  }
+
+  /**
    * Get schema for a table
    * @param conf Configuration
    * @param dbName Database name
