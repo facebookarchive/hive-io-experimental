@@ -20,7 +20,7 @@ package com.facebook.giraph.hive.output;
 
 import org.apache.hadoop.io.WritableComparable;
 
-import com.facebook.giraph.hive.HiveRecord;
+import com.facebook.giraph.hive.record.HiveRecord;
 
 /**
  * Observer for output operations
@@ -60,4 +60,38 @@ public interface HiveApiOutputObserver {
    * @param value Value
    */
   void endWrite(WritableComparable<?> key, HiveRecord value);
+
+  /**
+   * Output observer that does nothing
+   */
+  class Empty implements HiveApiOutputObserver {
+    /** Singleton */
+    private static final Empty INSTANCE = new Empty();
+
+    /** Constructor */
+    protected Empty() { }
+
+    /**
+     * Get singleton
+     * @return singelton instance
+     */
+    public static Empty get() {
+      return INSTANCE;
+    }
+
+    @Override
+    public void beginSerialize(WritableComparable<?> key, HiveRecord value) { }
+
+    @Override
+    public void serializeFailed(WritableComparable<?> key, HiveRecord value) { }
+
+    @Override
+    public void endSerialize(WritableComparable<?> key, HiveRecord value) { }
+
+    @Override
+    public void beginWrite(WritableComparable<?> key, HiveRecord value) { }
+
+    @Override
+    public void endWrite(WritableComparable<?> key, HiveRecord value) { }
+  }
 }

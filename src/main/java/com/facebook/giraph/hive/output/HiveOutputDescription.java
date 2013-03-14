@@ -21,7 +21,7 @@ package com.facebook.giraph.hive.output;
 import org.apache.hadoop.io.Writable;
 import org.apache.hadoop.io.WritableUtils;
 
-import com.facebook.giraph.hive.impl.common.Writables;
+import com.facebook.giraph.hive.common.Writables;
 import com.google.common.base.Objects;
 import com.google.common.collect.Maps;
 

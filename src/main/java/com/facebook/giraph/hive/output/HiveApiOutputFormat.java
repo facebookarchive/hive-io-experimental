@@ -44,20 +44,16 @@ import org.apache.hadoop.util.ReflectionUtils;
 import org.apache.log4j.Logger;
 import org.apache.thrift.TException;
 
-import com.facebook.giraph.hive.HiveRecord;
-import com.facebook.giraph.hive.HiveTableSchema;
-import com.facebook.giraph.hive.HiveTableSchemas;
-import com.facebook.giraph.hive.impl.HiveApiTableSchema;
-import com.facebook.giraph.hive.impl.common.FileSystems;
-import com.facebook.giraph.hive.impl.common.HadoopUtils;
-import com.facebook.giraph.hive.impl.common.HiveUtils;
-import com.facebook.giraph.hive.impl.common.Inspectors;
-import com.facebook.giraph.hive.impl.common.ProgressReporter;
-import com.facebook.giraph.hive.impl.output.HiveApiOutputCommitter;
-import com.facebook.giraph.hive.impl.output.HiveApiRecordWriter;
-import com.facebook.giraph.hive.impl.output.OutputConf;
-import com.facebook.giraph.hive.impl.output.OutputInfo;
+import com.facebook.giraph.hive.schema.HiveApiTableSchema;
+import com.facebook.giraph.hive.common.FileSystems;
+import com.facebook.giraph.hive.common.HadoopUtils;
+import com.facebook.giraph.hive.common.HiveUtils;
+import com.facebook.giraph.hive.common.Inspectors;
+import com.facebook.giraph.hive.common.ProgressReporter;
 import com.facebook.giraph.hive.input.HiveApiInputFormat;
+import com.facebook.giraph.hive.record.HiveRecord;
+import com.facebook.giraph.hive.schema.HiveTableSchema;
+import com.facebook.giraph.hive.schema.HiveTableSchemas;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 
@@ -251,11 +247,9 @@ public class HiveApiOutputFormat
     Path tablePath = new Path(oti.getTableRoot());
     FileSystem fs = tablePath.getFileSystem(conf);
 
-    if (fs.exists(tablePath)) {
-      if (FileSystems.dirHasNonHiddenFiles(fs, tablePath)) {
-        throw new IOException("Table " + description.getTableName() +
-            " has existing data");
-      }
+    if (fs.exists(tablePath) && FileSystems.dirHasNonHiddenFiles(fs, tablePath)) {
+      throw new IOException("Table " + description.getTableName() +
+          " has existing data");
     }
   }
 
@@ -312,7 +306,7 @@ public class HiveApiOutputFormat
       // CHECKSTYLE: resume IllegalCatch
       return false;
     }
-    return partitionNames.size() > 0;
+    return !partitionNames.isEmpty();
   }
 
   @Override

@@ -20,8 +20,6 @@ package com.facebook.giraph.hive.input;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.hive.conf.HiveConf;
-import org.apache.hadoop.hive.metastore.api.MetaException;
-import org.apache.hadoop.hive.metastore.api.NoSuchObjectException;
 import org.apache.hadoop.hive.metastore.api.Partition;
 import org.apache.hadoop.hive.metastore.api.Table;
 import org.apache.hadoop.hive.metastore.api.ThriftHiveMetastore;
@@ -36,18 +34,15 @@ import org.apache.hadoop.mapreduce.TaskAttemptContext;
 import org.apache.log4j.Logger;
 import org.apache.thrift.TException;
 
-import com.facebook.giraph.hive.HiveRecord;
-import com.facebook.giraph.hive.HiveTableSchema;
-import com.facebook.giraph.hive.HiveTableSchemas;
-import com.facebook.giraph.hive.impl.HiveApiTableSchema;
-import com.facebook.giraph.hive.impl.common.HadoopUtils;
-import com.facebook.giraph.hive.impl.common.HiveMetastores;
-import com.facebook.giraph.hive.impl.common.HiveUtils;
-import com.facebook.giraph.hive.impl.input.HiveApiInputSplit;
-import com.facebook.giraph.hive.impl.input.HiveApiRecordReader;
-import com.facebook.giraph.hive.impl.input.InputConf;
-import com.facebook.giraph.hive.impl.input.InputInfo;
-import com.facebook.giraph.hive.impl.input.InputPartition;
+import com.facebook.giraph.hive.common.HadoopUtils;
+import com.facebook.giraph.hive.common.HiveMetastores;
+import com.facebook.giraph.hive.common.HiveUtils;
+import com.facebook.giraph.hive.input.parser.DefaultParser;
+import com.facebook.giraph.hive.input.parser.RecordParser;
+import com.facebook.giraph.hive.record.HiveRecord;
+import com.facebook.giraph.hive.schema.HiveApiTableSchema;
+import com.facebook.giraph.hive.schema.HiveTableSchema;
+import com.facebook.giraph.hive.schema.HiveTableSchemas;
 import com.google.common.base.Function;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
@@ -170,9 +165,7 @@ public class HiveApiInputFormat
     Table table;
     try {
       table = client.get_table(dbName, tableName);
-    } catch (NoSuchObjectException e) {
-      throw new TException(e);
-    } catch (MetaException e) {
+    } catch (Exception e) {
       throw new TException(e);
     }
 
@@ -198,10 +191,8 @@ public class HiveApiInputFormat
       try {
         partitions = client.get_partitions_by_filter(dbName, tableName,
             inputDesc.getPartitionFilter(), (short) -1);
-      } catch (NoSuchObjectException e) {
+      } catch (Exception e) {
         throw new TException(e.getMessage());
-      } catch (MetaException e) {
-        throw new TException(e);
       }
       for (Partition partition : partitions) {
         inputInfo.addPartition(new InputPartition(table, partition));
@@ -240,7 +231,7 @@ public class HiveApiInputFormat
       int splitsRequested = inputConf.readNumSplitsFromConf();
       org.apache.hadoop.mapred.InputSplit[] baseSplits =
           baseInputFormat.getSplits(jobConf, splitsRequested);
-      LOG.info("Requested " + splitsRequested + " from partition (" +
+      LOG.info("Requested " + splitsRequested + " splits from partition (" +
           partitionNum + " out of " + Iterables.size(partitions) +
           ") values: " +
           inputPartition.getInputSplitData().getPartitionValues() +
@@ -281,14 +272,13 @@ public class HiveApiInputFormat
 
     HiveUtils.setReadColumnIds(conf, apiInputSplit.getColumnIds());
 
-    boolean reuseRecord = conf.getBoolean(REUSE_RECORD_KEY, true);
-
-    HiveApiRecordReader reader = new HiveApiRecordReader(
-        baseRecordReader,
+    RecordParser parser = new DefaultParser(
         apiInputSplit.getDeserializer(),
-        apiInputSplit.getPartitionValues(),
-        apiInputSplit.getTableSchema().numColumns(),
-        reuseRecord);
+        conf.getBoolean(REUSE_RECORD_KEY, true),
+        apiInputSplit.getTableSchema().numColumns()
+    );
+
+    HiveApiRecordReader reader = new HiveApiRecordReader(baseRecordReader, parser);
     reader.setObserver(observer);
 
     return reader;
