@@ -31,7 +31,7 @@ under the License.
   <groupId>com.facebook.giraph.hive</groupId>
   <artifactId>hive-io-experimental</artifactId>
   <packaging>jar</packaging>
-  <version>0.3-SNAPSHOT</version>
+  <version>0.4-SNAPSHOT</version>
 
   <name>${project.artifactId}</name>
   <description>Library for reading / writing to Hive</description>
