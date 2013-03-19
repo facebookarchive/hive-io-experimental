@@ -76,6 +76,11 @@ public class HiveApiRecord implements HiveRecord {
   }
 
   @Override
+  public String getPartitionValue(String partitionKey) {
+    return partitionValues.get(partitionKey);
+  }
+
+  @Override
   public List<Object> getAll() {
     return Arrays.asList(rowData);
   }

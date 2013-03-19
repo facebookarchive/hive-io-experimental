@@ -25,6 +25,14 @@ import java.util.List;
  */
 public interface HiveReadableRecord {
   /**
+   * Get value of a partition key
+   *
+   * @param partitionKey partition key
+   * @return value of partition key
+   */
+  String getPartitionValue(String partitionKey);
+
+  /**
    * Get column at given index
    * @param index column index
    * @return Object for column
