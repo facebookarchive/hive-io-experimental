@@ -81,6 +81,11 @@ public class HiveApiRecord implements HiveRecord {
   }
 
   @Override
+  public Map<String, String> getPartitionValues() {
+    return partitionValues;
+  }
+
+  @Override
   public List<Object> getAll() {
     return Arrays.asList(rowData);
   }
@@ -92,10 +97,6 @@ public class HiveApiRecord implements HiveRecord {
 
   public int getNumColumns() {
     return rowData.length;
-  }
-
-  public Map<String, String> getPartitionValues() {
-    return partitionValues;
   }
 
   /**

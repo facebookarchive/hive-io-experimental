@@ -19,6 +19,7 @@
 package com.facebook.giraph.hive;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * Hive record for reading that represents a row.
@@ -31,6 +32,13 @@ public interface HiveReadableRecord {
    * @return value of partition key
    */
   String getPartitionValue(String partitionKey);
+
+  /**
+   * Get all partition values
+   *
+   * @return Map of partition values
+   */
+  Map<String, String> getPartitionValues();
 
   /**
    * Get column at given index

@@ -31,7 +31,6 @@ import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapreduce.InputFormat;
 import org.apache.hadoop.mapreduce.InputSplit;
 import org.apache.hadoop.mapreduce.JobContext;
-import org.apache.hadoop.mapreduce.RecordReader;
 import org.apache.hadoop.mapreduce.TaskAttemptContext;
 import org.apache.log4j.Logger;
 import org.apache.thrift.TException;
@@ -260,7 +259,7 @@ public class HiveApiInputFormat
   }
 
   @Override
-  public RecordReader<WritableComparable, HiveRecord>
+  public HiveApiRecordReader
   createRecordReader(InputSplit inputSplit, TaskAttemptContext context)
     throws IOException, InterruptedException {
     Configuration conf = context.getConfiguration();

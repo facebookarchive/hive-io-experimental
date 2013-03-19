@@ -110,6 +110,15 @@ public class HiveApiRecordReader
   }
 
   /**
+   * Get partition values from the split we're reading.
+   *
+   * @return Map of partition values
+   */
+  public Map<String, String> getPartitionValues() {
+    return record.getPartitionValues();
+  }
+
+  /**
    * Read a row
    *
    * @return true if read succeeded
