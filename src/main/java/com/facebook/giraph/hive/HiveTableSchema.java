@@ -20,28 +20,21 @@ package com.facebook.giraph.hive;
 
 import org.apache.hadoop.io.Writable;
 
-import java.util.Collection;
-
 /**
  * Schema for a Hive table
  */
 public interface HiveTableSchema extends Writable {
   /**
-   * Get index of a column
-   * @param columnName Name of column
-   * @return Integer index of column
+   * Get index of a column or a paritition key
+   *
+   * @param columnOrPartitionKeyName Name of column or partition key
+   * @return Integer index of column or partition key, or -1
    */
-  int positionOf(String columnName);
+  int positionOf(String columnOrPartitionKeyName);
 
   /**
    * Get number of columns in table
    * @return Number of columns in table
    */
   int numColumns();
-
-  /**
-   * Get partition keys
-   * @return collection of partition keys
-   */
-  Collection<String> partitionKeys();
 }

@@ -30,12 +30,10 @@ import org.apache.log4j.Logger;
 import com.facebook.giraph.hive.HiveRecord;
 import com.google.common.base.Objects;
 import com.google.common.base.Preconditions;
-import com.google.common.collect.Maps;
 
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
 
 /**
  * Single record from a Hive table. Used for both reading and writing.
@@ -44,55 +42,44 @@ public class HiveApiRecord implements HiveRecord {
   /** Logger */
   public static final Logger LOG = Logger.getLogger(HiveApiRecord.class);
 
-  /** Partition data */
-  private final Map<String, String> partitionValues;
   /** Raw data for row */
   private final Object[] rowData;
+  /** Partition data */
+  private final List<String> partitionValues;
 
   /**
    * Constructor
    *
    * @param numColumns number of columns
+   * @param partitionValues partition values
    */
-  public HiveApiRecord(int numColumns) {
-    rowData = new Object[numColumns];
-    partitionValues = Maps.newHashMap();
-  }
-
-  /**
-   * Constructor
-   *
-   * @param numColumns number of columns
-   * @param partitionValues partition data
-   */
-  public HiveApiRecord(int numColumns, Map<String, String> partitionValues) {
+  public HiveApiRecord(int numColumns, List<String> partitionValues) {
     this.rowData = new Object[numColumns];
     this.partitionValues = partitionValues;
   }
 
   @Override
   public Object get(int index) {
-    return rowData[index];
+    if (index < rowData.length) {
+      return rowData[index];
+    } else {
+      final int partitionIndex = index - rowData.length;
+      return partitionValues.get(partitionIndex);
+    }
   }
 
   @Override
-  public String getPartitionValue(String partitionKey) {
-    return partitionValues.get(partitionKey);
-  }
-
-  @Override
-  public Map<String, String> getPartitionValues() {
-    return partitionValues;
-  }
-
-  @Override
-  public List<Object> getAll() {
+  public List<Object> getAllColumns() {
     return Arrays.asList(rowData);
   }
 
   @Override
   public void set(int index, Object value) {
     rowData[index] = value;
+  }
+
+  public List<String> getPartitionValues() {
+    return partitionValues;
   }
 
   public int getNumColumns() {
@@ -132,9 +119,9 @@ public class HiveApiRecord implements HiveRecord {
   @Override
   public String toString() {
     return Objects.toStringHelper(this)
-        .add("partitionValues", partitionValues)
         .add("numColumns", getNumColumns())
         .add("rowData", rowDataToString())
+        .add("partitionData", partitionValues)
         .toString();
   }
 

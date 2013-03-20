@@ -30,7 +30,7 @@ import com.facebook.giraph.hive.impl.HiveApiRecord;
 import com.facebook.giraph.hive.input.HiveApiInputObserver;
 
 import java.io.IOException;
-import java.util.Map;
+import java.util.List;
 
 /**
  * RecordReader for Hive data
@@ -62,13 +62,13 @@ public class HiveApiRecordReader
    *
    * @param baseRecordReader Base record reader
    * @param deserializer Deserializer
-   * @param partitionValues map of partition info
+   * @param partitionValues partition info
    * @param numColumns total number of columns
    * @param reuseRecord whether to reuse HiveRecord objects
    */
   public HiveApiRecordReader(
       org.apache.hadoop.mapred.RecordReader<WritableComparable, Writable> baseRecordReader,
-      Deserializer deserializer, Map<String, String> partitionValues,
+      Deserializer deserializer, List<String> partitionValues,
       int numColumns, boolean reuseRecord) {
     // CHECKSTYLE: resume LineLength
     this.baseRecordReader = baseRecordReader;
@@ -107,15 +107,6 @@ public class HiveApiRecordReader
     }
     parse();
     return true;
-  }
-
-  /**
-   * Get partition values from the split we're reading.
-   *
-   * @return Map of partition values
-   */
-  public Map<String, String> getPartitionValues() {
-    return record.getPartitionValues();
   }
 
   /**
