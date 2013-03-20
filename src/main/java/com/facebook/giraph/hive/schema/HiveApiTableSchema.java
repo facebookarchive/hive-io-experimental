@@ -24,17 +24,19 @@ import org.apache.hadoop.hive.metastore.api.Table;
 
 import com.facebook.giraph.hive.common.Writables;
 import com.google.common.base.Objects;
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import com.google.common.collect.Ordering;
 
 import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
-import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+
+import static com.facebook.giraph.hive.common.HiveUtils.FIELD_SCHEMA_NAME_GETTER;
+import static com.google.common.collect.Lists.transform;
 
 /**
  * Schema for a Hive table
@@ -67,7 +69,7 @@ public class HiveApiTableSchema implements HiveTableSchema {
                             Map<String, Integer> columnPositions) {
     this.partitionKeys = partitionKeys;
     this.columnPositions = columnPositions;
-    computeNumColumns();
+    this.numColumns = computeNumColumns(columnPositions);
   }
 
   /**
@@ -79,11 +81,8 @@ public class HiveApiTableSchema implements HiveTableSchema {
   public static HiveApiTableSchema fromTable(Table table) {
     StorageDescriptor storageDescriptor = table.getSd();
 
-    ImmutableList.Builder<String> partitionKeys =
-        ImmutableList.<String>builder();
-    for (FieldSchema fieldSchema : table.getPartitionKeys()) {
-      partitionKeys.add(fieldSchema.getName());
-    }
+    List<String> partitionKeys = transform(table.getPartitionKeys(),
+        FIELD_SCHEMA_NAME_GETTER);
 
     ImmutableMap.Builder<String, Integer> columnPositions =
         ImmutableMap.<String, Integer>builder();
@@ -92,20 +91,14 @@ public class HiveApiTableSchema implements HiveTableSchema {
       columnPositions.put(cols.get(i).getName(), i);
     }
 
-    return new HiveApiTableSchema(partitionKeys.build(),
-        columnPositions.build());
+    return new HiveApiTableSchema(partitionKeys, columnPositions.build());
   }
 
   /**
    * Compute number of columns from the data.
    */
-  private void computeNumColumns() {
-    numColumns = 0;
-    for (int index : columnPositions.values()) {
-      if (index >= numColumns) {
-        numColumns = index + 1;
-      }
-    }
+  private static int computeNumColumns(Map<String, Integer> columnPositions) {
+    return Ordering.natural().max(columnPositions.values()) + 1;
   }
 
   @Override
@@ -114,7 +107,7 @@ public class HiveApiTableSchema implements HiveTableSchema {
   }
 
   @Override
-  public Collection<String> partitionKeys() {
+  public List<String> partitionKeys() {
     return partitionKeys;
   }
 
@@ -138,7 +131,7 @@ public class HiveApiTableSchema implements HiveTableSchema {
   public void readFields(DataInput in) throws IOException {
     Writables.readStringList(in, partitionKeys);
     Writables.readStrIntMap(in, columnPositions);
-    computeNumColumns();
+    numColumns = computeNumColumns(columnPositions);
   }
 
   @Override

@@ -20,7 +20,7 @@ package com.facebook.giraph.hive.schema;
 
 import org.apache.hadoop.io.Writable;
 
-import java.util.Collection;
+import java.util.List;
 
 /**
  * Schema for a Hive table
@@ -43,5 +43,5 @@ public interface HiveTableSchema extends Writable {
    * Get partition keys
    * @return collection of partition keys
    */
-  Collection<String> partitionKeys();
+  List<String> partitionKeys();
 }

@@ -37,6 +37,7 @@ import org.apache.thrift.TException;
 import com.facebook.giraph.hive.common.HadoopUtils;
 import com.facebook.giraph.hive.common.HiveMetastores;
 import com.facebook.giraph.hive.common.HiveUtils;
+import com.facebook.giraph.hive.input.parser.BytesParser;
 import com.facebook.giraph.hive.input.parser.DefaultParser;
 import com.facebook.giraph.hive.input.parser.RecordParser;
 import com.facebook.giraph.hive.record.HiveRecord;
@@ -60,8 +61,8 @@ public class HiveApiInputFormat
   /** Logger */
   public static final Logger LOG = Logger.getLogger(HiveApiInputFormat.class);
 
-  /** Configuration key for whether to reuse records */
-  public static final String REUSE_RECORD_KEY = "hive.api.input.reuse_record";
+  /** Use more efficient bytes parser. */
+  public static final String BYTES_PARSER_KEY = "hive.api.input.bytes_parser";
 
   /** Default profile ID if none given */
   public static final String DEFAULT_PROFILE_ID = "input-profile";
@@ -272,13 +273,21 @@ public class HiveApiInputFormat
 
     HiveUtils.setReadColumnIds(conf, apiInputSplit.getColumnIds());
 
-    RecordParser parser = new DefaultParser(
+    RecordParser recordParser;
+    if (conf.getBoolean(BYTES_PARSER_KEY, false)) {
+      recordParser = new BytesParser(
+          apiInputSplit.getDeserializer(),
+          apiInputSplit.getTableSchema().numColumns());
+    } else {
+      recordParser = new DefaultParser(
+        conf,
         apiInputSplit.getDeserializer(),
-        conf.getBoolean(REUSE_RECORD_KEY, true),
+        apiInputSplit.getPartitionValues(),
         apiInputSplit.getTableSchema().numColumns()
-    );
+      );
+    }
 
-    HiveApiRecordReader reader = new HiveApiRecordReader(baseRecordReader, parser);
+    HiveApiRecordReader reader = new HiveApiRecordReader(baseRecordReader, recordParser);
     reader.setObserver(observer);
 
     return reader;

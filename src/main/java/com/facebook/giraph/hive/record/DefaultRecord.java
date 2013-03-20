@@ -18,33 +18,33 @@
 
 package com.facebook.giraph.hive.record;
 
-import org.apache.hadoop.hive.serde2.Deserializer;
-import org.apache.hadoop.io.Writable;
 import org.apache.log4j.Logger;
 
 import com.google.common.base.Objects;
 
-import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Single record from a Hive table. Used for both reading and writing.
  */
-public class HiveApiRecord implements HiveRecord {
+public class DefaultRecord implements HiveRecord {
   /** Logger */
-  public static final Logger LOG = Logger.getLogger(HiveApiRecord.class);
+  public static final Logger LOG = Logger.getLogger(DefaultRecord.class);
 
   /** Raw data for row */
   private final Object[] rowData;
+  private final Map<String, String> partitionValues;
 
   /**
    * Constructor
    *
    * @param numColumns number of columns
    */
-  public HiveApiRecord(int numColumns) {
-    rowData = new Object[numColumns];
+  public DefaultRecord(int numColumns, Map<String, String> partitionValues) {
+    this.rowData = new Object[numColumns];
+    this.partitionValues = partitionValues;
   }
 
   @Override
@@ -69,18 +69,6 @@ public class HiveApiRecord implements HiveRecord {
 
   public int getNumColumns() {
     return rowData.length;
-  }
-
-  /**
-   * Parse a row
-   *
-   * @param value Row from Hive
-   * @param deserializer Deserializer
-   * @throws IOException I/O errors
-   */
-  public void parse(Writable value, Deserializer deserializer)
-    throws IOException {
-
   }
 
   @Override

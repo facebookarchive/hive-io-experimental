@@ -42,6 +42,13 @@ public class HiveUtils {
   /** Logger */
   private static final Logger LOG = Logger.getLogger(HiveUtils.class);
 
+  public static final Function<FieldSchema, String> FIELD_SCHEMA_NAME_GETTER =
+    new Function<FieldSchema, String>() {
+      @Override public String apply(FieldSchema input) {
+        return input == null ? null : input.getName();
+      }
+    };
+
   /** Don't construct, allow inheritance */
   protected HiveUtils() { }
 
@@ -74,22 +81,6 @@ public class HiveUtils {
   }
 
   /**
-   * Function for getting the name from FieldSchema
-   * @return Function
-   */
-  private static Function<FieldSchema, String> fieldSchemaToName() {
-    return new Function<FieldSchema, String>() {
-      @Override public String apply(FieldSchema input) {
-        if (input == null) {
-          return null;
-        } else {
-          return input.getName();
-        }
-      }
-    };
-  }
-
-  /**
    * Get list of partition values in same order as partition keys passed in.
    * @param partitionKeys list of keys to grab
    * @param partitionValuesMap map of partition values
@@ -98,7 +89,7 @@ public class HiveUtils {
   public static List<String> orderedPartitionValues(
       List<FieldSchema> partitionKeys, Map<String, String> partitionValuesMap) {
     List<String> partitionNames = Lists.transform(partitionKeys,
-        fieldSchemaToName());
+        FIELD_SCHEMA_NAME_GETTER);
     return Lists.transform(partitionNames,
         Functions.forMap(partitionValuesMap));
   }
