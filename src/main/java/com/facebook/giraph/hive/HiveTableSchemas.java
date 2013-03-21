@@ -23,6 +23,7 @@ import org.apache.log4j.Logger;
 
 import com.facebook.giraph.hive.impl.HiveApiTableSchema;
 import com.facebook.giraph.hive.impl.common.Writables;
+import com.google.common.base.Function;
 
 /**
  * Helpers for Hive schemas
@@ -81,6 +82,21 @@ public class HiveTableSchemas {
   public static HiveTableSchema getForProfile(Configuration conf,
                                               String profile) {
     return getImpl(conf, profileKey(profile));
+  }
+
+  /**
+   * Get function to lookup names in the table schema given
+   *
+   * @param tableSchema Hive table schema to use
+   * @return Function that does lookup
+   */
+  public static Function<String, Integer> schemaLookupFunc(final HiveTableSchema tableSchema) {
+    return new Function<String, Integer>() {
+      @Override
+      public Integer apply(String input) {
+        return tableSchema.positionOf(input);
+      }
+    };
   }
 
   /**

@@ -31,7 +31,6 @@ import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapreduce.InputFormat;
 import org.apache.hadoop.mapreduce.InputSplit;
 import org.apache.hadoop.mapreduce.JobContext;
-import org.apache.hadoop.mapreduce.RecordReader;
 import org.apache.hadoop.mapreduce.TaskAttemptContext;
 import org.apache.log4j.Logger;
 import org.apache.thrift.TException;
@@ -48,13 +47,13 @@ import com.facebook.giraph.hive.impl.input.HiveApiRecordReader;
 import com.facebook.giraph.hive.impl.input.InputConf;
 import com.facebook.giraph.hive.impl.input.InputInfo;
 import com.facebook.giraph.hive.impl.input.InputPartition;
-import com.google.common.base.Function;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 
 import java.io.IOException;
 import java.util.List;
 
+import static com.facebook.giraph.hive.HiveTableSchemas.schemaLookupFunc;
 import static com.google.common.collect.Lists.transform;
 
 /**
@@ -180,18 +179,13 @@ public class HiveApiInputFormat
     HiveTableSchemas.putForName(conf, dbName, tableName, tableSchema);
     HiveTableSchemas.putForProfile(conf, profileId, tableSchema);
 
-    Function<String, Integer> columnNameToId = new Function<String, Integer>() {
-      @Override public Integer apply(String input) {
-        return tableSchema.positionOf(input);
-      }
-    };
-    List<Integer> columnIds = transform(inputDesc.getColumns(), columnNameToId);
+    List<Integer> columnIds = transform(inputDesc.getColumns(), schemaLookupFunc(tableSchema));
 
     InputInfo inputInfo = new InputInfo(tableSchema, columnIds);
 
     if (table.getPartitionKeysSize() == 0) {
       // table without partitions
-      inputInfo.addPartition(new InputPartition(table));
+      inputInfo.addPartition(InputPartition.newFromHiveTable(table));
     } else {
       // table with partitions, find matches to user filter.
       List<Partition> partitions = null;
@@ -204,7 +198,7 @@ public class HiveApiInputFormat
         throw new TException(e);
       }
       for (Partition partition : partitions) {
-        inputInfo.addPartition(new InputPartition(table, partition));
+        inputInfo.addPartition(InputPartition.newFromHivePartition(partition));
       }
     }
 
@@ -260,7 +254,7 @@ public class HiveApiInputFormat
   }
 
   @Override
-  public RecordReader<WritableComparable, HiveRecord>
+  public HiveApiRecordReader
   createRecordReader(InputSplit inputSplit, TaskAttemptContext context)
     throws IOException, InterruptedException {
     Configuration conf = context.getConfiguration();

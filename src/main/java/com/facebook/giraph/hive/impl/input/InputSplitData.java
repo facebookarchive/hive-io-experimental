@@ -19,10 +19,8 @@
 package com.facebook.giraph.hive.impl.input;
 
 import org.apache.hadoop.hive.metastore.api.FieldSchema;
-import org.apache.hadoop.hive.metastore.api.Partition;
 import org.apache.hadoop.hive.metastore.api.SerDeInfo;
 import org.apache.hadoop.hive.metastore.api.StorageDescriptor;
-import org.apache.hadoop.hive.metastore.api.Table;
 import org.apache.hadoop.hive.serde2.Deserializer;
 import org.apache.hadoop.io.Writable;
 import org.apache.log4j.Logger;
@@ -56,44 +54,27 @@ public class InputSplitData implements Writable {
   /** Information about columns */
   private final List<FieldSchema> columnInfo;
   /** Partition data */
-  private final Map<String, String> partitionValues;
+  private final List<String> partitionValues;
 
-  /**
-   * Constructor
-   */
+  /** Constructor for reflection */
   public InputSplitData() {
     deserializerParams = Maps.newHashMap();
     columnInfo = Lists.newArrayList();
-    partitionValues = Maps.newHashMap();
+    partitionValues = Lists.newArrayList();
   }
 
   /**
-   * Constructor
-   *
+   * Constructor from data
    * @param storageDescriptor StorageDescriptor
+   * @param partitionValues list pf partition values
    */
-  public InputSplitData(StorageDescriptor storageDescriptor) {
+  public InputSplitData(StorageDescriptor storageDescriptor,
+                        List<String> partitionValues) {
     columnInfo = storageDescriptor.getCols();
     SerDeInfo serDeInfo = storageDescriptor.getSerdeInfo();
     deserializerClass = SerDes.getSerDeClass(serDeInfo);
     deserializerParams = serDeInfo.getParameters();
-    partitionValues = Maps.newHashMap();
-  }
-
-  /**
-   * Parse partition values from Hive table/partition
-   *
-   * @param table Hive Table
-   * @param partition Hive Partition
-   */
-  public void parsePartitionValues(Table table, Partition partition) {
-    List<String> inputPartitionValues = partition.getValues();
-    int i = 0;
-    for (FieldSchema fieldSchema : table.getPartitionKeys()) {
-      partitionValues.put(fieldSchema.getName().toLowerCase(),
-          inputPartitionValues.get(i));
-      ++i;
-    }
+    this.partitionValues = partitionValues;
   }
 
   /**
@@ -138,7 +119,7 @@ public class InputSplitData implements Writable {
     return columnInfo;
   }
 
-  public Map<String, String> getPartitionValues() {
+  public List<String> getPartitionValues() {
     return partitionValues;
   }
 
@@ -148,7 +129,7 @@ public class InputSplitData implements Writable {
     Writables.writeClassName(out,
         Preconditions.checkNotNull(deserializerClass));
     Writables.writeStrStrMap(out, deserializerParams);
-    Writables.writeStrStrMap(out, partitionValues);
+    Writables.writeStringList(out, partitionValues);
   }
 
   @Override
@@ -156,7 +137,7 @@ public class InputSplitData implements Writable {
     Writables.readFieldSchemas(in, columnInfo);
     deserializerClass = Writables.readClass(in);
     Writables.readStrStrMap(in, deserializerParams);
-    Writables.readStrStrMap(in, partitionValues);
+    Writables.readStringList(in, partitionValues);
   }
 
   @Override
