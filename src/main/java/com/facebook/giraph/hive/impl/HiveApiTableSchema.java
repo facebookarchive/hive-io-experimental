@@ -22,7 +22,6 @@ import org.apache.hadoop.hive.metastore.api.Table;
 
 import com.facebook.giraph.hive.HiveTableSchema;
 import com.facebook.giraph.hive.impl.common.Writables;
-import com.google.common.base.Function;
 import com.google.common.base.Objects;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Ordering;
@@ -35,7 +34,6 @@ import java.util.Map;
 
 import static com.facebook.giraph.hive.impl.common.HiveUtils.FIELD_SCHEMA_NAME_GETTER;
 import static com.google.common.collect.Lists.transform;
-import static com.google.common.collect.Maps.toMap;
 
 /**
  * Schema for a Hive table
@@ -76,20 +74,19 @@ public class HiveApiTableSchema implements HiveTableSchema {
    * @return Schema
    */
   public static HiveApiTableSchema fromTable(Table table) {
-    Function<Object, Integer> counter = new Function<Object, Integer>() {
-      private int num = 0;
-
-      @Override
-      public Integer apply(Object input) {
-        return num++;
-      }
-    };
+    int index = 0;
 
     List<String> columnNames = transform(table.getSd().getCols(), FIELD_SCHEMA_NAME_GETTER);
-    Map<String, Integer> columnToIndex = toMap(columnNames, counter);
+    Map<String, Integer> columnToIndex = Maps.newHashMap();
+    for (String columnName : columnNames) {
+      columnToIndex.put(columnName, index++);
+    }
 
     List<String> partitionNames = transform(table.getPartitionKeys(), FIELD_SCHEMA_NAME_GETTER);
-    Map<String, Integer> partitionToIndex = toMap(partitionNames, counter);
+    Map<String, Integer> partitionToIndex = Maps.newHashMap();
+    for (String partitionName : partitionNames) {
+      partitionToIndex.put(partitionName, index++);
+    }
 
     return new HiveApiTableSchema(partitionToIndex, columnToIndex);
   }
