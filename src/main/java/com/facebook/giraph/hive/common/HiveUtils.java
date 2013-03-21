@@ -27,7 +27,6 @@ import org.apache.hadoop.hive.serde2.ColumnProjectionUtils;
 import org.apache.log4j.Logger;
 
 import com.google.common.base.Function;
-import com.google.common.base.Functions;
 import com.google.common.collect.Lists;
 
 import java.net.URI;
@@ -35,19 +34,26 @@ import java.net.URISyntaxException;
 import java.util.List;
 import java.util.Map;
 
+import static com.google.common.base.Functions.forMap;
+import static com.google.common.collect.Lists.transform;
+
 /**
  * Utilities for dealing with Hive
  */
 public class HiveUtils {
+  /**
+   * Function for getting the name from FieldSchema
+   */
+  public static Function<FieldSchema, String> FIELD_SCHEMA_NAME_GETTER =
+      new Function<FieldSchema, String>() {
+        @Override
+        public String apply(FieldSchema input) {
+          return input == null ? null : input.getName();
+        }
+      };
+
   /** Logger */
   private static final Logger LOG = Logger.getLogger(HiveUtils.class);
-
-  public static final Function<FieldSchema, String> FIELD_SCHEMA_NAME_GETTER =
-    new Function<FieldSchema, String>() {
-      @Override public String apply(FieldSchema input) {
-        return input == null ? null : input.getName();
-      }
-    };
 
   /** Don't construct, allow inheritance */
   protected HiveUtils() { }
@@ -88,10 +94,8 @@ public class HiveUtils {
    */
   public static List<String> orderedPartitionValues(
       List<FieldSchema> partitionKeys, Map<String, String> partitionValuesMap) {
-    List<String> partitionNames = Lists.transform(partitionKeys,
-        FIELD_SCHEMA_NAME_GETTER);
-    return Lists.transform(partitionNames,
-        Functions.forMap(partitionValuesMap));
+    List<String> partitionNames = transform(partitionKeys, FIELD_SCHEMA_NAME_GETTER);
+    return transform(partitionNames, forMap(partitionValuesMap));
   }
 
   /**
@@ -116,10 +120,10 @@ public class HiveUtils {
    */
   public static void setReadColumnIds(Configuration conf,
                                       List<Integer> columnIds) {
-    if (!columnIds.isEmpty()) {
-      ColumnProjectionUtils.setReadColumnIDs(conf, columnIds);
-    } else {
+    if (columnIds.isEmpty()) {
       ColumnProjectionUtils.setFullyReadColumns(conf);
+    } else {
+      ColumnProjectionUtils.setReadColumnIDs(conf, columnIds);
     }
   }
 

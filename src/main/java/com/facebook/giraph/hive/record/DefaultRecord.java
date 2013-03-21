@@ -18,10 +18,21 @@
 
 package com.facebook.giraph.hive.record;
 
+import org.apache.hadoop.hive.serde2.Deserializer;
+import org.apache.hadoop.hive.serde2.SerDeException;
+import org.apache.hadoop.hive.serde2.objectinspector.ObjectInspector;
+import org.apache.hadoop.hive.serde2.objectinspector.ObjectInspector.Category;
+import org.apache.hadoop.hive.serde2.objectinspector.ObjectInspectorUtils;
+import org.apache.hadoop.hive.serde2.objectinspector.StructObjectInspector;
+import org.apache.hadoop.io.Writable;
 import org.apache.log4j.Logger;
 
+import com.facebook.giraph.hive.HiveRecord;
 import com.google.common.base.Objects;
+import com.google.common.base.Preconditions;
+import com.google.common.collect.Maps;
 
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -35,30 +46,31 @@ public class DefaultRecord implements HiveRecord {
 
   /** Raw data for row */
   private final Object[] rowData;
-  private final Map<String, String> partitionValues;
+  /** Partition data */
+  private final List<String> partitionValues;
 
   /**
    * Constructor
    *
    * @param numColumns number of columns
    */
-  public DefaultRecord(int numColumns, Map<String, String> partitionValues) {
+  public DefaultRecord(int numColumns, List<String> partitionValues) {
     this.rowData = new Object[numColumns];
     this.partitionValues = partitionValues;
   }
 
   @Override
   public Object get(int index) {
-    return rowData[index];
+    if (index < rowData.length) {
+      return rowData[index];
+    } else {
+      final int partitionIndex = index - rowData.length;
+      return partitionValues.get(partitionIndex);
+    }
   }
 
   @Override
-  public String getPartitionValue(String partitionKey) {
-    return partitionValues.get(partitionKey);
-  }
-
-  @Override
-  public List<Object> getAll() {
+  public List<Object> getAllColumns() {
     return Arrays.asList(rowData);
   }
 
@@ -67,8 +79,42 @@ public class DefaultRecord implements HiveRecord {
     rowData[index] = value;
   }
 
+  public List<String> getPartitionValues() {
+    return partitionValues;
+  }
+  
   public int getNumColumns() {
     return rowData.length;
+  }
+
+  /**
+   * Parse a row
+   *
+   * @param value Row from Hive
+   * @param deserializer Deserializer
+   * @throws IOException I/O errors
+   */
+  public void parse(Writable value, Deserializer deserializer)
+    throws IOException {
+    Object data;
+    ObjectInspector dataInspector;
+    try {
+      data = deserializer.deserialize(value);
+      dataInspector = deserializer.getObjectInspector();
+    } catch (SerDeException e) {
+      throw new IOException(e);
+    }
+
+    Preconditions.checkArgument(dataInspector.getCategory() == Category.STRUCT);
+    StructObjectInspector structInspector =
+        (StructObjectInspector) dataInspector;
+
+    Object parsedData = ObjectInspectorUtils.copyToStandardJavaObject(data,
+        structInspector);
+    List<Object> parsedList = (List<Object>) parsedData;
+    for (int i = 0; i < parsedList.size(); ++i) {
+      set(i, parsedList.get(i));
+    }
   }
 
   @Override
@@ -76,6 +122,7 @@ public class DefaultRecord implements HiveRecord {
     return Objects.toStringHelper(this)
         .add("numColumns", getNumColumns())
         .add("rowData", rowDataToString())
+        .add("partitionData", partitionValues)
         .toString();
   }
 

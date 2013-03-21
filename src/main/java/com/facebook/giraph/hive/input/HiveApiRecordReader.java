@@ -56,7 +56,7 @@ class HiveApiRecordReader extends RecordReader<WritableComparable, HiveRecord> {
    *
    * @param baseRecordReader Base record reader
    * @param deserializer Deserializer
-   * @param partitionValues map of partition info
+   * @param partitionValues partition info
    * @param numColumns total number of columns
    * @param reuseRecord whether to reuse HiveRecord objects
    */

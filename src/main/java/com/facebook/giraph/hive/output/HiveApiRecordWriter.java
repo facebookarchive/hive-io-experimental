@@ -102,7 +102,7 @@ class HiveApiRecordWriter extends RecordWriter<WritableComparable, HiveRecord> {
    */
   private Writable serialize(WritableComparable key, HiveRecord value)
     throws IOException {
-    List<Object> rowData = value.getAll();
+    List<Object> rowData = value.getAllColumns();
     Writable serializedValue;
     observer.beginSerialize(key, value);
     try {

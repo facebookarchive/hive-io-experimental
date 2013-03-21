@@ -35,6 +35,8 @@ import com.google.common.base.Preconditions;
 import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
+import java.util.Collections;
+import java.util.List;
 
 /**
  * Internal partition information for reading
@@ -50,42 +52,56 @@ class InputPartition implements Writable {
   /** Location in Hadoop */
   private String location;
 
-  /**
-   * Constructor
-   */
+  /** Constructor for reflection */
   public InputPartition() {
     inputSplitData = new InputSplitData();
   }
 
   /**
-   * Constructor for unpartitioned tables
-   *
-   * @param table Hive table
+   * Constructor with data
+   * @param inputSplitData split data
+   * @param inputFormatClass class for input format
+   * @param location where data is on hdfs
    */
-  public InputPartition(Table table) {
-    this(table.getSd());
+  public InputPartition(InputSplitData inputSplitData,
+                        Class<? extends InputFormat> inputFormatClass,
+                        String location) {
+    this.inputSplitData = inputSplitData;
+    this.inputFormatClass = inputFormatClass;
+    this.location = location;
   }
 
   /**
-   * Constructor
-   *
+   * Create for un-partitioned tables
    * @param table Hive table
-   * @param partition Partition of table
+   * @return InputPartition
    */
-  public InputPartition(Table table, Partition partition) {
-    this(partition.getSd());
-    inputSplitData.parsePartitionValues(table, partition);
+  public static InputPartition newFromHiveTable(Table table) {
+    return makePartition(table.getSd(), Collections.<String>emptyList());
   }
 
   /**
-   * Internal constructor with storage descriptor
-   *
-   * @param storageDescriptor StorageDescriptor
+   * Create for partition of a table
+   * @param partition Hive partition
+   * @return InputPartition
    */
-  private InputPartition(StorageDescriptor storageDescriptor) {
-    inputSplitData = new InputSplitData(storageDescriptor);
-    inputFormatClass = Classes.classForName(storageDescriptor.getInputFormat());
-    location = storageDescriptor.getLocation();
+  public static InputPartition newFromHivePartition(Partition partition) {
+    return makePartition(partition.getSd(), partition.getValues());
+  }
+
+  /**
+   * Helper to construct class
+   * @param storageDescriptor {@link StorageDescriptor}
+   * @param partitionValues list of partition values
+   * @return InputPartition
+   */
+  private static InputPartition makePartition(StorageDescriptor storageDescriptor,
+                                              List<String> partitionValues) {
+    InputSplitData splitData = new InputSplitData(storageDescriptor, partitionValues);
+    Class<? extends InputFormat> inputFormatClass = Classes.classForName(
+        storageDescriptor.getInputFormat());
+    String location = storageDescriptor.getLocation();
+    return new InputPartition(splitData, inputFormatClass, location);
   }
 
   /**
@@ -100,10 +116,6 @@ class InputPartition implements Writable {
 
   public InputSplitData getInputSplitData() {
     return inputSplitData;
-  }
-
-  public Class<? extends InputFormat> getInputFormatClass() {
-    return inputFormatClass;
   }
 
   public String getLocation() {

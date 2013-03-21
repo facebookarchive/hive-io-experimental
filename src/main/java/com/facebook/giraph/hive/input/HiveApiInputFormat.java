@@ -20,6 +20,8 @@ package com.facebook.giraph.hive.input;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.hive.conf.HiveConf;
+import org.apache.hadoop.hive.metastore.api.MetaException;
+import org.apache.hadoop.hive.metastore.api.NoSuchObjectException;
 import org.apache.hadoop.hive.metastore.api.Partition;
 import org.apache.hadoop.hive.metastore.api.Table;
 import org.apache.hadoop.hive.metastore.api.ThriftHiveMetastore;
@@ -34,16 +36,18 @@ import org.apache.hadoop.mapreduce.TaskAttemptContext;
 import org.apache.log4j.Logger;
 import org.apache.thrift.TException;
 
-import com.facebook.giraph.hive.common.HadoopUtils;
-import com.facebook.giraph.hive.common.HiveMetastores;
-import com.facebook.giraph.hive.common.HiveUtils;
-import com.facebook.giraph.hive.input.parser.BytesParser;
-import com.facebook.giraph.hive.input.parser.DefaultParser;
-import com.facebook.giraph.hive.input.parser.RecordParser;
-import com.facebook.giraph.hive.record.HiveRecord;
-import com.facebook.giraph.hive.schema.HiveApiTableSchema;
-import com.facebook.giraph.hive.schema.HiveTableSchema;
-import com.facebook.giraph.hive.schema.HiveTableSchemas;
+import com.facebook.giraph.hive.HiveRecord;
+import com.facebook.giraph.hive.HiveTableSchema;
+import com.facebook.giraph.hive.HiveTableSchemas;
+import com.facebook.giraph.hive.impl.HiveApiTableSchema;
+import com.facebook.giraph.hive.impl.common.HadoopUtils;
+import com.facebook.giraph.hive.impl.common.HiveMetastores;
+import com.facebook.giraph.hive.impl.common.HiveUtils;
+import com.facebook.giraph.hive.impl.input.HiveApiInputSplit;
+import com.facebook.giraph.hive.impl.input.HiveApiRecordReader;
+import com.facebook.giraph.hive.impl.input.InputConf;
+import com.facebook.giraph.hive.impl.input.InputInfo;
+import com.facebook.giraph.hive.impl.input.InputPartition;
 import com.google.common.base.Function;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
@@ -174,18 +178,13 @@ public class HiveApiInputFormat
     HiveTableSchemas.putForName(conf, dbName, tableName, tableSchema);
     HiveTableSchemas.putForProfile(conf, profileId, tableSchema);
 
-    Function<String, Integer> columnNameToId = new Function<String, Integer>() {
-      @Override public Integer apply(String input) {
-        return tableSchema.positionOf(input);
-      }
-    };
-    List<Integer> columnIds = transform(inputDesc.getColumns(), columnNameToId);
+    List<Integer> columnIds = transform(inputDesc.getColumns(), schemaLookupFunc(tableSchema));
 
     InputInfo inputInfo = new InputInfo(tableSchema, columnIds);
 
     if (table.getPartitionKeysSize() == 0) {
       // table without partitions
-      inputInfo.addPartition(new InputPartition(table));
+      inputInfo.addPartition(InputPartition.newFromHiveTable(table));
     } else {
       // table with partitions, find matches to user filter.
       List<Partition> partitions = null;
@@ -196,7 +195,7 @@ public class HiveApiInputFormat
         throw new TException(e.getMessage());
       }
       for (Partition partition : partitions) {
-        inputInfo.addPartition(new InputPartition(table, partition));
+        inputInfo.addPartition(InputPartition.newFromHivePartition(partition));
       }
     }
 
@@ -252,7 +251,7 @@ public class HiveApiInputFormat
   }
 
   @Override
-  public RecordReader<WritableComparable, HiveRecord>
+  public HiveApiRecordReader
   createRecordReader(InputSplit inputSplit, TaskAttemptContext context)
     throws IOException, InterruptedException {
     Configuration conf = context.getConfiguration();
