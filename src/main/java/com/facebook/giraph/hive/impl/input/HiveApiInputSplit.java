@@ -20,7 +20,6 @@ package com.facebook.giraph.hive.impl.input;
 
 import org.apache.hadoop.conf.Configurable;
 import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.hive.metastore.api.FieldSchema;
 import org.apache.hadoop.hive.serde2.Deserializer;
 import org.apache.hadoop.io.Writable;
 import org.apache.hadoop.io.WritableComparable;
@@ -44,7 +43,6 @@ import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
 import java.util.List;
-import java.util.Map;
 
 /**
  * InputSplit for Hive
@@ -103,24 +101,12 @@ public class HiveApiInputSplit extends InputSplit
     setConf(conf);
   }
 
-  public org.apache.hadoop.mapred.InputFormat getBaseInputFormat() {
-    return baseInputFormat;
-  }
-
   public Deserializer getDeserializer() {
     return Preconditions.checkNotNull(deserializer);
   }
 
-  public List<FieldSchema> getColumnInfo() {
-    return inputSplitData.getColumnInfo();
-  }
-
-  public Map<String, String> getPartitionValues() {
+  public List<String> getPartitionValues() {
     return inputSplitData.getPartitionValues();
-  }
-
-  public Map<String, String> getDeserializerParams() {
-    return inputSplitData.getDeserializerParams();
   }
 
   public HiveTableSchema getTableSchema() {

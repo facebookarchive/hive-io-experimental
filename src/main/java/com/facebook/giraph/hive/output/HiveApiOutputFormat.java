@@ -38,7 +38,6 @@ import org.apache.hadoop.mapred.Reporter;
 import org.apache.hadoop.mapreduce.JobContext;
 import org.apache.hadoop.mapreduce.OutputCommitter;
 import org.apache.hadoop.mapreduce.OutputFormat;
-import org.apache.hadoop.mapreduce.RecordWriter;
 import org.apache.hadoop.mapreduce.TaskAttemptContext;
 import org.apache.hadoop.util.ReflectionUtils;
 import org.apache.log4j.Logger;
@@ -316,8 +315,7 @@ public class HiveApiOutputFormat
   }
 
   @Override
-  public RecordWriter<WritableComparable, HiveRecord> getRecordWriter(
-    TaskAttemptContext taskAttemptContext)
+  public HiveApiRecordWriter getRecordWriter(TaskAttemptContext taskAttemptContext)
     throws IOException, InterruptedException {
     HadoopUtils.setWorkOutputDir(taskAttemptContext);
 
@@ -342,10 +340,7 @@ public class HiveApiOutputFormat
 
     StructObjectInspector soi = Inspectors.createFor(oti.getColumnInfo());
 
-    HiveApiRecordWriter arw =
-        new HiveApiRecordWriter(baseWriter, serializer, soi);
-
-    return arw;
+    return new HiveApiRecordWriter(baseWriter, serializer, soi);
   }
 
   /**
