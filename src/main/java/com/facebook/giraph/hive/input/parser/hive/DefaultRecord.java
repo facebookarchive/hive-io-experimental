@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 
-package com.facebook.giraph.hive.record;
+package com.facebook.giraph.hive.input.parser.hive;
 
 import org.apache.hadoop.hive.serde2.Deserializer;
 import org.apache.hadoop.hive.serde2.SerDeException;
@@ -27,15 +27,13 @@ import org.apache.hadoop.hive.serde2.objectinspector.StructObjectInspector;
 import org.apache.hadoop.io.Writable;
 import org.apache.log4j.Logger;
 
-import com.facebook.giraph.hive.HiveRecord;
+import com.facebook.giraph.hive.record.HiveRecord;
 import com.google.common.base.Objects;
 import com.google.common.base.Preconditions;
-import com.google.common.collect.Maps;
 
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
 
 /**
  * Single record from a Hive table. Used for both reading and writing.
@@ -44,19 +42,20 @@ public class DefaultRecord implements HiveRecord {
   /** Logger */
   public static final Logger LOG = Logger.getLogger(DefaultRecord.class);
 
+  /** Partition data */
+  private final String[] partitionValues;
   /** Raw data for row */
   private final Object[] rowData;
-  /** Partition data */
-  private final List<String> partitionValues;
 
   /**
    * Constructor
    *
    * @param numColumns number of columns
+   * @param partitionValues partition data
    */
-  public DefaultRecord(int numColumns, List<String> partitionValues) {
-    this.rowData = new Object[numColumns];
+  public DefaultRecord(int numColumns, String[] partitionValues) {
     this.partitionValues = partitionValues;
+    this.rowData = new Object[numColumns];
   }
 
   @Override
@@ -64,9 +63,36 @@ public class DefaultRecord implements HiveRecord {
     if (index < rowData.length) {
       return rowData[index];
     } else {
-      final int partitionIndex = index - rowData.length;
-      return partitionValues.get(partitionIndex);
+      return partitionValues[index - rowData.length];
     }
+  }
+
+  @Override
+  public boolean getBoolean(int index) {
+    Boolean v = (Boolean) get(index);
+    return v == null ? false : v;
+  }
+
+  @Override
+  public long getLong(int index) {
+    Long v = (Long) get(index);
+    return v == null ? Long.MIN_VALUE : v;
+  }
+
+  @Override
+  public double getDouble(int index) {
+    Double v = (Double) get(index);
+    return v == null ? Double.NaN : v;
+  }
+
+  @Override
+  public String getString(int index) {
+    return (String) get(index);
+  }
+
+  @Override
+  public boolean isNull(int index) {
+    return get(index) == null;
   }
 
   @Override
@@ -79,10 +105,6 @@ public class DefaultRecord implements HiveRecord {
     rowData[index] = value;
   }
 
-  public List<String> getPartitionValues() {
-    return partitionValues;
-  }
-  
   public int getNumColumns() {
     return rowData.length;
   }

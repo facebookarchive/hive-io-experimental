@@ -16,12 +16,11 @@
  * limitations under the License.
  */
 
-package com.facebook.giraph.hive.impl;
+package com.facebook.giraph.hive.schema;
 
 import org.apache.hadoop.hive.metastore.api.Table;
 
 import com.facebook.giraph.hive.common.Writables;
-import com.facebook.giraph.hive.schema.HiveTableSchema;
 import com.google.common.base.Objects;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Ordering;
@@ -38,7 +37,7 @@ import static com.google.common.collect.Lists.transform;
 /**
  * Schema for a Hive table
  */
-public class HiveApiTableSchema implements HiveTableSchema {
+public class HiveTableSchemaImpl implements HiveTableSchema {
   /** Partition keys */
   private final Map<String, Integer> partitionPositions;
   /** Positions of columns in the row */
@@ -50,7 +49,7 @@ public class HiveApiTableSchema implements HiveTableSchema {
   /**
    * Constructor
    */
-  public HiveApiTableSchema() {
+  public HiveTableSchemaImpl() {
     partitionPositions = Maps.newHashMap();
     columnPositions = Maps.newHashMap();
   }
@@ -61,8 +60,7 @@ public class HiveApiTableSchema implements HiveTableSchema {
    * @param partitionPositions Partition keys
    * @param columnPositions Positions of columns in row
    */
-  public HiveApiTableSchema(Map<String, Integer> partitionPositions,
-                            Map<String, Integer> columnPositions) {
+  public HiveTableSchemaImpl(Map<String, Integer> partitionPositions, Map<String, Integer> columnPositions) {
     this.partitionPositions = partitionPositions;
     this.columnPositions = columnPositions;
     numColumns = computeNumColumns(columnPositions);
@@ -73,7 +71,7 @@ public class HiveApiTableSchema implements HiveTableSchema {
    * @param table Hive table
    * @return Schema
    */
-  public static HiveApiTableSchema fromTable(Table table) {
+  public static HiveTableSchemaImpl fromTable(Table table) {
     int index = 0;
 
     List<String> columnNames = transform(table.getSd().getCols(), FIELD_SCHEMA_NAME_GETTER);
@@ -88,7 +86,7 @@ public class HiveApiTableSchema implements HiveTableSchema {
       partitionToIndex.put(partitionName, index++);
     }
 
-    return new HiveApiTableSchema(partitionToIndex, columnToIndex);
+    return new HiveTableSchemaImpl(partitionToIndex, columnToIndex);
   }
 
   /**

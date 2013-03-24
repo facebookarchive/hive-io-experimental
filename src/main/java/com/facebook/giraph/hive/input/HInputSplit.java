@@ -30,7 +30,7 @@ import org.apache.hadoop.util.Progressable;
 import org.apache.log4j.Logger;
 
 import com.facebook.giraph.hive.schema.HiveTableSchema;
-import com.facebook.giraph.hive.schema.HiveApiTableSchema;
+import com.facebook.giraph.hive.schema.HiveTableSchemaImpl;
 import com.facebook.giraph.hive.common.HadoopUtils;
 import com.facebook.giraph.hive.common.ProgressReporter;
 import com.facebook.giraph.hive.common.SerDes;
@@ -47,10 +47,10 @@ import java.util.List;
 /**
  * InputSplit for Hive
  */
-class HiveApiInputSplit extends InputSplit
+class HInputSplit extends InputSplit
     implements org.apache.hadoop.mapred.InputSplit, Configurable {
   /** Logger */
-  public static final Logger LOG = Logger.getLogger(HiveApiInputSplit.class);
+  public static final Logger LOG = Logger.getLogger(HInputSplit.class);
 
   /** Hadoop InputFormat for reading records */
   private org.apache.hadoop.mapred.InputFormat baseInputFormat;
@@ -72,8 +72,8 @@ class HiveApiInputSplit extends InputSplit
   /**
    * Constructor for reflection
    */
-  public HiveApiInputSplit() {
-    tableSchema = new HiveApiTableSchema();
+  public HInputSplit() {
+    tableSchema = new HiveTableSchemaImpl();
     inputSplitData = new InputSplitData();
     columnIds = Lists.newArrayList();
   }
@@ -88,11 +88,10 @@ class HiveApiInputSplit extends InputSplit
    * @param inputSplitData Data for this split
    * @param conf Configuration
    */
-  public HiveApiInputSplit(
-      org.apache.hadoop.mapred.InputFormat baseInputFormat,
-      org.apache.hadoop.mapred.InputSplit baseSplit,
-      HiveTableSchema tableSchema, List<Integer> columnIds,
-      InputSplitData inputSplitData, Configuration conf) {
+  public HInputSplit(org.apache.hadoop.mapred.InputFormat baseInputFormat,
+                     org.apache.hadoop.mapred.InputSplit baseSplit,
+                     HiveTableSchema tableSchema, List<Integer> columnIds,
+                     InputSplitData inputSplitData, Configuration conf) {
     this.baseSplit = baseSplit;
     this.baseInputFormat = baseInputFormat;
     this.tableSchema = tableSchema;
@@ -105,8 +104,9 @@ class HiveApiInputSplit extends InputSplit
     return Preconditions.checkNotNull(deserializer);
   }
 
-  public List<String> getPartitionValues() {
-    return inputSplitData.getPartitionValues();
+  public String[] getPartitionValues() {
+    List<String> partValues = inputSplitData.getPartitionValues();
+    return partValues.toArray(new String[partValues.size()]);
   }
 
   public HiveTableSchema getTableSchema() {

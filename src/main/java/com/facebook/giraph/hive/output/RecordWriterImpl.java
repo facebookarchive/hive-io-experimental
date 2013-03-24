@@ -37,9 +37,9 @@ import java.util.List;
 /**
  * RecordWriter for Hive
  */
-class HiveApiRecordWriter extends RecordWriter<WritableComparable, HiveRecord> {
+class RecordWriterImpl extends RecordWriter<WritableComparable, HiveRecord> {
   /** Logger */
-  private static final Logger LOG = Logger.getLogger(HiveApiRecordWriter.class);
+  private static final Logger LOG = Logger.getLogger(RecordWriterImpl.class);
 
   // CHECKSTYLE: stop LineLength
   /** Base Hadoop RecordWriter */
@@ -60,9 +60,7 @@ class HiveApiRecordWriter extends RecordWriter<WritableComparable, HiveRecord> {
    * @param serializer Serializer
    * @param objectInspector ObjectInspector
    */
-  public HiveApiRecordWriter(
-      org.apache.hadoop.mapred.RecordWriter<WritableComparable, Writable> baseWriter,
-      Serializer serializer, ObjectInspector objectInspector) {
+  public RecordWriterImpl(org.apache.hadoop.mapred.RecordWriter<WritableComparable, Writable> baseWriter, Serializer serializer, ObjectInspector objectInspector) {
     // CHECKSTYLE: resume LineLength
     this.baseWriter = baseWriter;
     this.serializer = serializer;

@@ -20,53 +20,50 @@ package com.facebook.giraph.hive.input;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.hive.conf.HiveConf;
-import org.apache.hadoop.hive.metastore.api.MetaException;
-import org.apache.hadoop.hive.metastore.api.NoSuchObjectException;
 import org.apache.hadoop.hive.metastore.api.Partition;
 import org.apache.hadoop.hive.metastore.api.Table;
 import org.apache.hadoop.hive.metastore.api.ThriftHiveMetastore;
+import org.apache.hadoop.hive.serde2.Deserializer;
 import org.apache.hadoop.io.Writable;
 import org.apache.hadoop.io.WritableComparable;
 import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapreduce.InputFormat;
 import org.apache.hadoop.mapreduce.InputSplit;
 import org.apache.hadoop.mapreduce.JobContext;
-import org.apache.hadoop.mapreduce.RecordReader;
 import org.apache.hadoop.mapreduce.TaskAttemptContext;
 import org.apache.log4j.Logger;
 import org.apache.thrift.TException;
 
-import com.facebook.giraph.hive.HiveRecord;
-import com.facebook.giraph.hive.HiveTableSchema;
-import com.facebook.giraph.hive.HiveTableSchemas;
-import com.facebook.giraph.hive.impl.HiveApiTableSchema;
-import com.facebook.giraph.hive.impl.common.HadoopUtils;
-import com.facebook.giraph.hive.impl.common.HiveMetastores;
-import com.facebook.giraph.hive.impl.common.HiveUtils;
-import com.facebook.giraph.hive.impl.input.HiveApiInputSplit;
-import com.facebook.giraph.hive.impl.input.HiveApiRecordReader;
-import com.facebook.giraph.hive.impl.input.InputConf;
-import com.facebook.giraph.hive.impl.input.InputInfo;
-import com.facebook.giraph.hive.impl.input.InputPartition;
-import com.google.common.base.Function;
+import com.facebook.giraph.hive.common.HadoopUtils;
+import com.facebook.giraph.hive.common.HiveMetastores;
+import com.facebook.giraph.hive.common.HiveUtils;
+import com.facebook.giraph.hive.common.Writables;
+import com.facebook.giraph.hive.input.parser.RecordParser;
+import com.facebook.giraph.hive.input.parser.generic.ArrayParser;
+import com.facebook.giraph.hive.input.parser.hive.DefaultParser;
+import com.facebook.giraph.hive.record.HiveReadableRecord;
+import com.facebook.giraph.hive.schema.HiveTableSchemaImpl;
+import com.facebook.giraph.hive.schema.HiveTableSchema;
+import com.facebook.giraph.hive.schema.HiveTableSchemas;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 
 import java.io.IOException;
 import java.util.List;
 
+import static com.facebook.giraph.hive.schema.HiveTableSchemas.schemaLookupFunc;
 import static com.google.common.collect.Lists.transform;
 
 /**
  * InputFormat to read from Hive
  */
 public class HiveApiInputFormat
-    extends InputFormat<WritableComparable, HiveRecord> {
+    extends InputFormat<WritableComparable, HiveReadableRecord> {
   /** Logger */
   public static final Logger LOG = Logger.getLogger(HiveApiInputFormat.class);
 
   /** Use more efficient bytes parser. */
-  public static final String BYTES_PARSER_KEY = "hive.api.input.bytes_parser";
+  public static final String BYTES_PARSER_KEY = "hive.input.bytes_parser";
 
   /** Default profile ID if none given */
   public static final String DEFAULT_PROFILE_ID = "input-profile";
@@ -118,177 +115,156 @@ public class HiveApiInputFormat
     return HiveTableSchemas.getForProfile(conf, myProfileId);
   }
 
-  /**
-   * Set information to lookup later.
-   *
-   * @param conf Hadoop Configuration to store data in
-   * @param hiveInputDescription TableDesc of what to lookup in Hive
-   * @throws TException If anything goes wrong contacting Metastore
-   */
-  public static void initDefaultProfile(Configuration conf,
-    HiveInputDescription hiveInputDescription)
-    throws TException {
-    initProfile(conf, hiveInputDescription, DEFAULT_PROFILE_ID);
+  private static String profileConfKey(String profileId) {
+    return "hive.input." + profileId;
   }
 
-  /**
-   * Set information to lookup later. This allows for multiple configurations by
-   * using a single profile ID for each set of table information.
-   *
-   * @param conf Hadoop Configuration to store data in
-   * @param inputDesc TableDesc of what to lookup in Hive
-   * @param profileId String profile of configuration to set, allowing for
-   *                  multiple configs
-   * @throws TException If anything goes wrong contacting Metastore
-   */
-  public static void initProfile(
-    Configuration conf, HiveInputDescription inputDesc, String profileId)
-    throws TException {
-    HiveConf hiveConf = new HiveConf(conf, HiveApiInputFormat.class);
-    ThriftHiveMetastore.Iface client = HiveMetastores.create(hiveConf);
-    initProfile(conf, inputDesc, profileId, client);
+  public static void setProfileInputDesc(Configuration conf,
+    HiveInputDescription inputDesc, String profileId) {
+    conf.set(profileConfKey(profileId), Writables.writeToEncodedStr(inputDesc));
   }
 
-  /**
-   * Set information to lookup later. This allows for multiple configurations by
-   * using a single profile ID for each set of table information.
-   * This version allows you to supply your own hive metastore thrift client.
-   *
-   * @param conf Hadoop Configuration to store data in
-   * @param inputDesc TableDesc of what to lookup in Hive
-   * @param profileId String profile of configuration to set, allowing for
-   *                  multiple configs
-   * @param client Thrift client to use.
-   * @throws TException If anything goes wrong contacting Metastore
-   */
-  public static void initProfile(Configuration conf,
-    HiveInputDescription inputDesc, String profileId,
-    ThriftHiveMetastore.Iface client) throws TException {
-    String dbName = inputDesc.getDbName();
-    String tableName = inputDesc.getTableName();
-
-    Table table;
-    try {
-      table = client.get_table(dbName, tableName);
-    } catch (Exception e) {
-      throw new TException(e);
-    }
-
-    final HiveTableSchema tableSchema = HiveApiTableSchema.fromTable(table);
-    HiveTableSchemas.putForName(conf, dbName, tableName, tableSchema);
-    HiveTableSchemas.putForProfile(conf, profileId, tableSchema);
-
-    List<Integer> columnIds = transform(inputDesc.getColumns(), schemaLookupFunc(tableSchema));
-
-    InputInfo inputInfo = new InputInfo(tableSchema, columnIds);
-
-    if (table.getPartitionKeysSize() == 0) {
-      // table without partitions
-      inputInfo.addPartition(InputPartition.newFromHiveTable(table));
-    } else {
-      // table with partitions, find matches to user filter.
-      List<Partition> partitions = null;
-      try {
-        partitions = client.get_partitions_by_filter(dbName, tableName,
-            inputDesc.getPartitionFilter(), (short) -1);
-      } catch (Exception e) {
-        throw new TException(e.getMessage());
-      }
-      for (Partition partition : partitions) {
-        inputInfo.addPartition(InputPartition.newFromHivePartition(partition));
-      }
-    }
-
-    InputConf inputConf = new InputConf(conf, profileId);
-    inputConf.writeNumSplitsToConf(inputDesc.getNumSplits());
-    inputConf.writeProfileIdToConf();
-    inputConf.writeInputInfoToConf(inputInfo);
-
-    LOG.info("initProfile '" + profileId + "' to " + inputDesc);
+  private HiveInputDescription readProfileInputDesc(HiveConf conf) {
+    HiveInputDescription inputDesc = new HiveInputDescription();
+    Writables.readFieldsFromEncodedStr(conf.get(profileConfKey(myProfileId)), inputDesc);
+    return inputDesc;
   }
 
   @Override
   public List<InputSplit> getSplits(JobContext jobContext)
-    throws IOException, InterruptedException {
-    Configuration conf = jobContext.getConfiguration();
+    throws IOException, InterruptedException
+  {
+    LOG.info("getSplits for profile " + myProfileId);
 
-    InputConf inputConf = new InputConf(conf, myProfileId);
+    HiveConf conf = new HiveConf(jobContext.getConfiguration(), HiveApiInputFormat.class);
 
-    LOG.info("getSplits for profile " + inputConf.getProfileId());
+    ThriftHiveMetastore.Iface client;
+    try {
+      client = HiveMetastores.create(conf);
+    } catch (TException e) {
+      throw new IOException(e);
+    }
 
-    JobConf jobConf = new JobConf(conf);
-    InputInfo inputInfo = inputConf.readInputInfoFromConf();
+    return getSplits(conf, client);
+  }
 
+  public List<InputSplit> getSplits(HiveConf conf, ThriftHiveMetastore.Iface client)
+      throws IOException {
+    HiveInputDescription inputDesc = readProfileInputDesc(conf);
+
+    Table table;
+    try {
+      table = client.get_table(inputDesc.getDbName(), inputDesc.getTableName());
+    } catch (Exception e) {
+      throw new IOException(e);
+    }
+
+    final HiveTableSchema tableSchema = HiveTableSchemaImpl.fromTable(table);
+    HiveTableSchemas.putForProfile(conf, myProfileId, tableSchema);
+
+    List<InputPartition> partitions = computePartitions(inputDesc, client, table);
+
+    List<InputSplit> splits = computeSplits(conf, inputDesc, tableSchema, partitions);
+
+    return splits;
+  }
+
+  private List<InputSplit> computeSplits(HiveConf conf, HiveInputDescription inputDesc,
+    HiveTableSchema tableSchema, List<InputPartition> partitions) throws IOException
+  {
     int partitionNum = 0;
     List<InputSplit> splits = Lists.newArrayList();
-    Iterable<InputPartition> partitions = inputInfo.getPartitions();
+
+    List<Integer> columnIds = transform(inputDesc.getColumns(), schemaLookupFunc(tableSchema));
 
     for (InputPartition inputPartition : partitions) {
-      org.apache.hadoop.mapred.InputFormat baseInputFormat =
-          inputPartition.makeInputFormat(conf);
-      HadoopUtils.setInputDir(jobConf, inputPartition.getLocation());
+      org.apache.hadoop.mapred.InputFormat baseInputFormat = inputPartition.makeInputFormat(conf);
+      HadoopUtils.setInputDir(conf, inputPartition.getLocation());
 
-      int splitsRequested = inputConf.readNumSplitsFromConf();
       org.apache.hadoop.mapred.InputSplit[] baseSplits =
-          baseInputFormat.getSplits(jobConf, splitsRequested);
-      LOG.info("Requested " + splitsRequested + " splits from partition (" +
+          baseInputFormat.getSplits(new JobConf(conf), inputDesc.getNumSplits());
+      LOG.info("Requested " + inputDesc.getNumSplits() + " splits from partition (" +
           partitionNum + " out of " + Iterables.size(partitions) +
-          ") values: " +
-          inputPartition.getInputSplitData().getPartitionValues() +
+          ") values: " + inputPartition.getInputSplitData().getPartitionValues() +
           ", got " + baseSplits.length + " splits");
 
       for (org.apache.hadoop.mapred.InputSplit baseSplit : baseSplits)  {
-        InputSplit split = new HiveApiInputSplit(baseInputFormat, baseSplit,
-            inputInfo.getTableSchema(), inputInfo.getColumnIds(),
-            inputPartition.getInputSplitData(), conf);
+        InputSplit split = new HInputSplit(baseInputFormat, baseSplit,
+            tableSchema, columnIds, inputPartition.getInputSplitData(), conf);
         splits.add(split);
       }
 
       partitionNum++;
     }
-
     return splits;
   }
 
+  private List<InputPartition> computePartitions(HiveInputDescription inputDesc,
+    ThriftHiveMetastore.Iface client, Table table) throws IOException
+  {
+    List<InputPartition> partitions = Lists.newArrayList();
+
+    if (table.getPartitionKeysSize() == 0) {
+      // table without partitions
+      partitions.add(InputPartition.newFromHiveTable(table));
+    } else {
+      // table with partitions, find matches to user filter.
+      List<Partition> hivePartitions;
+      try {
+        hivePartitions = client.get_partitions_by_filter(inputDesc.getDbName(),
+            inputDesc.getTableName(), inputDesc.getPartitionFilter(), (short) -1);
+      } catch (Exception e) {
+        throw new IOException(e);
+      }
+      for (Partition hivePartition : hivePartitions) {
+        partitions.add(InputPartition.newFromHivePartition(hivePartition));
+      }
+    }
+    return partitions;
+  }
+
   @Override
-  public HiveApiRecordReader
+  public RecordReaderImpl
   createRecordReader(InputSplit inputSplit, TaskAttemptContext context)
     throws IOException, InterruptedException {
     Configuration conf = context.getConfiguration();
     JobConf jobConf = new JobConf(conf);
 
-    HiveApiInputSplit apiInputSplit;
-    if (inputSplit instanceof HiveApiInputSplit) {
-      apiInputSplit = (HiveApiInputSplit) inputSplit;
+    HInputSplit split;
+    if (inputSplit instanceof HInputSplit) {
+      split = (HInputSplit) inputSplit;
     } else {
-      throw new IllegalArgumentException("InputSplit not a HiveApiInputSplit");
+      throw new IllegalArgumentException("InputSplit not a " + HInputSplit.class.getSimpleName());
     }
-    apiInputSplit.setConf(jobConf);
+    split.setConf(jobConf);
 
     // CHECKSTYLE: stop LineLength
     org.apache.hadoop.mapred.RecordReader<WritableComparable, Writable> baseRecordReader =
-        apiInputSplit.getBaseRecordReader(jobConf, context);
+        split.getBaseRecordReader(jobConf, context);
     // CHECKSTYLE: resume LineLength
 
-    HiveUtils.setReadColumnIds(conf, apiInputSplit.getColumnIds());
+    List<Integer> columnIds = split.getColumnIds();
+    HiveUtils.setReadColumnIds(conf, columnIds);
 
-    RecordParser recordParser;
-    if (conf.getBoolean(BYTES_PARSER_KEY, false)) {
-      recordParser = new BytesParser(
-          apiInputSplit.getDeserializer(),
-          apiInputSplit.getTableSchema().numColumns());
-    } else {
-      recordParser = new DefaultParser(
-        conf,
-        apiInputSplit.getDeserializer(),
-        apiInputSplit.getPartitionValues(),
-        apiInputSplit.getTableSchema().numColumns()
-      );
-    }
+    RecordParser<Writable> recordParser = getParser(conf, split, columnIds);
 
-    HiveApiRecordReader reader = new HiveApiRecordReader(baseRecordReader, recordParser);
+    RecordReaderImpl reader = new RecordReaderImpl(baseRecordReader, recordParser);
     reader.setObserver(observer);
 
     return reader;
+  }
+
+  private RecordParser<Writable> getParser(Configuration conf, HInputSplit split,
+                                           List<Integer> columnIds)
+  {
+    Deserializer deserializer = split.getDeserializer();
+    String[] partitionValues = split.getPartitionValues();
+    int numColumns = split.getTableSchema().numColumns();
+
+    if (conf.getBoolean(BYTES_PARSER_KEY, false)) {
+      return new ArrayParser(deserializer, partitionValues, numColumns, columnIds);
+    } else {
+      return new DefaultParser(deserializer, partitionValues, numColumns);
+    }
   }
 }

@@ -146,7 +146,7 @@ public class HiveMetastores {
       try {
         return create(uri.getHost(), uri.getPort());
       } catch (TTransportException e) {
-        LOG.error("Failed to connect to " + uri.getHost() +
+        LOG.warn("Failed to connect to " + uri.getHost() +
             ":" + uri.getPort(), e);
       }
     }

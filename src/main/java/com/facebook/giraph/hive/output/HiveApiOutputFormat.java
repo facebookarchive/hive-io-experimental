@@ -43,7 +43,7 @@ import org.apache.hadoop.util.ReflectionUtils;
 import org.apache.log4j.Logger;
 import org.apache.thrift.TException;
 
-import com.facebook.giraph.hive.schema.HiveApiTableSchema;
+import com.facebook.giraph.hive.schema.HiveTableSchemaImpl;
 import com.facebook.giraph.hive.common.FileSystems;
 import com.facebook.giraph.hive.common.HadoopUtils;
 import com.facebook.giraph.hive.common.HiveUtils;
@@ -157,8 +157,7 @@ public class HiveApiOutputFormat
       oti.setFinalOutputPath(oti.getTableRoot());
     }
 
-    HiveTableSchema tableSchema = HiveApiTableSchema.fromTable(table);
-    HiveTableSchemas.putForName(conf, dbName, tableName, tableSchema);
+    HiveTableSchema tableSchema = HiveTableSchemaImpl.fromTable(table);
     HiveTableSchemas.putForProfile(conf, profileId, tableSchema);
 
     OutputConf outputConf = new OutputConf(conf, profileId);
@@ -309,7 +308,7 @@ public class HiveApiOutputFormat
   }
 
   @Override
-  public HiveApiRecordWriter getRecordWriter(TaskAttemptContext taskAttemptContext)
+  public RecordWriterImpl getRecordWriter(TaskAttemptContext taskAttemptContext)
     throws IOException, InterruptedException {
     HadoopUtils.setWorkOutputDir(taskAttemptContext);
 
@@ -334,7 +333,7 @@ public class HiveApiOutputFormat
 
     StructObjectInspector soi = Inspectors.createFor(oti.getColumnInfo());
 
-    return new HiveApiRecordWriter(baseWriter, serializer, soi);
+    return new RecordWriterImpl(baseWriter, serializer, soi);
   }
 
   /**

@@ -25,14 +25,14 @@ import org.apache.hadoop.mapreduce.RecordReader;
 import org.apache.hadoop.mapreduce.TaskAttemptContext;
 
 import com.facebook.giraph.hive.input.parser.RecordParser;
-import com.facebook.giraph.hive.record.HiveRecord;
+import com.facebook.giraph.hive.record.HiveReadableRecord;
 
 import java.io.IOException;
 
 /**
  * RecordReader for Hive data
  */
-class HiveApiRecordReader extends RecordReader<WritableComparable, HiveRecord> {
+public class RecordReaderImpl extends RecordReader<WritableComparable, HiveReadableRecord> {
   // CHECKSTYLE: stop LineLength
   /** Base record reader */
   private final org.apache.hadoop.mapred.RecordReader<WritableComparable, Writable> baseRecordReader;
@@ -42,10 +42,10 @@ class HiveApiRecordReader extends RecordReader<WritableComparable, HiveRecord> {
   /** Current value read */
   private final Writable value;
   /** Parser to use */
-  private final RecordParser parser;
+  private final RecordParser<Writable> parser;
 
   /** Holds current record */
-  private HiveRecord record;
+  private HiveReadableRecord record;
 
   /** Observer for operations here */
   private HiveApiInputObserver observer;
@@ -60,9 +60,7 @@ class HiveApiRecordReader extends RecordReader<WritableComparable, HiveRecord> {
    * @param numColumns total number of columns
    * @param reuseRecord whether to reuse HiveRecord objects
    */
-  public HiveApiRecordReader(
-      org.apache.hadoop.mapred.RecordReader<WritableComparable, Writable> baseRecordReader,
-      RecordParser parser) {
+  public RecordReaderImpl(org.apache.hadoop.mapred.RecordReader<WritableComparable, Writable> baseRecordReader, RecordParser parser) {
     // CHECKSTYLE: resume LineLength
     this.baseRecordReader = baseRecordReader;
     this.key = baseRecordReader.createKey();
@@ -89,7 +87,9 @@ class HiveApiRecordReader extends RecordReader<WritableComparable, HiveRecord> {
   @Override
   public void initialize(InputSplit inputSplit,
                          TaskAttemptContext taskAttemptContext)
-    throws IOException, InterruptedException { }
+    throws IOException, InterruptedException {
+    record = parser.createRecord();
+  }
 
   @Override
   public boolean nextKeyValue() throws IOException, InterruptedException {
@@ -116,7 +116,7 @@ class HiveApiRecordReader extends RecordReader<WritableComparable, HiveRecord> {
   }
 
   @Override
-  public HiveRecord getCurrentValue()
+  public HiveReadableRecord getCurrentValue()
     throws IOException, InterruptedException {
     return record;
   }

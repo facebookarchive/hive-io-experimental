@@ -27,6 +27,9 @@ public interface HiveTableSchema extends Writable {
   /**
    * Get index of a column or a paritition key
    *
+   * Regular data columns from the tables should always be placed first, and then
+   * partition value columns.
+   *
    * @param columnOrPartitionKeyName Name of column or partition key
    * @return Integer index of column or partition key, or -1
    */

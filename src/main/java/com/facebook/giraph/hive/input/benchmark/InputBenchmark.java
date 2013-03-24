@@ -18,13 +18,10 @@
 
 package com.facebook.giraph.hive.input.benchmark;
 
-import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.hive.conf.HiveConf;
 import org.apache.hadoop.hive.metastore.api.ThriftHiveMetastore;
 import org.apache.hadoop.io.WritableComparable;
 import org.apache.hadoop.mapreduce.InputSplit;
-import org.apache.hadoop.mapreduce.JobContext;
-import org.apache.hadoop.mapreduce.JobID;
 import org.apache.hadoop.mapreduce.RecordReader;
 import org.apache.hadoop.mapreduce.TaskAttemptContext;
 import org.apache.hadoop.mapreduce.TaskAttemptID;
@@ -34,7 +31,7 @@ import org.apache.thrift.transport.TTransportException;
 import com.facebook.giraph.hive.common.HiveMetastores;
 import com.facebook.giraph.hive.input.HiveApiInputFormat;
 import com.facebook.giraph.hive.input.HiveInputDescription;
-import com.facebook.giraph.hive.record.HiveRecord;
+import com.facebook.giraph.hive.record.HiveReadableRecord;
 import com.google.common.base.Optional;
 import com.sampullara.cli.Args;
 import com.yammer.metrics.Metrics;
@@ -112,48 +109,29 @@ public class InputBenchmark {
     input.setPartitionFilter(parsedArgs.getPartitionFilter());
 
     HiveConf hiveConf = new HiveConf(InputBenchmark.class);
+    if (parsedArgs.isBytesParser()) {
+      hiveConf.setBoolean(HiveApiInputFormat.BYTES_PARSER_KEY, true);
+    }
     ThriftHiveMetastore.Iface client = HiveMetastores.create(parsedArgs.getHiveHost(), parsedArgs.getHivePort());
 
     System.err.println("Initialize profile with input data");
-    try {
-      HiveApiInputFormat.initProfile(hiveConf, input, HiveApiInputFormat.DEFAULT_PROFILE_ID, client);
-      // CHECKSTYLE: stop IllegalCatch
-    } catch (Exception e) {
-      // CHECKSTYLE: resume IllegalCatch
-      System.err.println("Error initializing HiveInput: " + e);
-      return;
-    }
+    HiveApiInputFormat.setProfileInputDesc(hiveConf, input, HiveApiInputFormat.DEFAULT_PROFILE_ID);
 
-    readAll(hiveConf, parsedArgs);
-  }
-
-  /**
-   * Read all data from an InputFormat
-   *
-   * @param conf Configuration
-   * @param inputFormat InputFormat
-   * @throws IOException I/O errors
-   * @throws InterruptedException thread errors
-   */
-  private static void readAll(Configuration conf, BenchmarkArgs args)
-    throws IOException, InterruptedException {
     HiveApiInputFormat defaultInputFormat = new HiveApiInputFormat();
-    defaultInputFormat.setObserver(new MetricsObserver("default", args.getRecordPrintPeriod()));
+    defaultInputFormat.setObserver(new MetricsObserver("default", parsedArgs.getRecordPrintPeriod()));
 
-    JobID jobID = new JobID();
-    JobContext jobContext = new JobContext(conf, jobID);
-
-    List<InputSplit> splits =  defaultInputFormat.getSplits(jobContext);
+    List<InputSplit> splits = defaultInputFormat.getSplits(hiveConf, client);
     System.err.println("getSplits returned " + splits.size() + " splits");
 
     for (int i = 0; i < splits.size(); ++i) {
       InputSplit split = splits.get(i);
       TaskAttemptID taskID = new TaskAttemptID();
-      TaskAttemptContext taskContext = new TaskAttemptContext(conf, taskID);
-      if (i % args.getSplitPrintPeriod() == 0) {
+      TaskAttemptContext taskContext = new TaskAttemptContext(hiveConf, taskID);
+      if (i % parsedArgs.getSplitPrintPeriod() == 0) {
         System.err.println("Handling split " + i + " of " + splits.size());
       }
-      RecordReader<WritableComparable, HiveRecord> reader = defaultInputFormat.createRecordReader(split, taskContext);
+      RecordReader<WritableComparable, HiveReadableRecord> reader =
+          defaultInputFormat.createRecordReader(split, taskContext);
       reader.initialize(split, taskContext);
       readFully(reader);
     }
@@ -166,14 +144,17 @@ public class InputBenchmark {
    * @throws IOException I/O errors
    * @throws InterruptedException thread errors
    */
-  private static void readFully(RecordReader<WritableComparable, HiveRecord> reader)
+  private static void readFully(RecordReader<WritableComparable, HiveReadableRecord> reader)
     throws IOException, InterruptedException {
-    float lastProgress = 0.0f;
     while (reader.nextKeyValue()) {
-      HiveRecord record = reader.getCurrentValue();
-      record.get(0);
-      record.get(1);
-      record.get(2);
+      HiveReadableRecord record = reader.getCurrentValue();
+      parseLongLongDouble(record);
     }
+  }
+
+  private static void parseLongLongDouble(HiveReadableRecord record) {
+    record.getLong(0);
+    record.getLong(1);
+    record.getDouble(2);
   }
 }

@@ -44,7 +44,7 @@ public class HiveUtils {
   /**
    * Function for getting the name from FieldSchema
    */
-  public static Function<FieldSchema, String> FIELD_SCHEMA_NAME_GETTER =
+  public static final Function<FieldSchema, String> FIELD_SCHEMA_NAME_GETTER =
       new Function<FieldSchema, String>() {
         @Override
         public String apply(FieldSchema input) {

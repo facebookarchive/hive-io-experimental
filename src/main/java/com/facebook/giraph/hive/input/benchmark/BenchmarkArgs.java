@@ -25,19 +25,19 @@ import com.sampullara.cli.Argument;
  */
 class BenchmarkArgs {
   /** Hive host */
-  @Argument(required = true) private String hiveHost;
+  @Argument private String hiveHost = "hadoopminimstr032.frc1.facebook.com";
 
   /** Hive port */
   @Argument private int hivePort = 9083;
 
-  /** Hive table */
-  @Argument(required = true) private String table;
-
-  /** Partition filter */
-  @Argument private String partitionFilter;
-
   /** Hive database */
   @Argument private String database = "default";
+
+  /** Hive table */
+  @Argument private String table = "inference_sims";
+
+  /** Partition filter */
+  @Argument private String partitionFilter = "ds='2013-01-01' and feature='test_nz'";
 
   /** Every how many splits to print */
   @Argument private int splitPrintPeriod = 3;

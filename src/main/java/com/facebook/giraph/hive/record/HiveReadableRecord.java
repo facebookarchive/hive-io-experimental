@@ -18,22 +18,58 @@
 
 package com.facebook.giraph.hive.record;
 
-import java.util.List;
-
 /**
- * Hive record for reading that represents a row.
+ * Hive record representing a row for reading.
  */
 public interface HiveReadableRecord {
   /**
-   * Get column at given index
+   * Get column at given index.
+   *
+   * Regular data columns from the tables should always be placed first, and then
+   * partition value columns.
+   *
+   * If you know the type of the column and it is a primitive you should use
+   * one of the calls below as it will likely be more efficient.
+   *
    * @param index column index
    * @return Object for column
    */
   Object get(int index);
 
   /**
-   * Get all columns
-   * @return All the row's data
+   * Get boolean column at given index
+   * @param index column index
+   * @return boolean at index
    */
-  List<Object> getAllColumns();
+  boolean getBoolean(int index);
+
+  /**
+   * Get long column at given index
+   * @param index column index
+   * @return long at index
+   */
+  long getLong(int index);
+
+  /**
+   * Get double column at given index
+   * @param index column index
+   * @return double at index
+   */
+  double getDouble(int index);
+
+  /**
+   * Get String column at given index.
+   * Note that partition values are all strings.
+   *
+   * @param index column index
+   * @return String at index
+   */
+  String getString(int index);
+
+  /**
+   * Check if value at column is null
+   * @param index column index
+   * @return true if value at at column is null
+   */
+  boolean isNull(int index);
 }

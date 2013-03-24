@@ -19,10 +19,25 @@ package com.facebook.giraph.hive.input.parser;
 
 import org.apache.hadoop.io.Writable;
 
-import com.facebook.giraph.hive.record.HiveRecord;
+import com.facebook.giraph.hive.record.HiveReadableRecord;
 
 import java.io.IOException;
 
-public interface RecordParser {
-  HiveRecord parse(Writable value, HiveRecord record) throws IOException;
+public interface RecordParser<W extends Writable> {
+  /**
+   * Create an empty record. Will be called before any parse() calls are made.
+   * Will be passed in to parse() so that parser can reuse the record.
+   * @return record
+   */
+  HiveReadableRecord createRecord();
+
+  /**
+   * Parse a value.
+   * @param value data to parse
+   * @param record created from createRecord()
+   * @return record with parsed data
+   * @throws IOException if any problems occur
+   */
+  HiveReadableRecord parse(W value, HiveReadableRecord record)
+      throws IOException;
 }

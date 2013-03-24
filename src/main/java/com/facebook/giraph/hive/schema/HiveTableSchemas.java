@@ -22,15 +22,12 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.log4j.Logger;
 
 import com.facebook.giraph.hive.common.Writables;
-import com.facebook.giraph.hive.impl.HiveApiTableSchema;
 import com.google.common.base.Function;
 
 /**
  * Helpers for Hive schemas
  */
 public class HiveTableSchemas {
-  /** Key for table schema for a name */
-  public static final String TABLE_KEY_PREFIX = "hive.api.schema.table.";
   /** Key for table schema for a profile */
   public static final String PROFILE_KEY_PREFIX = "hive.api.schema.profile.";
 
@@ -52,39 +49,6 @@ public class HiveTableSchemas {
   }
 
   /**
-   * Configure object with hive table schema
-   * @param obj Object
-   * @param schema Hive table schema
-   */
-  public static void configure(HiveTableSchemaAware obj, HiveTableSchema schema) {
-    obj.setTableSchema(schema);
-  }
-
-  /**
-   * Get schema for a table
-   * @param conf Configuration
-   * @param dbName Database name
-   * @param tableName Table name
-   * @return schema
-   */
-  public static HiveTableSchema getForTable(Configuration conf, String dbName,
-                                            String tableName) {
-
-    return getImpl(conf, tableNameKey(dbName, tableName));
-  }
-
-  /**
-   * Get schema for a profile
-   * @param conf Configuration
-   * @param profile Profile ID
-   * @return schema
-   */
-  public static HiveTableSchema getForProfile(Configuration conf,
-                                              String profile) {
-    return getImpl(conf, profileKey(profile));
-  }
-
-  /**
    * Get function to lookup names in the table schema given
    *
    * @param tableSchema Hive table schema to use
@@ -101,65 +65,31 @@ public class HiveTableSchemas {
   }
 
   /**
-   * Get schema from Configuration using key
+   * Get schema for a profile
    * @param conf Configuration
-   * @param key String key
+   * @param profile Profile ID
    * @return schema
    */
-  private static HiveTableSchema getImpl(Configuration conf, String key) {
+  public static HiveTableSchema getForProfile(Configuration conf, String profile) {
+    String key = profileKey(profile);
     String value = conf.get(key);
     if (value == null) {
-      throw new NullPointerException("No HiveTableSchema with key " +
-          key + " found");
+      throw new NullPointerException("No HiveTableSchema with key " + key + " found");
     }
-    HiveTableSchema hiveTableSchema = new HiveApiTableSchema();
+    HiveTableSchema hiveTableSchema = new HiveTableSchemaImpl();
     Writables.readFieldsFromEncodedStr(value, hiveTableSchema);
     return hiveTableSchema;
   }
 
   /**
-   * Put schema for table
-   * @param conf Configuration
-   * @param dbName Database name
-   * @param tableName Table name
-   * @param hiveTableSchema schema
-   */
-  public static void putForName(Configuration conf, String dbName,
-    String tableName, HiveTableSchema hiveTableSchema) {
-    putImpl(conf, tableNameKey(dbName, tableName), hiveTableSchema);
-  }
-
-  /**
    * Put schema for profile
-   * @param conf Configuraiton
+   * @param conf Configuration
    * @param profile Profile ID
    * @param hiveTableSchema schema
    */
   public static void putForProfile(Configuration conf, String profile,
                                    HiveTableSchema hiveTableSchema) {
-    putImpl(conf, profileKey(profile), hiveTableSchema);
-  }
-
-  /**
-   * Put schema for given key into Configuration
-   * @param conf Configuration
-   * @param key String key
-   * @param schema Hive table schema
-   */
-  private static void putImpl(Configuration conf, String key,
-                              HiveTableSchema schema) {
-    conf.set(key, Writables.writeToEncodedStr(schema));
-  }
-
-  /**
-   * Key for Configuration for a table
-   *
-   * @param dbName database name
-   * @param tableName table name
-   * @return key
-   */
-  private static String tableNameKey(String dbName, String tableName) {
-    return TABLE_KEY_PREFIX + dbName + "." + tableName;
+    conf.set(profileKey(profile), Writables.writeToEncodedStr(hiveTableSchema));
   }
 
   /**

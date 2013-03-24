@@ -15,27 +15,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-package com.facebook.giraph.hive.record;
-
-import java.util.List;
-
 /**
- * Hive row for writing
+ * Hive schema interface package.
  */
-public interface HiveWritableRecord {
-  /**
-   * Set value for column at index.
-   * @param index Column offset
-   * @param value Data for column
-   */
-  void set(int index, Object value);
-
-  /**
-   * Get all columns.
-   * Note this is needed for saving records, it is not here by accident.
-   *
-   * @return All the row's data
-   */
-  List<Object> getAllColumns();
-}
+package com.facebook.giraph.hive.schema;

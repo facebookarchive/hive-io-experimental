@@ -22,7 +22,7 @@ import org.apache.hadoop.io.Writable;
 import org.apache.hadoop.io.WritableComparable;
 
 import com.facebook.giraph.hive.input.HiveApiInputObserver;
-import com.facebook.giraph.hive.record.HiveRecord;
+import com.facebook.giraph.hive.record.HiveReadableRecord;
 import com.yammer.metrics.Metrics;
 import com.yammer.metrics.core.MetricName;
 import com.yammer.metrics.core.Timer;
@@ -103,7 +103,7 @@ class MetricsObserver extends HiveApiInputObserver.Empty {
   }
 
   @Override
-  public void endParse(HiveRecord record) {
+  public void endParse(HiveReadableRecord record) {
     parseTimerContext.stop();
   }
 
