@@ -29,7 +29,7 @@ under the License.
   <groupId>com.facebook.giraph.hive</groupId>
   <artifactId>hive-io-experimental</artifactId>
   <packaging>jar</packaging>
-  <version>0.5-SNAPSHOT</version>
+  <version>0.4</version>
 
   <name>Hive I/O</name>
   <url>https://github.com/facebook/hive-io-experimental</url>
