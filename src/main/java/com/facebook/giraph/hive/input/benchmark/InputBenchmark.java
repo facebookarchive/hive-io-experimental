@@ -118,11 +118,14 @@ public class InputBenchmark {
     HiveApiInputFormat.setProfileInputDesc(hiveConf, input, HiveApiInputFormat.DEFAULT_PROFILE_ID);
 
     HiveApiInputFormat defaultInputFormat = new HiveApiInputFormat();
-    defaultInputFormat.setObserver(new MetricsObserver("default", parsedArgs.getRecordPrintPeriod()));
+    if (parsedArgs.isTrackMetrics()) {
+      defaultInputFormat.setObserver(new MetricsObserver("default", parsedArgs.getRecordPrintPeriod()));
+    }
 
     List<InputSplit> splits = defaultInputFormat.getSplits(hiveConf, client);
     System.err.println("getSplits returned " + splits.size() + " splits");
 
+    long numRows = 0;
     for (int i = 0; i < splits.size(); ++i) {
       InputSplit split = splits.get(i);
       TaskAttemptID taskID = new TaskAttemptID();
@@ -133,8 +136,10 @@ public class InputBenchmark {
       RecordReader<WritableComparable, HiveReadableRecord> reader =
           defaultInputFormat.createRecordReader(split, taskContext);
       reader.initialize(split, taskContext);
-      readFully(reader);
+      numRows += readFully(reader);
     }
+
+    System.err.println("Parsed " + numRows + " rows");
   }
 
   /**
@@ -144,12 +149,16 @@ public class InputBenchmark {
    * @throws IOException I/O errors
    * @throws InterruptedException thread errors
    */
-  private static void readFully(RecordReader<WritableComparable, HiveReadableRecord> reader)
-    throws IOException, InterruptedException {
+  private static long readFully(RecordReader<WritableComparable, HiveReadableRecord> reader)
+    throws IOException, InterruptedException
+  {
+    long num = 0;
     while (reader.nextKeyValue()) {
       HiveReadableRecord record = reader.getCurrentValue();
       parseLongLongDouble(record);
+      ++num;
     }
+    return num;
   }
 
   private static void parseLongLongDouble(HiveReadableRecord record) {

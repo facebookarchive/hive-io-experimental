@@ -39,6 +39,9 @@ class BenchmarkArgs {
   /** Partition filter */
   @Argument private String partitionFilter = "ds='2013-01-01' and feature='test_nz'";
 
+  /** Whether to track metrics */
+  @Argument private boolean trackMetrics = false;
+
   /** Every how many splits to print */
   @Argument private int splitPrintPeriod = 3;
 
@@ -50,6 +53,10 @@ class BenchmarkArgs {
 
   /** Print usage */
   @Argument private boolean help = false;
+
+  public boolean isTrackMetrics() {
+    return trackMetrics;
+  }
 
   public boolean isBytesParser() {
     return bytesParser;
