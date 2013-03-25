@@ -153,9 +153,10 @@ public class InputBenchmark {
     while (reader.nextKeyValue()) {
       HiveReadableRecord record = reader.getCurrentValue();
       parseLongLongDouble(record);
-      if (++num % 1000000 == 0) {
-        System.out.println("Parsed " + num + " rows");
-      }
+      ++num;
+//      if (num % 1000000 == 0) {
+//        System.out.println("Parsed " + num + " rows");
+//      }
     }
     return num;
   }
@@ -163,11 +164,8 @@ public class InputBenchmark {
   private static int rowsPrinted = 0;
 
   private static void parseLongLongDouble(HiveReadableRecord record) {
-    long id1 = record.getLong(0);
-    long id2 = record.getLong(1);
-    double sim = record.getDouble(2);
-    if (rowsPrinted++ < 10) {
-      System.out.println("id1: " + id1 + ", id2: " + id2 + ", sim: " + sim);
-    }
+    record.getLong(0);
+    record.getLong(1);
+    record.getDouble(2);
   }
 }
