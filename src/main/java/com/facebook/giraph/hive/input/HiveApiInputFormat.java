@@ -44,11 +44,11 @@ import com.facebook.giraph.hive.record.HiveReadableRecord;
 import com.facebook.giraph.hive.schema.HiveTableSchema;
 import com.facebook.giraph.hive.schema.HiveTableSchemaImpl;
 import com.facebook.giraph.hive.schema.HiveTableSchemas;
-import com.google.common.collect.ContiguousSet;
-import com.google.common.collect.DiscreteDomain;
+import com.google.common.collect.DiscreteDomains;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Range;
+import com.google.common.collect.Ranges;
 
 import java.io.IOException;
 import java.util.List;
@@ -201,8 +201,8 @@ public class HiveApiInputFormat
   private int[] computeColumnIds(List<String> columnNames, HiveTableSchema tableSchema) {
     List<Integer> ints;
     if (columnNames.isEmpty()) {
-      Range<Integer> range = Range.closedOpen(0, tableSchema.numColumns());
-      ints = ContiguousSet.create(range, DiscreteDomain.integers()).asList();
+      Range<Integer> range = Ranges.closedOpen(0, tableSchema.numColumns());
+      ints = range.asSet(DiscreteDomains.integers()).asList();
     } else {
       ints = transform(columnNames, schemaLookupFunc(tableSchema));
     }
