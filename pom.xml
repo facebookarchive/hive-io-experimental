@@ -25,13 +25,13 @@ under the License.
   <parent>
     <groupId>com.facebook</groupId>
     <artifactId>facebook-oss-pom</artifactId>
-    <version>4</version>
+    <version>5</version>
   </parent>
 
   <groupId>com.facebook.giraph.hive</groupId>
   <artifactId>hive-io-experimental</artifactId>
   <packaging>jar</packaging>
-  <version>0.4-SNAPSHOT</version>
+  <version>0.5-SNAPSHOT</version>
 
   <name>${project.artifactId}</name>
   <description>Library for reading / writing to Hive</description>
@@ -61,6 +61,7 @@ under the License.
     <fb.check.fail-all>true</fb.check.fail-all>
     <fb.check.fail-duplicate-finder>false</fb.check.fail-duplicate-finder>
     <fb.check.fail-license>false</fb.check.fail-license>
+    <fb.check.fail-pmd>false</fb.check.fail-pmd>
     <dep.hive.version>0.10.0</dep.hive.version>
   </properties>
 
@@ -76,10 +77,8 @@ under the License.
           </descriptorRefs>
           <archive>
             <manifest>
-              <addDefaultImplementationEntries>true
-              </addDefaultImplementationEntries>
-              <addDefaultSpecificationEntries>true
-              </addDefaultSpecificationEntries>
+              <addDefaultImplementationEntries>true</addDefaultImplementationEntries>
+              <addDefaultSpecificationEntries>true</addDefaultSpecificationEntries>
               <addClasspath>true</addClasspath>
               <mainClass>
                 com.facebook.giraph.hive.input.benchmark.InputBenchmark
@@ -92,10 +91,8 @@ under the License.
               <Git-Commit-Branch>${mvngit.branch}</Git-Commit-Branch>
               <Git-Commit-Hash>${mvngit.commit.id}</Git-Commit-Hash>
               <Git-Commit-Date>${mvngit.commit.committer.date}</Git-Commit-Date>
-              <Git-Committer-Email>${mvngit.commit.committer.email}
-              </Git-Committer-Email>
-              <Git-Committer-Name>${mvngit.commit.committer.name}
-              </Git-Committer-Name>
+              <Git-Committer-Email>${mvngit.commit.committer.email}</Git-Committer-Email>
+              <Git-Committer-Name>${mvngit.commit.committer.name}</Git-Committer-Name>
             </manifestEntries>
           </archive>
         </configuration>
