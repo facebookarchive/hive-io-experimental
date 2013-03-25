@@ -109,9 +109,6 @@ public class InputBenchmark {
     input.setPartitionFilter(parsedArgs.getPartitionFilter());
 
     HiveConf hiveConf = new HiveConf(InputBenchmark.class);
-    if (parsedArgs.isBytesParser()) {
-      hiveConf.setBoolean(HiveApiInputFormat.BYTES_PARSER_KEY, true);
-    }
     ThriftHiveMetastore.Iface client = HiveMetastores.create(parsedArgs.getHiveHost(), parsedArgs.getHivePort());
 
     System.err.println("Initialize profile with input data");

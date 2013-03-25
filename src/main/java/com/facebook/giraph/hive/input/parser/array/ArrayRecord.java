@@ -1,5 +1,6 @@
 package com.facebook.giraph.hive.input.parser.array;
 
+import com.facebook.giraph.hive.common.HiveType;
 import com.facebook.giraph.hive.common.NativeType;
 import com.facebook.giraph.hive.record.HiveReadableRecord;
 import com.google.common.base.Objects;
@@ -7,9 +8,10 @@ import com.google.common.base.Objects;
 import java.util.Arrays;
 
 class ArrayRecord implements HiveReadableRecord {
+  private final int numColumns;
+
   // Note that partition data and column data are stored together, with column
   // data coming before partition values.
-
   private final NativeType[] types;
   private final boolean[] booleans;
   private final long[] longs;
@@ -17,13 +19,43 @@ class ArrayRecord implements HiveReadableRecord {
   private final String[] strings;
   private final boolean[] nulls;
 
-  public ArrayRecord(int size) {
+  public ArrayRecord(int numColumns, int numPartitionValues) {
+    this.numColumns = numColumns;
+
+    final int size = numColumns + numPartitionValues;
     this.types = new NativeType[size];
     this.booleans = new boolean[size];
     this.longs = new long[size];
     this.doubles = new double[size];
     this.strings = new String[size];
     this.nulls = new boolean[size];
+  }
+
+  public void initColumnTypes(HiveType[] hiveTypes) {
+    for (int column = 0; column < numColumns; ++column) {
+      if (hiveTypes[column].isPrimitive()) {
+        types[column] = hiveTypes[column].getNativeType();
+      }
+    }
+  }
+
+  public void initPartitionValues(String[] partitionValues) {
+    for (int partIndex = 0; partIndex < partitionValues.length; ++partIndex) {
+      types[partIndex + numColumns] = NativeType.STRING;
+      strings[partIndex + numColumns] = partitionValues[partIndex];
+    }
+  }
+
+  public int getNumColumns() {
+    return numColumns;
+  }
+
+  public int getNumPartitionValues() {
+    return booleans.length - numColumns;
+  }
+
+  public int getSize() {
+    return booleans.length;
   }
 
   public void reset() {

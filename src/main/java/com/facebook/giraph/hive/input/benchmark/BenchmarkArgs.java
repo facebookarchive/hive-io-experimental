@@ -48,18 +48,11 @@ class BenchmarkArgs {
   /** Every how many records in a split to print */
   @Argument private int recordPrintPeriod = 1000000;
 
-  /** Use more efficient bytes parser */
-  @Argument private boolean bytesParser = false;
-
   /** Print usage */
   @Argument private boolean help = false;
 
   public boolean isTrackMetrics() {
     return trackMetrics;
-  }
-
-  public boolean isBytesParser() {
-    return bytesParser;
   }
 
   public int getSplitPrintPeriod() {

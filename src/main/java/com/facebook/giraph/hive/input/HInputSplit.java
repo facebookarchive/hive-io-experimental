@@ -29,15 +29,14 @@ import org.apache.hadoop.mapreduce.InputSplit;
 import org.apache.hadoop.util.Progressable;
 import org.apache.log4j.Logger;
 
-import com.facebook.giraph.hive.schema.HiveTableSchema;
-import com.facebook.giraph.hive.schema.HiveTableSchemaImpl;
 import com.facebook.giraph.hive.common.HadoopUtils;
 import com.facebook.giraph.hive.common.ProgressReporter;
 import com.facebook.giraph.hive.common.SerDes;
 import com.facebook.giraph.hive.common.Writables;
+import com.facebook.giraph.hive.schema.HiveTableSchema;
+import com.facebook.giraph.hive.schema.HiveTableSchemaImpl;
 import com.google.common.base.Objects;
 import com.google.common.base.Preconditions;
-import com.google.common.collect.Lists;
 
 import java.io.DataInput;
 import java.io.DataOutput;
@@ -61,7 +60,7 @@ class HInputSplit extends InputSplit
   /** Data for this input split */
   private final InputSplitData inputSplitData;
   /** Which columns to read */
-  private final List<Integer> columnIds;
+  private int[] columnIds;
 
   // These members are not serialized.
   /** Hadoop Configuration */
@@ -75,7 +74,7 @@ class HInputSplit extends InputSplit
   public HInputSplit() {
     tableSchema = new HiveTableSchemaImpl();
     inputSplitData = new InputSplitData();
-    columnIds = Lists.newArrayList();
+    columnIds = new int[0];
   }
 
   /**
@@ -90,7 +89,7 @@ class HInputSplit extends InputSplit
    */
   public HInputSplit(org.apache.hadoop.mapred.InputFormat baseInputFormat,
                      org.apache.hadoop.mapred.InputSplit baseSplit,
-                     HiveTableSchema tableSchema, List<Integer> columnIds,
+                     HiveTableSchema tableSchema, int[] columnIds,
                      InputSplitData inputSplitData, Configuration conf) {
     this.baseSplit = baseSplit;
     this.baseInputFormat = baseInputFormat;
@@ -113,7 +112,7 @@ class HInputSplit extends InputSplit
     return tableSchema;
   }
 
-  public List<Integer> getColumnIds() {
+  public int[] getColumnIds() {
     return columnIds;
   }
 
@@ -190,7 +189,7 @@ class HInputSplit extends InputSplit
     Writables.writeClassName(out, baseInputFormat);
     tableSchema.write(out);
     inputSplitData.write(out);
-    Writables.writeIntList(out, columnIds);
+    Writables.writeIntArray(out, columnIds);
   }
 
   @Override
@@ -199,7 +198,7 @@ class HInputSplit extends InputSplit
     baseInputFormat = Writables.readNewInstance(in);
     tableSchema.readFields(in);
     inputSplitData.readFields(in);
-    Writables.readIntList(in, columnIds);
+    columnIds = Writables.readIntArray(in);
     initDeserializer();
   }
 

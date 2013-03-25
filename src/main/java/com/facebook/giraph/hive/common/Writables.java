@@ -233,49 +233,31 @@ public class Writables {
   }
 
   /**
-   * Write a list of Writables
-   *
+   * Write an array of integers
    * @param out DataOutput
-   * @param list List to write
-   * @param <T> Type of writable
+   * @param data array of ints
    * @throws IOException I/O errors
    */
-  public static <T extends Writable> void writeList(DataOutput out,
-    List<T> list) throws IOException {
-    out.writeInt(list.size());
-    for (Writable w : list) {
-      w.write(out);
-    }
-  }
-
-  /**
-   * Read a List<Integer>
-   *
-   * @param in DataInput
-   * @param list List to read into
-   * @throws IOException I/O errors
-   */
-  public static void readIntList(DataInput in, List<Integer> list)
-    throws IOException {
-    int size = in.readInt();
-    for (int i = 0; i < size; ++i) {
-      list.add(in.readInt());
-    }
-  }
-
-  /**
-   * Write a List<Integer>
-   *
-   * @param out DataOutput
-   * @param list List to write
-   * @throws IOException I/O errors
-   */
-  public static void writeIntList(DataOutput out, List<Integer> list)
-    throws IOException {
-    out.writeInt(list.size());
-    for (int x : list) {
+  public static void writeIntArray(DataOutput out, int[] data) throws IOException {
+    out.writeInt(data.length);
+    for (int x : data) {
       out.writeInt(x);
     }
+  }
+
+  /**
+   * Read an array of integers
+   * @param in DataInput
+   * @return array of ints
+   * @throws IOException I/O errors
+   */
+  public static int[] readIntArray(DataInput in) throws IOException {
+    int size = in.readInt();
+    int[] result = new int[size];
+    for (int i = 0; i < size; ++i) {
+      result[i] = in.readInt();
+    }
+    return result;
   }
 
   /**

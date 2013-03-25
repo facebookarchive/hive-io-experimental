@@ -28,6 +28,7 @@ import org.apache.log4j.Logger;
 
 import com.google.common.base.Function;
 import com.google.common.collect.Lists;
+import com.google.common.primitives.Ints;
 
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -125,6 +126,17 @@ public class HiveUtils {
     } else {
       ColumnProjectionUtils.setReadColumnIDs(conf, columnIds);
     }
+  }
+
+  /**
+   * Set ids of columns we're reading. Used by things like RCFile for skipping
+   * other columns which we don't need.
+   * @param conf Configuration to use
+   * @param columnIds array of column ids
+   */
+  public static void setReadColumnIds(Configuration conf,
+                                      int[] columnIds) {
+    setReadColumnIds(conf, Ints.asList(columnIds));
   }
 
   /**

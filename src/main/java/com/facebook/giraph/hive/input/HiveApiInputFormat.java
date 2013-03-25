@@ -24,7 +24,6 @@ import org.apache.hadoop.hive.metastore.api.Partition;
 import org.apache.hadoop.hive.metastore.api.Table;
 import org.apache.hadoop.hive.metastore.api.ThriftHiveMetastore;
 import org.apache.hadoop.hive.serde2.Deserializer;
-import org.apache.hadoop.hive.serde2.columnar.BytesRefArrayWritable;
 import org.apache.hadoop.io.Writable;
 import org.apache.hadoop.io.WritableComparable;
 import org.apache.hadoop.mapred.JobConf;
@@ -39,16 +38,17 @@ import com.facebook.giraph.hive.common.HadoopUtils;
 import com.facebook.giraph.hive.common.HiveMetastores;
 import com.facebook.giraph.hive.common.HiveUtils;
 import com.facebook.giraph.hive.common.Writables;
+import com.facebook.giraph.hive.input.parser.Parsers;
 import com.facebook.giraph.hive.input.parser.RecordParser;
-import com.facebook.giraph.hive.input.parser.array.ArrayParser;
-import com.facebook.giraph.hive.input.parser.array.BytesParser;
-import com.facebook.giraph.hive.input.parser.hive.DefaultParser;
 import com.facebook.giraph.hive.record.HiveReadableRecord;
-import com.facebook.giraph.hive.schema.HiveTableSchemaImpl;
 import com.facebook.giraph.hive.schema.HiveTableSchema;
+import com.facebook.giraph.hive.schema.HiveTableSchemaImpl;
 import com.facebook.giraph.hive.schema.HiveTableSchemas;
+import com.google.common.collect.ContiguousSet;
+import com.google.common.collect.DiscreteDomain;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Range;
 
 import java.io.IOException;
 import java.util.List;
@@ -63,9 +63,6 @@ public class HiveApiInputFormat
     extends InputFormat<WritableComparable, HiveReadableRecord> {
   /** Logger */
   public static final Logger LOG = Logger.getLogger(HiveApiInputFormat.class);
-
-  /** Use more efficient bytes parser. */
-  public static final String BYTES_PARSER_KEY = "hive.io.input.bytes_parser";
 
   /** Default profile ID if none given */
   public static final String DEFAULT_PROFILE_ID = "input-profile";
@@ -177,7 +174,7 @@ public class HiveApiInputFormat
     int partitionNum = 0;
     List<InputSplit> splits = Lists.newArrayList();
 
-    List<Integer> columnIds = transform(inputDesc.getColumns(), schemaLookupFunc(tableSchema));
+    int[] columnIds = computeColumnIds(inputDesc.getColumns(), tableSchema);
 
     for (InputPartition inputPartition : partitions) {
       org.apache.hadoop.mapred.InputFormat baseInputFormat = inputPartition.makeInputFormat(conf);
@@ -199,6 +196,21 @@ public class HiveApiInputFormat
       partitionNum++;
     }
     return splits;
+  }
+
+  private int[] computeColumnIds(List<String> columnNames, HiveTableSchema tableSchema) {
+    List<Integer> ints;
+    if (columnNames.isEmpty()) {
+      Range<Integer> range = Range.closedOpen(0, tableSchema.numColumns());
+      ints = ContiguousSet.create(range, DiscreteDomain.integers()).asList();
+    } else {
+      ints = transform(columnNames, schemaLookupFunc(tableSchema));
+    }
+    int[] result = new int[ints.size()];
+    for (int i = 0; i < ints.size(); ++i) {
+      result[i] = ints.get(i);
+    }
+    return result;
   }
 
   private List<InputPartition> computePartitions(HiveInputDescription inputDesc,
@@ -232,12 +244,7 @@ public class HiveApiInputFormat
     Configuration conf = context.getConfiguration();
     JobConf jobConf = new JobConf(conf);
 
-    HInputSplit split;
-    if (inputSplit instanceof HInputSplit) {
-      split = (HInputSplit) inputSplit;
-    } else {
-      throw new IllegalArgumentException("InputSplit not a " + HInputSplit.class.getSimpleName());
-    }
+    HInputSplit split = (HInputSplit) inputSplit;
     split.setConf(jobConf);
 
     // CHECKSTYLE: stop LineLength
@@ -245,10 +252,10 @@ public class HiveApiInputFormat
         split.getBaseRecordReader(jobConf, context);
     // CHECKSTYLE: resume LineLength
 
-    List<Integer> columnIds = split.getColumnIds();
+    int[] columnIds = split.getColumnIds();
     HiveUtils.setReadColumnIds(conf, columnIds);
 
-    RecordParser<Writable> recordParser = getParser(conf, baseRecordReader.createValue(),
+    RecordParser<Writable> recordParser = getParser(baseRecordReader.createValue(),
         split, columnIds);
 
     RecordReaderImpl reader = new RecordReaderImpl(baseRecordReader, recordParser);
@@ -257,24 +264,12 @@ public class HiveApiInputFormat
     return reader;
   }
 
-  private RecordParser<Writable> getParser(Configuration conf,
-    Writable exampleValue, HInputSplit split, List<Integer> columnIds)
+  private RecordParser<Writable> getParser(Writable exampleValue,
+                                           HInputSplit split, int[] columnIds)
   {
     Deserializer deserializer = split.getDeserializer();
     String[] partitionValues = split.getPartitionValues();
     int numColumns = split.getTableSchema().numColumns();
-
-    if (conf.getBoolean(BYTES_PARSER_KEY, false)) {
-      if (exampleValue instanceof BytesRefArrayWritable) {
-        LOG.info("Using BytesParser to parse hive records");
-        return new BytesParser(deserializer, partitionValues, numColumns, columnIds);
-      } else {
-        LOG.info("Using ArrayParser to parse hive records");
-        return new ArrayParser(deserializer, partitionValues, numColumns, columnIds);
-      }
-    } else {
-      LOG.info("Using DefaultParser to parse hive records");
-      return new DefaultParser(deserializer, partitionValues, numColumns);
-    }
+    return Parsers.bestParser(deserializer, numColumns, columnIds, partitionValues, exampleValue);
   }
 }
