@@ -114,7 +114,7 @@ public class HiveApiInputFormat
    * @return HiveTableSchema
    */
   public HiveTableSchema getTableSchema(Configuration conf) {
-    return HiveTableSchemas.getForProfile(conf, myProfileId);
+    return HiveTableSchemas.get(conf, myProfileId);
   }
 
   private static String profileConfKey(String profileId) {
@@ -162,7 +162,7 @@ public class HiveApiInputFormat
     }
 
     final HiveTableSchema tableSchema = HiveTableSchemaImpl.fromTable(table);
-    HiveTableSchemas.putForProfile(conf, myProfileId, tableSchema);
+    HiveTableSchemas.put(conf, myProfileId, tableSchema);
 
     List<InputPartition> partitions = computePartitions(inputDesc, client, table);
 

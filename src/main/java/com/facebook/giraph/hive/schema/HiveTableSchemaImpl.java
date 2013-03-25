@@ -20,6 +20,7 @@ package com.facebook.giraph.hive.schema;
 
 import org.apache.hadoop.hive.metastore.api.Table;
 
+import com.facebook.giraph.hive.common.HiveTableName;
 import com.facebook.giraph.hive.common.Writables;
 import com.google.common.base.Objects;
 import com.google.common.collect.Maps;
@@ -38,6 +39,8 @@ import static com.google.common.collect.Lists.transform;
  * Schema for a Hive table
  */
 public class HiveTableSchemaImpl implements HiveTableSchema {
+  /** Hive table name */
+  private HiveTableName tableName;
   /** Partition keys */
   private final Map<String, Integer> partitionPositions;
   /** Positions of columns in the row */
@@ -50,6 +53,7 @@ public class HiveTableSchemaImpl implements HiveTableSchema {
    * Constructor
    */
   public HiveTableSchemaImpl() {
+    tableName = new HiveTableName("_unknown_", "_unknown_");
     partitionPositions = Maps.newHashMap();
     columnPositions = Maps.newHashMap();
   }
@@ -60,7 +64,10 @@ public class HiveTableSchemaImpl implements HiveTableSchema {
    * @param partitionPositions Partition keys
    * @param columnPositions Positions of columns in row
    */
-  public HiveTableSchemaImpl(Map<String, Integer> partitionPositions, Map<String, Integer> columnPositions) {
+  public HiveTableSchemaImpl(HiveTableName tableName,
+                             Map<String, Integer> partitionPositions,
+                             Map<String, Integer> columnPositions) {
+    this.tableName = tableName;
     this.partitionPositions = partitionPositions;
     this.columnPositions = columnPositions;
     numColumns = computeNumColumns(columnPositions);
@@ -86,7 +93,8 @@ public class HiveTableSchemaImpl implements HiveTableSchema {
       partitionToIndex.put(partitionName, index++);
     }
 
-    return new HiveTableSchemaImpl(partitionToIndex, columnToIndex);
+    HiveTableName hiveTableName = new HiveTableName(table.getDbName(), table.getTableName());
+    return new HiveTableSchemaImpl(hiveTableName, partitionToIndex, columnToIndex);
   }
 
   /**
@@ -96,6 +104,11 @@ public class HiveTableSchemaImpl implements HiveTableSchema {
    */
   private static int computeNumColumns(Map<String, Integer> columnPositions) {
     return Ordering.natural().max(columnPositions.values()) + 1;
+  }
+
+  @Override
+  public HiveTableName getTableName() {
+    return tableName;
   }
 
   @Override

@@ -20,10 +20,18 @@ package com.facebook.giraph.hive.schema;
 
 import org.apache.hadoop.io.Writable;
 
+import com.facebook.giraph.hive.common.HiveTableName;
+
 /**
  * Schema for a Hive table
  */
 public interface HiveTableSchema extends Writable {
+  /**
+   * Get Hive table name
+   * @return Hive table name
+   */
+  HiveTableName getTableName();
+
   /**
    * Get index of a column or a paritition key
    *

@@ -43,15 +43,15 @@ import org.apache.hadoop.util.ReflectionUtils;
 import org.apache.log4j.Logger;
 import org.apache.thrift.TException;
 
-import com.facebook.giraph.hive.schema.HiveTableSchemaImpl;
 import com.facebook.giraph.hive.common.FileSystems;
 import com.facebook.giraph.hive.common.HadoopUtils;
 import com.facebook.giraph.hive.common.HiveUtils;
 import com.facebook.giraph.hive.common.Inspectors;
 import com.facebook.giraph.hive.common.ProgressReporter;
 import com.facebook.giraph.hive.input.HiveApiInputFormat;
-import com.facebook.giraph.hive.record.HiveRecord;
+import com.facebook.giraph.hive.record.HiveWritableRecord;
 import com.facebook.giraph.hive.schema.HiveTableSchema;
+import com.facebook.giraph.hive.schema.HiveTableSchemaImpl;
 import com.facebook.giraph.hive.schema.HiveTableSchemas;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
@@ -65,7 +65,7 @@ import java.util.Map;
  * Hadoop compatible OutputFormat for writing to Hive.
  */
 public class HiveApiOutputFormat
-    extends OutputFormat<WritableComparable, HiveRecord> {
+    extends OutputFormat<WritableComparable, HiveWritableRecord> {
   /** Logger */
   public static final Logger LOG = Logger.getLogger(HiveApiOutputFormat.class);
 
@@ -89,7 +89,7 @@ public class HiveApiOutputFormat
    * @return HiveTableSchema
    */
   public HiveTableSchema getTableSchema(Configuration conf) {
-    return HiveTableSchemas.getForProfile(conf, myProfileId);
+    return HiveTableSchemas.get(conf, myProfileId);
   }
 
   /**
@@ -158,7 +158,7 @@ public class HiveApiOutputFormat
     }
 
     HiveTableSchema tableSchema = HiveTableSchemaImpl.fromTable(table);
-    HiveTableSchemas.putForProfile(conf, profileId, tableSchema);
+    HiveTableSchemas.put(conf, profileId, tableSchema);
 
     OutputConf outputConf = new OutputConf(conf, profileId);
     outputConf.writeOutputDescription(outputDesc);

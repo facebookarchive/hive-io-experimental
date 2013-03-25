@@ -19,8 +19,13 @@
 package com.facebook.giraph.hive.schema;
 
 import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.hive.conf.HiveConf;
+import org.apache.hadoop.hive.metastore.api.Table;
+import org.apache.hadoop.hive.metastore.api.ThriftHiveMetastore;
 import org.apache.log4j.Logger;
 
+import com.facebook.giraph.hive.common.HiveMetastores;
+import com.facebook.giraph.hive.common.HiveTableName;
 import com.facebook.giraph.hive.common.Writables;
 import com.google.common.base.Function;
 
@@ -70,7 +75,7 @@ public class HiveTableSchemas {
    * @param profile Profile ID
    * @return schema
    */
-  public static HiveTableSchema getForProfile(Configuration conf, String profile) {
+  public static HiveTableSchema get(Configuration conf, String profile) {
     String key = profileKey(profile);
     String value = conf.get(key);
     if (value == null) {
@@ -87,9 +92,28 @@ public class HiveTableSchemas {
    * @param profile Profile ID
    * @param hiveTableSchema schema
    */
-  public static void putForProfile(Configuration conf, String profile,
-                                   HiveTableSchema hiveTableSchema) {
+  public static void put(Configuration conf, String profile,
+                         HiveTableSchema hiveTableSchema) {
     conf.set(profileKey(profile), Writables.writeToEncodedStr(hiveTableSchema));
+  }
+
+  /**
+   * Put schema for a Hive table doing lookup in Hive metastore
+   * @param conf Configuration
+   * @param tableName Hive table name
+   */
+  public static void put(Configuration conf, String profile,
+                         HiveTableName tableName) {
+     HiveConf hiveConf = new HiveConf(conf, HiveTableSchemas.class);
+    ThriftHiveMetastore.Iface client;
+    Table table;
+    try {
+      client = HiveMetastores.create(hiveConf);
+      table = client.get_table(tableName.getDatabaseName(), tableName.getTableName());
+    } catch (Exception e) {
+      throw new IllegalStateException(e);
+    }
+    put(conf, profile, HiveTableSchemaImpl.fromTable(table));
   }
 
   /**

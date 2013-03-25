@@ -29,7 +29,7 @@ import org.apache.hadoop.mapreduce.TaskAttemptContext;
 import org.apache.log4j.Logger;
 
 import com.facebook.giraph.hive.common.ProgressReporter;
-import com.facebook.giraph.hive.record.HiveRecord;
+import com.facebook.giraph.hive.record.HiveWritableRecord;
 
 import java.io.IOException;
 import java.util.List;
@@ -37,7 +37,7 @@ import java.util.List;
 /**
  * RecordWriter for Hive
  */
-class RecordWriterImpl extends RecordWriter<WritableComparable, HiveRecord> {
+class RecordWriterImpl extends RecordWriter<WritableComparable, HiveWritableRecord> {
   /** Logger */
   private static final Logger LOG = Logger.getLogger(RecordWriterImpl.class);
 
@@ -84,7 +84,7 @@ class RecordWriterImpl extends RecordWriter<WritableComparable, HiveRecord> {
   }
 
   @Override
-  public void write(WritableComparable key, HiveRecord value)
+  public void write(WritableComparable key, HiveWritableRecord value)
     throws IOException, InterruptedException {
     Writable serializedValue = serialize(key, value);
     write(key, value, serializedValue);
@@ -98,7 +98,7 @@ class RecordWriterImpl extends RecordWriter<WritableComparable, HiveRecord> {
    * @return Serialized value. Key is ignored.
    * @throws IOException I/O errors
    */
-  private Writable serialize(WritableComparable key, HiveRecord value)
+  private Writable serialize(WritableComparable key, HiveWritableRecord value)
     throws IOException {
     List<Object> rowData = value.getAllColumns();
     Writable serializedValue;
@@ -121,7 +121,7 @@ class RecordWriterImpl extends RecordWriter<WritableComparable, HiveRecord> {
    * @param serializedValue Serialized value
    * @throws IOException I/O errors
    */
-  private void write(WritableComparable key, HiveRecord value,
+  private void write(WritableComparable key, HiveWritableRecord value,
                      Writable serializedValue) throws IOException {
     observer.beginWrite(key, value);
     baseWriter.write(NullWritable.get(), serializedValue);

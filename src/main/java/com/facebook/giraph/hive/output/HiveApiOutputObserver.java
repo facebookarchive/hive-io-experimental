@@ -20,7 +20,7 @@ package com.facebook.giraph.hive.output;
 
 import org.apache.hadoop.io.WritableComparable;
 
-import com.facebook.giraph.hive.record.HiveRecord;
+import com.facebook.giraph.hive.record.HiveWritableRecord;
 
 /**
  * Observer for output operations
@@ -31,35 +31,35 @@ public interface HiveApiOutputObserver {
    * @param key Key
    * @param value Value
    */
-  void beginSerialize(WritableComparable<?> key, HiveRecord value);
+  void beginSerialize(WritableComparable<?> key, HiveWritableRecord value);
 
   /**
    * Failed to serialize key/value
    * @param key Key
    * @param value Value
    */
-  void serializeFailed(WritableComparable<?> key, HiveRecord value);
+  void serializeFailed(WritableComparable<?> key, HiveWritableRecord value);
 
   /**
    * Finished serializing key/value
    * @param key Key
    * @param value Value
    */
-  void endSerialize(WritableComparable<?> key, HiveRecord value);
+  void endSerialize(WritableComparable<?> key, HiveWritableRecord value);
 
   /**
    * Begin writing key/value
    * @param key Key
    * @param value Value
    */
-  void beginWrite(WritableComparable<?> key, HiveRecord value);
+  void beginWrite(WritableComparable<?> key, HiveWritableRecord value);
 
   /**
    * Finished writing key/value
    * @param key Key
    * @param value Value
    */
-  void endWrite(WritableComparable<?> key, HiveRecord value);
+  void endWrite(WritableComparable<?> key, HiveWritableRecord value);
 
   /**
    * Output observer that does nothing
@@ -80,18 +80,18 @@ public interface HiveApiOutputObserver {
     }
 
     @Override
-    public void beginSerialize(WritableComparable<?> key, HiveRecord value) { }
+    public void beginSerialize(WritableComparable<?> key, HiveWritableRecord value) { }
 
     @Override
-    public void serializeFailed(WritableComparable<?> key, HiveRecord value) { }
+    public void serializeFailed(WritableComparable<?> key, HiveWritableRecord value) { }
 
     @Override
-    public void endSerialize(WritableComparable<?> key, HiveRecord value) { }
+    public void endSerialize(WritableComparable<?> key, HiveWritableRecord value) { }
 
     @Override
-    public void beginWrite(WritableComparable<?> key, HiveRecord value) { }
+    public void beginWrite(WritableComparable<?> key, HiveWritableRecord value) { }
 
     @Override
-    public void endWrite(WritableComparable<?> key, HiveRecord value) { }
+    public void endWrite(WritableComparable<?> key, HiveWritableRecord value) { }
   }
 }
