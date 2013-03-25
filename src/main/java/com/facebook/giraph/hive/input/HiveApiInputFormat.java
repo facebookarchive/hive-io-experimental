@@ -65,7 +65,7 @@ public class HiveApiInputFormat
   public static final Logger LOG = Logger.getLogger(HiveApiInputFormat.class);
 
   /** Use more efficient bytes parser. */
-  public static final String BYTES_PARSER_KEY = "hive.input.bytes_parser";
+  public static final String BYTES_PARSER_KEY = "hive.io.input.bytes_parser";
 
   /** Default profile ID if none given */
   public static final String DEFAULT_PROFILE_ID = "input-profile";

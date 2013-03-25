@@ -34,7 +34,7 @@ import com.google.common.base.Function;
  */
 public class HiveTableSchemas {
   /** Key for table schema for a profile */
-  public static final String PROFILE_KEY_PREFIX = "hive.api.schema.profile.";
+  public static final String PROFILE_KEY_PREFIX = "hive.io.schema.profile.";
 
   /** Logger */
   private static final Logger LOG = Logger.getLogger(HiveTableSchemas.class);

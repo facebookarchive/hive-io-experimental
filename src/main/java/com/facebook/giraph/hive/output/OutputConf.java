@@ -28,7 +28,7 @@ import com.google.common.base.Objects;
  */
 class OutputConf {
   /** Prefix for Configuration keys */
-  public static final String PREFIX_KEY = "hive.api.output";
+  public static final String PREFIX_KEY = "hive.io.output";
   /** Configuration key for table info */
   public static final String OUTPUT_TABLE_INFO_KEY = "table_info";
   /** Configuration key for description */
