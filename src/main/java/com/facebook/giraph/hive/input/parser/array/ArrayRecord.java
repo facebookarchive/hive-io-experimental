@@ -1,36 +1,61 @@
-package com.facebook.giraph.hive.input.parser.generic;
+package com.facebook.giraph.hive.input.parser.array;
 
 import com.facebook.giraph.hive.common.NativeType;
 import com.facebook.giraph.hive.record.HiveReadableRecord;
 import com.google.common.base.Objects;
 
-import static com.google.common.base.Preconditions.checkArgument;
+import java.util.Arrays;
 
 class ArrayRecord implements HiveReadableRecord {
   // Note that partition data and column data are stored together, with column
   // data coming before partition values.
 
+  private final NativeType[] types;
   private final boolean[] booleans;
   private final long[] longs;
   private final double[] doubles;
   private final String[] strings;
   private final boolean[] nulls;
-  private final NativeType[] types;
 
-  public ArrayRecord(boolean[] booleans, long[] longs, double[] doubles,
-                     String[] strings, boolean[] nulls, NativeType[] types) {
-    checkArgument(booleans.length == longs.length);
-    checkArgument(booleans.length == doubles.length);
-    checkArgument(booleans.length == strings.length);
-    checkArgument(booleans.length == nulls.length);
-    checkArgument(booleans.length == types.length);
+  public ArrayRecord(int size) {
+    this.types = new NativeType[size];
+    this.booleans = new boolean[size];
+    this.longs = new long[size];
+    this.doubles = new double[size];
+    this.strings = new String[size];
+    this.nulls = new boolean[size];
+  }
 
-    this.booleans = booleans;
-    this.longs = longs;
-    this.doubles = doubles;
-    this.strings = strings;
-    this.nulls = nulls;
-    this.types = types;
+  public void reset() {
+    Arrays.fill(nulls, false);
+  }
+
+  public NativeType getType(int index) {
+    return types[index];
+  }
+
+  public void setType(int index, NativeType type) {
+    types[index] = type;
+  }
+
+  public void setBoolean(int index, boolean value) {
+    booleans[index] = value;
+  }
+
+  public void setLong(int index, long value) {
+    longs[index] = value;
+  }
+
+  public void setDouble(int index, double value) {
+    doubles[index] = value;
+  }
+
+  public void setString(int index, String value) {
+    strings[index] = value;
+  }
+
+  public void setNull(int index, boolean value) {
+    nulls[index] = value;
   }
 
   @Override
@@ -53,25 +78,25 @@ class ArrayRecord implements HiveReadableRecord {
 
   @Override
   public boolean getBoolean(int index) {
-    verifyType(index, NativeType.BOOLEAN);
+//    verifyType(index, NativeType.BOOLEAN);
     return booleans[index];
   }
 
   @Override
   public long getLong(int index) {
-    verifyType(index, NativeType.LONG);
+//    verifyType(index, NativeType.LONG);
     return longs[index];
   }
 
   @Override
   public double getDouble(int index) {
-    verifyType(index, NativeType.DOUBLE);
+//    verifyType(index, NativeType.DOUBLE);
     return doubles[index];
   }
 
   @Override
   public String getString(int index) {
-    verifyType(index, NativeType.STRING);
+//    verifyType(index, NativeType.STRING);
     return strings[index];
   }
 
@@ -81,11 +106,6 @@ class ArrayRecord implements HiveReadableRecord {
   }
 
   private void verifyType(int index, NativeType expectedType) {
-    // Commented out for efficiency.
-//    validateType(index, expectedType);
-  }
-
-  private void validateType(int index, NativeType expectedType) {
     if (types[index] != expectedType) {
       throw new IllegalStateException(
           String.format("Got an unexpected type %s from row %s for column %d, should be %s",

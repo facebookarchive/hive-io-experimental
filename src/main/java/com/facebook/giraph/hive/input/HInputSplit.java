@@ -167,6 +167,13 @@ class HInputSplit extends InputSplit
 
   @Override
   public Configuration getConf() {
+    if (conf == null) {
+      getConfFromMembers();
+    }
+    return conf;
+  }
+
+  private void getConfFromMembers() {
     Object[] objectsToCheck = new Object[] {
       baseSplit,
       baseInputFormat,
@@ -175,7 +182,6 @@ class HInputSplit extends InputSplit
     for (int i = 0; conf == null && i < objectsToCheck.length; ++i) {
       conf = HadoopUtils.getConfIfPossible(objectsToCheck[i]);
     }
-    return conf;
   }
 
   @Override

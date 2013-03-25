@@ -18,4 +18,4 @@
 /**
  * Parser using raw primitives.
  */
-package com.facebook.giraph.hive.input.parser.generic;
+package com.facebook.giraph.hive.input.parser.array;

@@ -1,4 +1,4 @@
-package com.facebook.giraph.hive.input.parser.generic;
+package com.facebook.giraph.hive.input.parser.array;
 
 import org.apache.hadoop.hive.serde2.Deserializer;
 import org.apache.hadoop.hive.serde2.SerDeException;
@@ -24,26 +24,14 @@ public class ArrayParser implements RecordParser {
   private final PrimitiveObjectInspector fieldInspectors[];
   private final StructField[] structFields;
 
-  private final NativeType[] nativeTypes;
-
-  private final boolean[] booleans;
-  private final long[] longs;
-  private final double[] doubles;
-  private final String[] strings;
-  private final boolean[] nulls;
+  private final ArrayRecord record;
 
   public ArrayParser(Deserializer deserializer, String[] partitionValues,
                      int numColumns, List<Integer> readColumnIds) {
     this.deserializer = deserializer;
 
+    record = new ArrayRecord(numColumns + partitionValues.length);
     columnIndexes = new int[numColumns];
-
-    booleans = new boolean[numColumns + partitionValues.length];
-    longs = new long[numColumns + partitionValues.length];
-    doubles = new double[numColumns + partitionValues.length];
-    strings = new String[numColumns + partitionValues.length];
-    nulls = new boolean[numColumns + partitionValues.length];
-    nativeTypes = new NativeType[numColumns + partitionValues.length];
 
     try {
       inspector = (StructObjectInspector) deserializer.getObjectInspector();
@@ -65,7 +53,7 @@ public class ArrayParser implements RecordParser {
       ObjectInspector fieldInspector = structFields[i].getFieldObjectInspector();
       hiveTypes[i] = HiveType.fromHiveObjectInspector(fieldInspector);
       if (hiveTypes[i].isPrimitive()) {
-        nativeTypes[i] = hiveTypes[i].getNativeType();
+        record.setType(i, hiveTypes[i].getNativeType());
         fieldInspectors[i] = (PrimitiveObjectInspector) fieldInspector;
       }
     }
@@ -82,20 +70,21 @@ public class ArrayParser implements RecordParser {
 
   private void initPartitionValues(int numColumns, String[] partitionValues) {
     for (int i = 0; i < partitionValues.length; ++i) {
-      strings[i + numColumns] = partitionValues[i];
-      nativeTypes[i + numColumns] = NativeType.STRING;
+      record.setType(i + numColumns, NativeType.STRING);
+      record.setString(i + numColumns, partitionValues[i]);
     }
   }
 
   @Override
   public HiveReadableRecord createRecord() {
-    return new ArrayRecord(booleans, longs, doubles, strings, nulls, nativeTypes);
+    return record;
   }
 
   @Override
   public HiveReadableRecord parse(Writable value, HiveReadableRecord record)
       throws IOException {
     ArrayRecord arrayRecord = (ArrayRecord) record;
+    arrayRecord.reset();
 
     Object rowData;
     try {
@@ -107,22 +96,23 @@ public class ArrayParser implements RecordParser {
     for (int i = 0; i < columnIndexes.length; ++i) {
       int columnIndex = columnIndexes[i];
       Object fieldData = inspector.getStructFieldData(rowData, structFields[columnIndex]);
-      if (fieldData == nulls) {
-        nulls[columnIndex] = true;
+      if (fieldData == null) {
+        arrayRecord.setNull(columnIndex, true);
+        continue;
       }
       Object primitiveData = fieldInspectors[columnIndex].getPrimitiveJavaObject(fieldData);
-      switch (nativeTypes[columnIndex]) {
+      switch (arrayRecord.getType(columnIndex)) {
         case BOOLEAN:
-          booleans[columnIndex] = (Boolean) primitiveData;
+          arrayRecord.setBoolean(columnIndex, (Boolean) primitiveData);
           break;
         case LONG:
-          longs[columnIndex] = ((Number) primitiveData).longValue();
+          arrayRecord.setLong(columnIndex, ((Number) primitiveData).longValue());
           break;
         case DOUBLE:
-          doubles[columnIndex] = ((Number) primitiveData).doubleValue();
+          arrayRecord.setDouble(columnIndex, ((Number) primitiveData).doubleValue());
           break;
         case STRING:
-          strings[columnIndex] = (String) primitiveData;
+          arrayRecord.setString(columnIndex, (String) primitiveData);
           break;
       }
     }
