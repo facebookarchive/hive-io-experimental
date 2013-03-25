@@ -19,6 +19,7 @@
 package com.facebook.giraph.hive.schema;
 
 import org.apache.hadoop.hive.metastore.api.Table;
+import org.apache.hadoop.io.WritableUtils;
 
 import com.facebook.giraph.hive.common.HiveTableName;
 import com.facebook.giraph.hive.common.Writables;
@@ -133,6 +134,8 @@ public class HiveTableSchemaImpl implements HiveTableSchema {
   public void write(DataOutput out) throws IOException {
     Writables.writeStrIntMap(out, partitionPositions);
     Writables.writeStrIntMap(out, columnPositions);
+    WritableUtils.writeString(out, tableName.getDatabaseName());
+    WritableUtils.writeString(out, tableName.getTableName());
   }
 
   @Override
@@ -140,6 +143,9 @@ public class HiveTableSchemaImpl implements HiveTableSchema {
     Writables.readStrIntMap(in, partitionPositions);
     Writables.readStrIntMap(in, columnPositions);
     numColumns = computeNumColumns(columnPositions);
+    String dbName = WritableUtils.readString(in);
+    String tblName = WritableUtils.readString(in);
+    tableName = new HiveTableName(dbName, tblName);
   }
 
   @Override
