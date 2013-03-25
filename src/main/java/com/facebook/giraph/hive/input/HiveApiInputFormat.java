@@ -36,6 +36,7 @@ import org.apache.thrift.TException;
 
 import com.facebook.giraph.hive.common.HadoopUtils;
 import com.facebook.giraph.hive.common.HiveMetastores;
+import com.facebook.giraph.hive.common.HiveTableName;
 import com.facebook.giraph.hive.common.HiveUtils;
 import com.facebook.giraph.hive.common.Writables;
 import com.facebook.giraph.hive.input.parser.Parsers;
@@ -256,7 +257,7 @@ public class HiveApiInputFormat
     HiveUtils.setReadColumnIds(conf, columnIds);
 
     RecordParser<Writable> recordParser = getParser(baseRecordReader.createValue(),
-        split, columnIds);
+        split.getTableSchema().getTableName(), split, columnIds);
 
     RecordReaderImpl reader = new RecordReaderImpl(baseRecordReader, recordParser);
     reader.setObserver(observer);
@@ -265,11 +266,12 @@ public class HiveApiInputFormat
   }
 
   private RecordParser<Writable> getParser(Writable exampleValue,
-                                           HInputSplit split, int[] columnIds)
+    HiveTableName tableName, HInputSplit split, int[] columnIds)
   {
     Deserializer deserializer = split.getDeserializer();
     String[] partitionValues = split.getPartitionValues();
     int numColumns = split.getTableSchema().numColumns();
-    return Parsers.bestParser(deserializer, numColumns, columnIds, partitionValues, exampleValue);
+    return Parsers.bestParser(deserializer, numColumns, columnIds,
+        tableName, partitionValues, exampleValue);
   }
 }

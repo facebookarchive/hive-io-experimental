@@ -29,18 +29,18 @@ public class BytesParser implements RecordParser {
 
   @Override
   public HiveReadableRecord parse(Writable value, HiveReadableRecord record) throws IOException {
-    BytesRefArrayWritable braw = (BytesRefArrayWritable) value;
-    ArrayRecord arrayRecord = (ArrayRecord) record;
+    final BytesRefArrayWritable braw = (BytesRefArrayWritable) value;
+    final ArrayRecord arrayRecord = (ArrayRecord) record;
 
     arrayRecord.reset();
 
     for (int i = 0; i < columnIndexes.length; i++) {
-      int column = columnIndexes[i];
-      BytesRefWritable fieldData = braw.unCheckedGet(column);
+      final int column = columnIndexes[i];
+      final BytesRefWritable fieldData = braw.unCheckedGet(column);
 
-      byte[] bytes = fieldData.getData();
-      int start = fieldData.getStart();
-      int length = fieldData.getLength();
+      final byte[] bytes = fieldData.getData();
+      final int start = fieldData.getStart();
+      final int length = fieldData.getLength();
 
       if (length == "\\N".length() && bytes[start] == '\\' &&
           bytes[start + 1] == 'N') {

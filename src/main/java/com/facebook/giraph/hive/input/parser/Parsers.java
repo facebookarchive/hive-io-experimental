@@ -7,6 +7,7 @@ import org.apache.hadoop.hive.serde2.objectinspector.PrimitiveObjectInspector;
 import org.apache.hadoop.io.Writable;
 import org.apache.log4j.Logger;
 
+import com.facebook.giraph.hive.common.HiveTableName;
 import com.facebook.giraph.hive.common.HiveType;
 import com.facebook.giraph.hive.input.parser.array.ArrayParser;
 import com.facebook.giraph.hive.input.parser.array.ArrayParserData;
@@ -17,7 +18,8 @@ public class Parsers {
   private static final Logger LOG = Logger.getLogger(Parsers.class);
 
   public static RecordParser<Writable> bestParser(Deserializer deserializer,
-      int numColumns, int[] columnIndexes, String[] partitionValues, Writable exampleValue)
+      int numColumns, int[] columnIndexes, HiveTableName tableName,
+      String[] partitionValues, Writable exampleValue)
   {
     ArrayParserData data = new ArrayParserData(deserializer, columnIndexes, numColumns);
 
@@ -31,20 +33,25 @@ public class Parsers {
       }
     }
 
+    RecordParser<Writable> parser = null;
+
     for (int i = 0; i < columnIndexes.length; ++i) {
       int columnId = columnIndexes[i];
       if (!data.hiveTypes[columnId].isPrimitive()) {
-        LOG.info("Hive table has non-primitives, using DefaultParser with it");
-        return new DefaultParser(deserializer, partitionValues, numColumns);
+        parser = new DefaultParser(deserializer, partitionValues, numColumns);
       }
     }
 
-    if (exampleValue instanceof BytesRefArrayWritable) {
-      LOG.info("Using BytesParser to parse hive records");
-      return new BytesParser(partitionValues, numColumns, data);
-    } else {
-      LOG.info("Using ArrayParser to parse hive records");
-      return new ArrayParser(partitionValues, numColumns, data);
+    if (parser == null) {
+      if (exampleValue instanceof BytesRefArrayWritable) {
+        parser = new BytesParser(partitionValues, numColumns, data);
+      } else {
+        parser = new ArrayParser(partitionValues, numColumns, data);
+      }
     }
+
+    LOG.info("Using " + parser.getClass().getSimpleName() +
+        " to parse hive records from table " + tableName.dotString());
+    return parser;
   }
 }
