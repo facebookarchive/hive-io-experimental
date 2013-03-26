@@ -11,15 +11,12 @@ import com.google.common.base.Charsets;
 import java.io.IOException;
 
 public class BytesParser implements RecordParser {
-  private final ArrayRecord record;
   private final int[] columnIndexes;
+  private final ArrayRecord record;
 
   public BytesParser(String[] partitionValues, int numColumns, ArrayParserData parserData) {
-    record = new ArrayRecord(numColumns, partitionValues.length);
     columnIndexes = parserData.columnIndexes;
-
-    record.initColumnTypes(parserData.hiveTypes);
-    record.initPartitionValues(partitionValues);
+    record = new ArrayRecord(numColumns, partitionValues, parserData.hiveTypes);
   }
 
   @Override
@@ -54,7 +51,7 @@ public class BytesParser implements RecordParser {
   }
 
   private void parsePrimitiveColumn(int column, byte[] bytes, int start, int length) {
-    switch (record.getType(column)) {
+    switch (record.getNativeType(column)) {
       case BOOLEAN:
         Boolean bool = parseBoolean(bytes, start, length);
         if (bool == null) {

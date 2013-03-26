@@ -7,7 +7,6 @@ import org.apache.hadoop.hive.serde2.objectinspector.StructField;
 import org.apache.hadoop.hive.serde2.objectinspector.StructObjectInspector;
 
 import com.facebook.giraph.hive.common.HiveType;
-import com.facebook.giraph.hive.common.NativeType;
 
 public class ArrayParserData {
   public final Deserializer deserializer;
@@ -15,20 +14,23 @@ public class ArrayParserData {
 
   public final int[] columnIndexes;
 
-  public final PrimitiveObjectInspector[] fieldInspectors;
+  public final PrimitiveObjectInspector[] primitiveInspectors;
   public final StructField[] structFields;
   public final HiveType[] hiveTypes;
-  public final NativeType[] nativeTypes;
 
-  public ArrayParserData(Deserializer deserializer, int[] columnIndexes, int numColumns) {
+  public ArrayParserData(Deserializer deserializer, int[] columnIndexes,
+                         int numColumns, String[] partitionValues) {
     this.deserializer = deserializer;
 
     this.columnIndexes = columnIndexes;
 
-    this.fieldInspectors = new PrimitiveObjectInspector[numColumns];
+    this.primitiveInspectors = new PrimitiveObjectInspector[numColumns];
     this.structFields = new StructField[numColumns];
-    this.hiveTypes = new HiveType[numColumns];
-    this.nativeTypes = new NativeType[numColumns];
+
+    this.hiveTypes = new HiveType[numColumns + partitionValues.length];
+    for (int partIndex = 0; partIndex < partitionValues.length; ++partIndex) {
+      hiveTypes[partIndex + numColumns] = HiveType.STRING;
+    }
 
     try {
       inspector = (StructObjectInspector) deserializer.getObjectInspector();

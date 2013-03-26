@@ -27,6 +27,10 @@ public enum HiveType {
     this.nativeType = nativeType;
   }
 
+  public boolean isCollection() {
+    return nativeType == null;
+  }
+
   public boolean isPrimitive() {
     return nativeType != null;
   }

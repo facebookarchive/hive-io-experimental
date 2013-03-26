@@ -12,36 +12,27 @@ class ArrayRecord implements HiveReadableRecord {
 
   // Note that partition data and column data are stored together, with column
   // data coming before partition values.
-  private final NativeType[] types;
+  private final HiveType[] hiveTypes;
   private final boolean[] booleans;
   private final long[] longs;
   private final double[] doubles;
   private final String[] strings;
+  private final Object[] objects;
   private final boolean[] nulls;
 
-  public ArrayRecord(int numColumns, int numPartitionValues) {
+  public ArrayRecord(int numColumns, String[] partitionValues, HiveType[] hiveTypes) {
     this.numColumns = numColumns;
+    this.hiveTypes = hiveTypes;
 
-    final int size = numColumns + numPartitionValues;
-    this.types = new NativeType[size];
+    final int size = numColumns + partitionValues.length;
     this.booleans = new boolean[size];
     this.longs = new long[size];
     this.doubles = new double[size];
     this.strings = new String[size];
+    this.objects = new Object[size];
     this.nulls = new boolean[size];
-  }
 
-  public void initColumnTypes(HiveType[] hiveTypes) {
-    for (int column = 0; column < numColumns; ++column) {
-      if (hiveTypes[column].isPrimitive()) {
-        types[column] = hiveTypes[column].getNativeType();
-      }
-    }
-  }
-
-  public void initPartitionValues(String[] partitionValues) {
     for (int partIndex = 0; partIndex < partitionValues.length; ++partIndex) {
-      types[partIndex + numColumns] = NativeType.STRING;
       strings[partIndex + numColumns] = partitionValues[partIndex];
     }
   }
@@ -62,12 +53,12 @@ class ArrayRecord implements HiveReadableRecord {
     Arrays.fill(nulls, false);
   }
 
-  public NativeType getType(int index) {
-    return types[index];
+  public HiveType getHiveType(int index) {
+    return hiveTypes[index];
   }
 
-  public void setType(int index, NativeType type) {
-    types[index] = type;
+  public NativeType getNativeType(int index) {
+    return hiveTypes[index].getNativeType();
   }
 
   public void setBoolean(int index, boolean value) {
@@ -86,16 +77,28 @@ class ArrayRecord implements HiveReadableRecord {
     strings[index] = value;
   }
 
+  public void setObject(int index, Object value) {
+    objects[index] = value;
+  }
+
   public void setNull(int index, boolean value) {
     nulls[index] = value;
   }
 
   @Override
   public Object get(int index) {
-    if (types[index] == null) {
+    if (nulls[index]) {
       return null;
     }
-    switch (types[index]) {
+    if (hiveTypes[index].isCollection()) {
+      return objects[index];
+    } else {
+      return getPrimitive(index);
+    }
+  }
+
+  private Object getPrimitive(int index) {
+    switch (hiveTypes[index].getNativeType()) {
       case BOOLEAN:
         return booleans[index];
       case LONG:
@@ -105,7 +108,7 @@ class ArrayRecord implements HiveReadableRecord {
       case STRING:
         return strings[index];
     }
-    return nulls[index];
+    return null;
   }
 
   @Override
@@ -138,10 +141,10 @@ class ArrayRecord implements HiveReadableRecord {
   }
 
   private void verifyType(int index, NativeType expectedType) {
-    if (types[index] != expectedType) {
+    if (hiveTypes[index].getNativeType() != expectedType) {
       throw new IllegalStateException(
           String.format("Got an unexpected type %s from row %s for column %d, should be %s",
-              types[index], this, index, expectedType));
+              hiveTypes[index], this, index, expectedType));
     }
   }
 
