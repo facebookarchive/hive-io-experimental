@@ -21,7 +21,8 @@ package com.facebook.giraph.hive.input;
 import org.apache.hadoop.io.Writable;
 import org.apache.hadoop.io.WritableUtils;
 
-import com.facebook.giraph.hive.impl.common.Writables;
+import com.facebook.giraph.hive.common.HiveTableName;
+import com.facebook.giraph.hive.common.Writables;
 import com.google.common.base.Objects;
 import com.google.common.collect.Lists;
 
@@ -132,6 +133,14 @@ public class HiveInputDescription implements Writable {
    */
   public boolean hasTableName() {
     return tableName != null && !tableName.isEmpty();
+  }
+
+  /**
+   * Make hive table name from this
+   * @return HiveTableName
+   */
+  public HiveTableName hiveTableName() {
+    return new HiveTableName(dbName, tableName);
   }
 
   /**

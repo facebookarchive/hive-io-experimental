@@ -21,7 +21,7 @@ package com.facebook.giraph.hive.input;
 import org.apache.hadoop.io.Writable;
 import org.apache.hadoop.io.WritableComparable;
 
-import com.facebook.giraph.hive.HiveRecord;
+import com.facebook.giraph.hive.record.HiveReadableRecord;
 
 /**
  * Observer for input operations
@@ -53,5 +53,40 @@ public interface HiveApiInputObserver {
    * Finished parsing row
    * @param record HiveRecord parsed
    */
-  void endParse(HiveRecord record);
+  void endParse(HiveReadableRecord record);
+
+  /**
+   * An input observer that does nothing
+   */
+  class Empty implements HiveApiInputObserver {
+    /** Singleton */
+    private static final Empty INSTANCE = new Empty();
+
+    /** Constructor */
+    protected Empty() { }
+
+    /**
+     * Get singleton instance
+     *
+     * @return singleton instance
+     */
+    public static Empty get() {
+      return INSTANCE;
+    }
+
+    @Override
+    public void beginReadRow() { }
+
+    @Override
+    public void endReadRow(WritableComparable key, Writable value) { }
+
+    @Override
+    public void hiveReadRowFailed() { }
+
+    @Override
+    public void beginParse() { }
+
+    @Override
+    public void endParse(HiveReadableRecord record) { }
+  }
 }

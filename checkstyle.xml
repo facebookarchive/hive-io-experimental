@@ -222,6 +222,7 @@
       <!-- Lines cannot exceed 100 chars -->
     <module name="LineLength">
       <property name="max" value="100"/>
+      <property name="ignorePattern" value="^import"/>
     </module>
       <!-- Over time, we will revised this down -->
     <module name="MethodLength">

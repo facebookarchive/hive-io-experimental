@@ -43,20 +43,16 @@ import org.apache.hadoop.util.ReflectionUtils;
 import org.apache.log4j.Logger;
 import org.apache.thrift.TException;
 
-import com.facebook.giraph.hive.HiveRecord;
-import com.facebook.giraph.hive.HiveTableSchema;
-import com.facebook.giraph.hive.HiveTableSchemas;
-import com.facebook.giraph.hive.impl.HiveApiTableSchema;
-import com.facebook.giraph.hive.impl.common.FileSystems;
-import com.facebook.giraph.hive.impl.common.HadoopUtils;
-import com.facebook.giraph.hive.impl.common.HiveUtils;
-import com.facebook.giraph.hive.impl.common.Inspectors;
-import com.facebook.giraph.hive.impl.common.ProgressReporter;
-import com.facebook.giraph.hive.impl.output.HiveApiOutputCommitter;
-import com.facebook.giraph.hive.impl.output.HiveApiRecordWriter;
-import com.facebook.giraph.hive.impl.output.OutputConf;
-import com.facebook.giraph.hive.impl.output.OutputInfo;
+import com.facebook.giraph.hive.common.FileSystems;
+import com.facebook.giraph.hive.common.HadoopUtils;
+import com.facebook.giraph.hive.common.HiveUtils;
+import com.facebook.giraph.hive.common.Inspectors;
+import com.facebook.giraph.hive.common.ProgressReporter;
 import com.facebook.giraph.hive.input.HiveApiInputFormat;
+import com.facebook.giraph.hive.record.HiveWritableRecord;
+import com.facebook.giraph.hive.schema.HiveTableSchema;
+import com.facebook.giraph.hive.schema.HiveTableSchemaImpl;
+import com.facebook.giraph.hive.schema.HiveTableSchemas;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 
@@ -69,7 +65,7 @@ import java.util.Map;
  * Hadoop compatible OutputFormat for writing to Hive.
  */
 public class HiveApiOutputFormat
-    extends OutputFormat<WritableComparable, HiveRecord> {
+    extends OutputFormat<WritableComparable, HiveWritableRecord> {
   /** Logger */
   public static final Logger LOG = Logger.getLogger(HiveApiOutputFormat.class);
 
@@ -93,7 +89,7 @@ public class HiveApiOutputFormat
    * @return HiveTableSchema
    */
   public HiveTableSchema getTableSchema(Configuration conf) {
-    return HiveTableSchemas.getForProfile(conf, myProfileId);
+    return HiveTableSchemas.get(conf, myProfileId);
   }
 
   /**
@@ -161,9 +157,8 @@ public class HiveApiOutputFormat
       oti.setFinalOutputPath(oti.getTableRoot());
     }
 
-    HiveTableSchema tableSchema = HiveApiTableSchema.fromTable(table);
-    HiveTableSchemas.putForName(conf, dbName, tableName, tableSchema);
-    HiveTableSchemas.putForProfile(conf, profileId, tableSchema);
+    HiveTableSchema tableSchema = HiveTableSchemaImpl.fromTable(table);
+    HiveTableSchemas.put(conf, profileId, tableSchema);
 
     OutputConf outputConf = new OutputConf(conf, profileId);
     outputConf.writeOutputDescription(outputDesc);
@@ -250,11 +245,9 @@ public class HiveApiOutputFormat
     Path tablePath = new Path(oti.getTableRoot());
     FileSystem fs = tablePath.getFileSystem(conf);
 
-    if (fs.exists(tablePath)) {
-      if (FileSystems.dirHasNonHiddenFiles(fs, tablePath)) {
-        throw new IOException("Table " + description.getTableName() +
-            " has existing data");
-      }
+    if (fs.exists(tablePath) && FileSystems.dirHasNonHiddenFiles(fs, tablePath)) {
+      throw new IOException("Table " + description.getTableName() +
+          " has existing data");
     }
   }
 
@@ -311,11 +304,11 @@ public class HiveApiOutputFormat
       // CHECKSTYLE: resume IllegalCatch
       return false;
     }
-    return partitionNames.size() > 0;
+    return !partitionNames.isEmpty();
   }
 
   @Override
-  public HiveApiRecordWriter getRecordWriter(TaskAttemptContext taskAttemptContext)
+  public RecordWriterImpl getRecordWriter(TaskAttemptContext taskAttemptContext)
     throws IOException, InterruptedException {
     HadoopUtils.setWorkOutputDir(taskAttemptContext);
 
@@ -340,7 +333,7 @@ public class HiveApiOutputFormat
 
     StructObjectInspector soi = Inspectors.createFor(oti.getColumnInfo());
 
-    return new HiveApiRecordWriter(baseWriter, serializer, soi);
+    return new RecordWriterImpl(baseWriter, serializer, soi);
   }
 
   /**
