@@ -31,7 +31,7 @@ under the License.
   <groupId>com.facebook.giraph.hive</groupId>
   <artifactId>hive-io-experimental</artifactId>
   <packaging>jar</packaging>
-  <version>0.5</version>
+  <version>0.5-SNAPSHOT</version>
 
   <name>${project.artifactId}</name>
   <description>Library for reading / writing to Hive</description>
@@ -44,6 +44,13 @@ under the License.
       <distribution>repo</distribution>
     </license>
   </licenses>
+
+  <scm>
+    <connection>scm:git:git@github.com/facebook/${project.artifactId}.git</connection>
+    <developerConnection>scm:git:git@github.com:facebook/${project.artifactId}.git</developerConnection>
+    <url>https://github.com/facebook/${project.artifactId}</url>
+    <tag>facebook-oss-pom-5</tag>
+  </scm>
 
   <developers>
     <developer>
@@ -128,6 +135,36 @@ under the License.
       </plugin>
     </plugins>
   </build>
+
+  <profiles>
+    <profile>
+      <id>release-sign-artifacts</id>
+      <activation>
+        <property>
+          <name>performRelease</name>
+          <value>true</value>
+        </property>
+      </activation>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-gpg-plugin</artifactId>
+            <version>1.4</version>
+            <executions>
+              <execution>
+                <id>sign-artifacts</id>
+                <phase>verify</phase>
+                <goals>
+                  <goal>sign</goal>
+                </goals>
+              </execution>
+            </executions>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+  </profiles>
 
   <!--For javax.jdo:jdo2-api:2.3-ec-->
   <repositories>
