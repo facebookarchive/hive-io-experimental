@@ -17,9 +17,7 @@ specific language governing permissions and limitations
 under the License.
 -->
 
-<project xmlns="http://maven.apache.org/POM/4.0.0"
-         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
   <parent>
@@ -31,7 +29,7 @@ under the License.
   <groupId>com.facebook.giraph.hive</groupId>
   <artifactId>hive-io-experimental</artifactId>
   <packaging>jar</packaging>
-  <version>0.5-SNAPSHOT</version>
+  <version>0.5</version>
 
   <name>${project.artifactId}</name>
   <description>Library for reading / writing to Hive</description>
@@ -49,6 +47,7 @@ under the License.
     <connection>scm:git:git@github.com/facebook/${project.artifactId}.git</connection>
     <developerConnection>scm:git:git@github.com:facebook/${project.artifactId}.git</developerConnection>
     <url>https://github.com/facebook/${project.artifactId}</url>
+    <tag>hive-io-experimental-0.5</tag>
   </scm>
 
   <developers>
