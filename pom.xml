@@ -49,7 +49,6 @@ under the License.
     <connection>scm:git:git@github.com/facebook/${project.artifactId}.git</connection>
     <developerConnection>scm:git:git@github.com:facebook/${project.artifactId}.git</developerConnection>
     <url>https://github.com/facebook/${project.artifactId}</url>
-    <tag>facebook-oss-pom-5</tag>
   </scm>
 
   <developers>
