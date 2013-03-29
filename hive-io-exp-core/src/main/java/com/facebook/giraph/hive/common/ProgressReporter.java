@@ -44,12 +44,12 @@ public class ProgressReporter implements Reporter {
 
   @Override
   public Counters.Counter getCounter(Enum<?> name) {
-    return Reporter.NULL.getCounter(name);
+    return NULL.getCounter(name);
   }
 
   @Override
   public Counters.Counter getCounter(String group, String name) {
-    return Reporter.NULL.getCounter(group, name);
+    return NULL.getCounter(group, name);
   }
 
   @Override
@@ -62,7 +62,7 @@ public class ProgressReporter implements Reporter {
 
   @Override
   public InputSplit getInputSplit() {
-    return Reporter.NULL.getInputSplit();
+    return NULL.getInputSplit();
   }
 
   @Override

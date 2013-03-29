@@ -175,8 +175,7 @@ class OutputInfo implements Writable {
 
   @Override
   public void write(DataOutput out) throws IOException {
-    Writables.writeClassName(out,
-        Preconditions.checkNotNull(outputFormatClass));
+    Writables.writeClassName(out, Preconditions.checkNotNull(outputFormatClass));
     Writables.writeFieldSchemas(out, partitionInfo);
     Writables.writeStrStrMap(out, tableParams);
     Writables.writeFieldSchemas(out, columnInfo);

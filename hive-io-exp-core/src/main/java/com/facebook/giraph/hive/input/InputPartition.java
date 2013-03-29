@@ -98,8 +98,8 @@ class InputPartition implements Writable {
   private static InputPartition makePartition(StorageDescriptor storageDescriptor,
                                               List<String> partitionValues) {
     InputSplitData splitData = new InputSplitData(storageDescriptor, partitionValues);
-    Class<? extends InputFormat> inputFormatClass = Classes.classForName(
-        storageDescriptor.getInputFormat());
+    Class<? extends InputFormat> inputFormatClass = Classes
+        .classForName(storageDescriptor.getInputFormat());
     String location = storageDescriptor.getLocation();
     return new InputPartition(splitData, inputFormatClass, location);
   }

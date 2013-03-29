@@ -26,6 +26,7 @@ import com.facebook.giraph.hive.common.Writables;
 import com.google.common.base.Objects;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Ordering;
+import com.facebook.giraph.hive.common.HiveUtils;
 
 import java.io.DataInput;
 import java.io.DataOutput;
@@ -33,7 +34,6 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 
-import static com.facebook.giraph.hive.common.HiveUtils.FIELD_SCHEMA_NAME_GETTER;
 import static com.google.common.collect.Lists.transform;
 
 /**
@@ -82,13 +82,13 @@ public class HiveTableSchemaImpl implements HiveTableSchema {
   public static HiveTableSchemaImpl fromTable(Table table) {
     int index = 0;
 
-    List<String> columnNames = transform(table.getSd().getCols(), FIELD_SCHEMA_NAME_GETTER);
+    List<String> columnNames = transform(table.getSd().getCols(), HiveUtils.FIELD_SCHEMA_NAME_GETTER);
     Map<String, Integer> columnToIndex = Maps.newHashMap();
     for (String columnName : columnNames) {
       columnToIndex.put(columnName, index++);
     }
 
-    List<String> partitionNames = transform(table.getPartitionKeys(), FIELD_SCHEMA_NAME_GETTER);
+    List<String> partitionNames = transform(table.getPartitionKeys(), HiveUtils.FIELD_SCHEMA_NAME_GETTER);
     Map<String, Integer> partitionToIndex = Maps.newHashMap();
     for (String partitionName : partitionNames) {
       partitionToIndex.put(partitionName, index++);

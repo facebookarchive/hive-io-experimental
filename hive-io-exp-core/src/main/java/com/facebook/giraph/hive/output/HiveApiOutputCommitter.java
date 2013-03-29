@@ -133,8 +133,9 @@ class HiveApiOutputCommitter extends OutputCommitter {
     partition.setDbName(dbName);
     partition.setTableName(tableName);
     partition.setParameters(outputInfo.getTableParams());
-    List<String> partitionValues = HiveUtils.orderedPartitionValues(
-        hiveTable.getPartitionKeys(), outputDesc.getPartitionValues());
+    List<String> partitionValues = HiveUtils
+        .orderedPartitionValues(hiveTable.getPartitionKeys(),
+            outputDesc.getPartitionValues());
     partition.setValues(partitionValues);
 
     StorageDescriptor sd = new StorageDescriptor(hiveTable.getSd());

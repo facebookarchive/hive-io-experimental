@@ -54,7 +54,6 @@ import com.google.common.collect.Ranges;
 import java.io.IOException;
 import java.util.List;
 
-import static com.facebook.giraph.hive.schema.HiveTableSchemas.schemaLookupFunc;
 import static com.google.common.collect.Lists.transform;
 
 /**
@@ -206,7 +205,8 @@ public class HiveApiInputFormat
       Range<Integer> range = Ranges.closedOpen(0, tableSchema.numColumns());
       ints = range.asSet(DiscreteDomains.integers()).asList();
     } else {
-      ints = transform(columnNames, schemaLookupFunc(tableSchema));
+      ints = transform(columnNames, HiveTableSchemas
+          .schemaLookupFunc(tableSchema));
     }
     int[] result = new int[ints.size()];
     for (int i = 0; i < ints.size(); ++i) {
@@ -272,7 +272,7 @@ public class HiveApiInputFormat
     Deserializer deserializer = split.getDeserializer();
     String[] partitionValues = split.getPartitionValues();
     int numColumns = split.getTableSchema().numColumns();
-    return Parsers.bestParser(deserializer, numColumns, columnIds,
-        tableName, partitionValues, exampleValue);
+    return Parsers.bestParser(deserializer, numColumns, columnIds, tableName,
+        partitionValues, exampleValue);
   }
 }
