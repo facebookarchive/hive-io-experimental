@@ -30,7 +30,7 @@ under the License.
   <packaging>jar</packaging>
 
   <properties>
-    <jar.main.class>com.facebook.giraph.com.facebook.giraph.hive.input.benchmark.InputBenchmark</jar.main.class>
+    <jar.main.class>com.facebook.giraph.hive.input.benchmark.InputBenchmark</jar.main.class>
     <root.dir>..</root.dir>
   </properties>
 

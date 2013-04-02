@@ -28,6 +28,7 @@ import org.apache.hadoop.mapreduce.TaskAttemptID;
 import org.apache.log4j.Logger;
 import org.apache.thrift.transport.TTransportException;
 
+import com.facebook.giraph.hive.common.HadoopNative;
 import com.facebook.giraph.hive.common.HiveMetastores;
 import com.facebook.giraph.hive.input.HiveApiInputFormat;
 import com.facebook.giraph.hive.input.HiveInputDescription;

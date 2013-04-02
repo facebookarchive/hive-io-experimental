@@ -69,6 +69,7 @@ under the License.
 
   <properties>
     <dep.hive.version>0.10.0</dep.hive.version>
+    <dep.jackson.version>2.1.4</dep.jackson.version>
     <root.dir>.</root.dir>
   </properties>
 
@@ -133,7 +134,7 @@ under the License.
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-checkstyle-plugin</artifactId>
-          <version>2.9</version>
+          <version>2.10</version>
           <configuration>
             <configLocation>${root.dir}/checkstyle.xml</configLocation>
             <consoleOutput>true</consoleOutput>
@@ -217,9 +218,10 @@ under the License.
           <artifactId>findbugs-maven-plugin</artifactId>
           <version>2.5.1</version>
           <configuration>
-            <xmlOutput>true</xmlOutput>
-            <findbugsXmlOutput>false</findbugsXmlOutput>
             <excludeFilterFile>${root.dir}/findbugs-exclude.xml</excludeFilterFile>
+            <failOnError>false</failOnError>
+            <findbugsXmlOutput>false</findbugsXmlOutput>
+            <xmlOutput>true</xmlOutput>
           </configuration>
           <executions>
             <execution>
@@ -419,6 +421,21 @@ under the License.
         <groupId>com.facebook.giraph.hive</groupId>
         <artifactId>hive-io-exp-tailer</artifactId>
         <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>com.fasterxml.jackson.core</groupId>
+        <artifactId>jackson-annotations</artifactId>
+        <version>${dep.jackson.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>com.fasterxml.jackson.core</groupId>
+        <artifactId>jackson-core</artifactId>
+        <version>${dep.jackson.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>com.fasterxml.jackson.core</groupId>
+        <artifactId>jackson-databind</artifactId>
+        <version>${dep.jackson.version}</version>
       </dependency>
       <dependency>
         <groupId>com.github.spullara.cli-parser</groupId>

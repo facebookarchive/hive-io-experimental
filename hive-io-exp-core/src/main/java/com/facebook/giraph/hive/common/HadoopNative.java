@@ -15,7 +15,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.facebook.giraph.hive.input.benchmark;
+package com.facebook.giraph.hive.common;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.hive.ql.io.CodecPool;
@@ -36,7 +36,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
-class HadoopNative {
+public class HadoopNative {
     private static boolean loaded = false;
     private static Throwable error = null;
 

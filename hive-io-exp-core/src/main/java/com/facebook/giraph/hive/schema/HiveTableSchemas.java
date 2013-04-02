@@ -103,8 +103,20 @@ public class HiveTableSchemas {
    * @param tableName Hive table name
    */
   public static void put(Configuration conf, String profile,
-                         HiveTableName tableName) {
-     HiveConf hiveConf = new HiveConf(conf, HiveTableSchemas.class);
+                         HiveTableName tableName)
+  {
+    put(conf, profile, lookup(conf, tableName));
+  }
+
+  /**
+   * Lookup schema from Hive metastore
+   * @param conf Configuration
+   * @param tableName Hive table name
+   * @return Hive table schema
+   */
+  public static HiveTableSchema lookup(Configuration conf, HiveTableName tableName)
+  {
+    HiveConf hiveConf = new HiveConf(conf, HiveTableSchemas.class);
     ThriftHiveMetastore.Iface client;
     Table table;
     try {
@@ -113,7 +125,24 @@ public class HiveTableSchemas {
     } catch (Exception e) {
       throw new IllegalStateException(e);
     }
-    put(conf, profile, HiveTableSchemaImpl.fromTable(table));
+    return HiveTableSchemaImpl.fromTable(table);
+  }
+
+  /**
+   * Lookup schema from Hive metastore
+   * @param client Metastore client
+   * @param tableName Hive table name
+   * @return Hive table schema
+   */
+  public static HiveTableSchema lookup(ThriftHiveMetastore.Iface client, HiveTableName tableName)
+  {
+    Table table;
+    try {
+      table = client.get_table(tableName.getDatabaseName(), tableName.getTableName());
+    } catch (Exception e) {
+      throw new IllegalStateException(e);
+    }
+    return HiveTableSchemaImpl.fromTable(table);
   }
 
   /**

@@ -242,7 +242,8 @@ public class HiveApiInputFormat
   @Override
   public RecordReaderImpl
   createRecordReader(InputSplit inputSplit, TaskAttemptContext context)
-    throws IOException, InterruptedException {
+    throws IOException, InterruptedException
+  {
     Configuration conf = context.getConfiguration();
     JobConf jobConf = new JobConf(conf);
 
