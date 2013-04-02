@@ -34,7 +34,6 @@ import org.apache.hadoop.io.Writable;
 import org.apache.hadoop.io.WritableComparable;
 import org.apache.hadoop.mapred.FileOutputFormat;
 import org.apache.hadoop.mapred.JobConf;
-import org.apache.hadoop.mapred.RecordWriter;
 import org.apache.hadoop.mapred.Reporter;
 import org.apache.hadoop.mapreduce.JobContext;
 import org.apache.hadoop.mapreduce.OutputCommitter;
@@ -378,43 +377,5 @@ public class HiveApiOutputFormat
     JobConf jobConf = new JobConf(conf);
     OutputCommitter baseCommitter = jobConf.getOutputCommitter();
     return new HiveApiOutputCommitter(baseCommitter, myProfileId);
-  }
-
-  /** Class for creating new base record writers which will replace slow ones. */
-  class BaseWriterCreator {
-    /** Task attempt context */
-    private final TaskAttemptContext taskAttemptContext;
-    /** Base output format */
-    private final org.apache.hadoop.mapred.OutputFormat baseOutputFormat;
-
-    /**
-     * Constructor
-     *
-     * @param taskAttemptContext Task attempt context
-     * @param baseOutputFormat Base output format
-     */
-    BaseWriterCreator(TaskAttemptContext taskAttemptContext,
-        org.apache.hadoop.mapred.OutputFormat baseOutputFormat) {
-      this.taskAttemptContext = taskAttemptContext;
-      this.baseOutputFormat = baseOutputFormat;
-    }
-
-    /**
-     * Create new base record writer
-     *
-     * @return New base record writer
-     */
-    public RecordWriter<WritableComparable, Writable> createBaseWriter() throws IOException {
-      return getBaseRecordWriter(taskAttemptContext, baseOutputFormat);
-    }
-
-    /**
-     * Get task attempt context
-     *
-     * @return Task attempt context
-     */
-    public TaskAttemptContext getContext() {
-      return taskAttemptContext;
-    }
   }
 }
