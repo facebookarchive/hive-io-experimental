@@ -144,7 +144,7 @@ public class Writables {
    */
   public static <T extends Writable> T readUnknownWritable(DataInput dataInput)
     throws IOException {
-    T writable = readNewInstance(dataInput);
+    T writable = (T) readNewInstance(dataInput);
     writable.readFields(dataInput);
     return writable;
   }
