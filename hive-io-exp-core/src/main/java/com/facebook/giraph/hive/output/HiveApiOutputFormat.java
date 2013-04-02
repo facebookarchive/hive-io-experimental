@@ -341,9 +341,9 @@ public class HiveApiOutputFormat
     if (!outputConf.shouldResetSlowWrites()) {
       return new RecordWriterImpl(baseWriter, serializer, soi);
     } else {
-      BaseWriterCreator bwc = new BaseWriterCreator(taskAttemptContext, baseOutputFormat);
       long writeTimeout = outputConf.getWriteResetTimeout();
-      return new ResettableRecordWriterImpl(baseWriter, serializer, soi, bwc, writeTimeout);
+      return new ResettableRecordWriterImpl(baseWriter, serializer, soi, taskAttemptContext,
+          baseOutputFormat, writeTimeout);
     }
   }
 
@@ -355,7 +355,7 @@ public class HiveApiOutputFormat
    * @throws IOException Hadoop issues
    */
   // CHECKSTYLE: stop LineLengthCheck
-  private org.apache.hadoop.mapred.RecordWriter<WritableComparable, Writable> getBaseRecordWriter(
+  protected static org.apache.hadoop.mapred.RecordWriter<WritableComparable, Writable> getBaseRecordWriter(
     TaskAttemptContext taskAttemptContext,
     org.apache.hadoop.mapred.OutputFormat baseOutputFormat) throws IOException {
     // CHECKSTYLE: resume LineLengthCheck
