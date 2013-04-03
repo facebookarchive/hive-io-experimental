@@ -23,9 +23,13 @@ import org.apache.hadoop.hive.conf.HiveConf;
 import org.apache.hadoop.hive.metastore.Warehouse;
 import org.apache.hadoop.hive.metastore.api.FieldSchema;
 import org.apache.hadoop.hive.metastore.api.MetaException;
+import org.apache.hadoop.hive.metastore.api.Partition;
+import org.apache.hadoop.hive.metastore.api.ThriftHiveMetastore;
 import org.apache.hadoop.hive.serde2.ColumnProjectionUtils;
 import org.apache.log4j.Logger;
+import org.apache.thrift.TException;
 
+import com.facebook.giraph.hive.input.HiveInputDescription;
 import com.google.common.base.Function;
 import com.google.common.collect.Lists;
 import com.google.common.primitives.Ints;
@@ -58,6 +62,22 @@ public class HiveUtils {
 
   /** Don't construct, allow inheritance */
   protected HiveUtils() { }
+
+  public static HiveStats statsOf(ThriftHiveMetastore.Iface client,
+      HiveInputDescription inputDesc) throws TException
+  {
+    List<Partition> partitions = client.get_partitions_by_filter(
+        inputDesc.getDbName(), inputDesc.getTableName(),
+        inputDesc.getPartitionFilter(), (short) -1);
+
+    HiveStats hiveStats = new HiveStats();
+
+    for (int i = 0; i < partitions.size(); ++i) {
+      hiveStats.add(HiveStats.fromParams(partitions.get(i).getParameters()));
+    }
+
+    return hiveStats;
+  }
 
   /**
    * Get Configuration value as list of URIs.

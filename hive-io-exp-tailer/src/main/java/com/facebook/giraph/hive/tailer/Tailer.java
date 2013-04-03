@@ -27,7 +27,9 @@ import org.apache.hadoop.mapreduce.TaskAttemptID;
 
 import com.facebook.giraph.hive.common.HadoopNative;
 import com.facebook.giraph.hive.common.HiveMetastores;
+import com.facebook.giraph.hive.common.HiveStats;
 import com.facebook.giraph.hive.common.HiveTableName;
+import com.facebook.giraph.hive.common.HiveUtils;
 import com.facebook.giraph.hive.input.HiveApiInputFormat;
 import com.facebook.giraph.hive.input.HiveInputDescription;
 import com.facebook.giraph.hive.record.HiveReadableRecord;
@@ -49,13 +51,30 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.FutureTask;
 import java.util.concurrent.RunnableFuture;
-import java.util.concurrent.TimeUnit;
 
 import static com.facebook.giraph.hive.input.HiveApiInputFormat.DEFAULT_PROFILE_ID;
 import static com.facebook.giraph.hive.input.HiveApiInputFormat.LOG;
 
 public class Tailer {
-  public static final int DEFAULT_METASTORE_PORT = 9083;
+  private static class Context {
+    public Queue<InputSplit> splitsQueue;
+    public HiveApiInputFormat hiveApiInputFormat;
+    public HiveConf hiveConf;
+    public HiveTableSchema schema;
+    public HiveStats hiveStats;
+    public Opts opts;
+    public Stats stats;
+
+    private Context(HiveApiInputFormat hiveApiInputFormat, HiveConf hiveConf,
+        HiveTableSchema schema, HiveStats hiveStats, Opts opts, Stats stats) {
+      this.hiveApiInputFormat = hiveApiInputFormat;
+      this.hiveConf = hiveConf;
+      this.schema = schema;
+      this.hiveStats = hiveStats;
+      this.opts = opts;
+      this.stats = stats;
+    }
+  }
 
   public static void main(String[] args) throws Exception {
     Opts opts = new Opts();
@@ -86,6 +105,13 @@ public class Tailer {
     inputDesc.setDbName(opts.database);
     inputDesc.setTableName(opts.table);
     inputDesc.setPartitionFilter(opts.partitionFilter);
+    if (opts.requestNumSplits == 0) {
+      opts.requestNumSplits = opts.threads * opts.splitsPerThread;
+    }
+    inputDesc.setNumSplits(opts.requestNumSplits);
+
+    HiveStats hiveStats = HiveUtils.statsOf(client, inputDesc);
+    System.err.println(hiveStats);
 
     HiveConf hiveConf = new HiveConf(Tailer.class);
     HiveApiInputFormat.setProfileInputDesc(hiveConf, inputDesc, DEFAULT_PROFILE_ID);
@@ -94,43 +120,47 @@ public class Tailer {
     hapi.setMyProfileId(DEFAULT_PROFILE_ID);
 
     List<InputSplit> splits = hapi.getSplits(hiveConf, client);
+    System.err.println("Have " + splits + " splits to read");
 
     HiveTableName hiveTableName = new HiveTableName(opts.database, opts.table);
     HiveTableSchema schema = HiveTableSchemas.lookup(client, hiveTableName);
 
-    Queue<InputSplit> splitsQueue;
-    long numRows;
+    Stats stats = new Stats();
+    Context context = new Context(hapi, hiveConf, schema, hiveStats, opts, stats);
     long startNanos = System.nanoTime();
+
     if (opts.threads == 1) {
-      splitsQueue = Queues.newArrayDeque(splits);
-      numRows = readSplits(splitsQueue, hapi, hiveConf, schema, opts);
+      context.splitsQueue = Queues.newArrayDeque(splits);
+      stats.numRows = readSplits(context);
     } else {
-      splitsQueue = Queues.newConcurrentLinkedQueue(splits);
-      numRows = multiThreaded(opts.threads, splitsQueue, hapi, hiveConf, schema, opts);
+      context.splitsQueue = Queues.newConcurrentLinkedQueue(splits);
+      stats.numRows = multiThreaded(context, opts.threads);
     }
-    long diffNanos = System.nanoTime() - startNanos;
-    System.err.println("Processed " + numRows + " rows in " +
-        TimeUnit.NANOSECONDS.toMillis(diffNanos) + " msec");
+
+    stats.timeNanos = System.nanoTime() - startNanos;
+    stats.printEnd(hiveStats);
   }
 
-  private static long multiThreaded(int numThreads, final Queue<InputSplit> splitsQueue,
-      final HiveApiInputFormat hapi, final HiveConf hiveConf,
-      final HiveTableSchema schema, final Opts opts)
+  private static long multiThreaded(final Context context, int numThreads)
   {
-    long numRows = 0;
-    List<Thread> threads = Lists.newArrayList();
     List<Future<Long>> futures = Lists.newArrayList();
+    List<Thread> threads = Lists.newArrayList();
     for (int i = 0; i < numThreads; ++i) {
       RunnableFuture<Long> future = new FutureTask(new Callable<Long>() {
         @Override public Long call() throws Exception {
-          return readSplits(splitsQueue, hapi, hiveConf, schema, opts);
+          return readSplits(context);
         }
       });
-      futures.add(future);
+
       Thread thread = new Thread(future);
       thread.setName("readSplit-" + i);
       thread.start();
+
+      futures.add(future);
+      threads.add(thread);
     }
+
+    long numRows = 0;
     for (int i = 0; i < threads.size(); ++i) {
       Uninterruptibles.joinUninterruptibly(threads.get(i));
       try {
@@ -142,46 +172,47 @@ public class Tailer {
     return numRows;
   }
 
-  private static long readSplits(Queue<InputSplit> splitsQueue, HiveApiInputFormat hapi,
-      HiveConf hiveConf, HiveTableSchema schema, Opts opts)
+  private static long readSplits(Context context)
   {
-    long numRows = 0;
-    while (!splitsQueue.isEmpty()) {
-      InputSplit split = splitsQueue.poll();
+    long totalRows = 0;
+    while (!context.splitsQueue.isEmpty()) {
+      InputSplit split = context.splitsQueue.poll();
       try {
-        numRows += readSplit(split, hapi, hiveConf, schema, opts);
+        totalRows += readSplit(split, context);
       } catch (Exception e) {
         System.err.println("Failed to read split " + split);
         e.printStackTrace();
       }
     }
-    return numRows;
+    return totalRows;
   }
 
-  private static long readSplit(InputSplit split, HiveApiInputFormat hapi,
-      HiveConf hiveConf, HiveTableSchema schema, Opts opts)
+  private static long readSplit(InputSplit split, Context context)
       throws IOException, InterruptedException
   {
     long numRows = 0;
     TaskAttemptID taskId = new TaskAttemptID();
-    TaskAttemptContext taskContext = new TaskAttemptContext(hiveConf, taskId);
+    TaskAttemptContext taskContext = new TaskAttemptContext(context.hiveConf, taskId);
     RecordReader<WritableComparable, HiveReadableRecord> recordReader;
-    recordReader = hapi.createRecordReader(split, taskContext);
+    recordReader = context.hiveApiInputFormat.createRecordReader(split, taskContext);
     recordReader.initialize(split, taskContext);
-    String[] values = new String[schema.numColumns()];
+    String[] values = new String[context.schema.numColumns()];
     while (recordReader.nextKeyValue()) {
       HiveReadableRecord record = recordReader.getCurrentValue();
-      printRecord(record, schema, opts, values);
+      printRecord(record, context.schema.numColumns(), context.opts, values);
       ++numRows;
+      if (numRows % Opts.METRICS_ROWS_UPDATE == 0) {
+        context.stats.addRows(context.hiveStats, Opts.METRICS_ROWS_UPDATE);
+      }
     }
     return numRows;
   }
 
-  private static void printRecord(HiveReadableRecord record, HiveTableSchema schema,
+  private static void printRecord(HiveReadableRecord record, int numColumns,
       Opts opts, String[] values)
   {
-    for (int index = 0; index < schema.numColumns(); ++index) {
-      values[index] = record.get(index).toString();
+    for (int index = 0; index < numColumns; ++index) {
+      values[index] = String.valueOf(record.get(index));
     }
     System.out.println(opts.joiner.join(values));
   }
@@ -194,20 +225,20 @@ public class Tailer {
     }
     if (metastoreHostPort.host == null && opts.cluster != null) {
       ClusterData clustersData = new ClusterData();
-      if (opts.clusterFile == null) {
+      if (opts.clustersFile == null) {
         System.err.println("ERROR: Cluster file not given");
         Args.usage(opts);
         return null;
       }
-      if (opts.clusterFile != null) {
+      if (opts.clustersFile != null) {
         ObjectMapper objectMapper = new ObjectMapper();
-        File file = new File(opts.clusterFile);
+        File file = new File(opts.clustersFile);
         clustersData = objectMapper.readValue(file, ClusterData.class);
       }
       List<HostPort> hostAndPorts = clustersData.data.get(opts.cluster);
       if (hostAndPorts == null) {
         System.err.println("Cluster " + opts.cluster +
-            " not found in data file " + opts.clusterFile);
+            " not found in data file " + opts.clustersFile);
         return null;
       }
       Collections.shuffle(hostAndPorts);

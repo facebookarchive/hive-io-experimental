@@ -186,7 +186,7 @@ public class HiveApiInputFormat
           partitionNum + " out of " + Iterables.size(partitions) +
           ") values: " + inputPartition.getInputSplitData().getPartitionValues() +
           ", got " + baseSplits.length + " splits from inputFormat " +
-          baseInputFormat.getClass());
+          baseInputFormat.getClass().getCanonicalName());
 
       for (org.apache.hadoop.mapred.InputSplit baseSplit : baseSplits)  {
         InputSplit split = new HInputSplit(baseInputFormat, baseSplit,

@@ -19,26 +19,46 @@ package com.facebook.giraph.hive.tailer;
 
 import com.google.common.base.Joiner;
 import com.sampullara.cli.Argument;
+import com.yammer.metrics.Metrics;
+import com.yammer.metrics.core.MetricPredicate;
+import com.yammer.metrics.reporting.ConsoleReporter;
+
+import java.util.concurrent.TimeUnit;
 
 public class Opts {
+  public static final int METASTORE_PORT = 9083;
+  public static final int METRICS_ROWS_UPDATE = 100000;
+
   @Argument(alias = "h") public boolean help = false;
 
-  @Argument public String clusterFile;
+  @Argument public String clustersFile;
   @Argument public String cluster;
 
   @Argument public String metastoreHost;
-  @Argument public int metastorePort = Tailer.DEFAULT_METASTORE_PORT;
+  @Argument public Integer metastorePort = METASTORE_PORT;
 
   @Argument public String database = "default";
   @Argument(required = true) public String table;
   @Argument(required = true) public String partitionFilter;
 
-  @Argument public int threads = 1;
+  @Argument public Integer threads = 1;
   @Argument public String separator = "\t";
+
+  @Argument public Integer requestNumSplits = 0;
+  @Argument public Integer splitsPerThread = 3;
+
+  @Argument public Integer printMetricsSeconds = 0;
 
   public Joiner joiner;
 
+  public static ConsoleReporter metricsReporter() {
+    return new ConsoleReporter(Metrics.defaultRegistry(), System.err, MetricPredicate.ALL);
+  }
+
   public void process() {
     joiner = Joiner.on(separator);
+    if (printMetricsSeconds > 0) {
+      metricsReporter().start(printMetricsSeconds, TimeUnit.SECONDS);
+    }
   }
 }

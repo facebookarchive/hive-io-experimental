@@ -26,11 +26,11 @@ under the License.
     <version>0.6-SNAPSHOT</version>
   </parent>
 
-  <artifactId>hive-io-exp-tailer</artifactId>
+  <artifactId>hive-io-exp-deps</artifactId>
   <packaging>jar</packaging>
 
   <properties>
-    <jar.main.class>com.facebook.giraph.hive.tailer.Tailer</jar.main.class>
+    <jar.main.class>com.facebook.giraph.hive.Empty</jar.main.class>
     <root.dir>..</root.dir>
   </properties>
 
@@ -46,10 +46,6 @@ under the License.
       </plugin>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-checkstyle-plugin</artifactId>
-      </plugin>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-jar-plugin</artifactId>
       </plugin>
       <plugin>
@@ -59,14 +55,6 @@ under the License.
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-enforcer-plugin</artifactId>
-      </plugin>
-      <plugin>
-        <groupId>org.codehaus.mojo</groupId>
-        <artifactId>findbugs-maven-plugin</artifactId>
-      </plugin>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-javadoc-plugin</artifactId>
       </plugin>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
@@ -85,10 +73,6 @@ under the License.
 
   <dependencies>
     <dependency>
-      <groupId>com.facebook.giraph.hive</groupId>
-      <artifactId>hive-io-exp-core</artifactId>
-    </dependency>
-    <dependency>
       <groupId>com.fasterxml.jackson.core</groupId>
       <artifactId>jackson-annotations</artifactId>
     </dependency>
@@ -105,13 +89,28 @@ under the License.
       <artifactId>cli-parser</artifactId>
     </dependency>
     <dependency>
+      <groupId>com.google.guava</groupId>
+      <artifactId>guava</artifactId>
+    </dependency>
+    <dependency>
       <groupId>com.yammer.metrics</groupId>
       <artifactId>metrics-core</artifactId>
     </dependency>
     <dependency>
-      <groupId>javax.validation</groupId>
-      <artifactId>validation-api</artifactId>
-      <version>1.0.0.GA</version>
+      <groupId>log4j</groupId>
+      <artifactId>log4j</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>com.facebook.hadoop</groupId>
+      <artifactId>hadoop-core</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.hive</groupId>
+      <artifactId>hive-exec</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.hive</groupId>
+      <artifactId>hive-metastore</artifactId>
     </dependency>
   </dependencies>
 </project>

@@ -62,6 +62,7 @@ under the License.
   </developers>
 
   <modules>
+    <module>hive-io-exp-deps</module>
     <module>hive-io-exp-core</module>
     <module>hive-io-exp-benchmark</module>
     <module>hive-io-exp-tailer</module>

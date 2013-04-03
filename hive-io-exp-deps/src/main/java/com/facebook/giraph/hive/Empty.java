@@ -15,13 +15,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.facebook.giraph.hive.tailer;
+package com.facebook.giraph.hive;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-
-import javax.validation.constraints.Min;
-
-class HostPort {
-  @JsonProperty public String host;
-  @JsonProperty @Min(1) public int port = Opts.METASTORE_PORT;
+public class Empty {
+  public static void main(String[] args) {
+    System.out.println("This binary does nothing");
+  }
 }
