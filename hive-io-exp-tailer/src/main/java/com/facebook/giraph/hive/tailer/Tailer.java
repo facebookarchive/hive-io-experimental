@@ -106,7 +106,7 @@ public class Tailer {
     inputDesc.setTableName(opts.table);
     inputDesc.setPartitionFilter(opts.partitionFilter);
     if (opts.requestNumSplits == 0) {
-      opts.requestNumSplits = opts.threads * opts.splitsPerThread;
+      opts.requestNumSplits = opts.threads * opts.requestSplitsPerThread;
     }
     inputDesc.setNumSplits(opts.requestNumSplits);
 
@@ -120,7 +120,7 @@ public class Tailer {
     hapi.setMyProfileId(DEFAULT_PROFILE_ID);
 
     List<InputSplit> splits = hapi.getSplits(hiveConf, client);
-    System.err.println("Have " + splits + " splits to read");
+    System.err.println("Have " + splits.size() + " splits to read");
 
     HiveTableName hiveTableName = new HiveTableName(opts.database, opts.table);
     HiveTableSchema schema = HiveTableSchemas.lookup(client, hiveTableName);
@@ -201,8 +201,8 @@ public class Tailer {
       HiveReadableRecord record = recordReader.getCurrentValue();
       printRecord(record, context.schema.numColumns(), context.opts, values);
       ++numRows;
-      if (numRows % Opts.METRICS_ROWS_UPDATE == 0) {
-        context.stats.addRows(context.hiveStats, Opts.METRICS_ROWS_UPDATE);
+      if (numRows % context.opts.metricsUpdatePeriodRows == 0) {
+        context.stats.addRows(context.hiveStats, context.opts.metricsUpdatePeriodRows);
       }
     }
     return numRows;

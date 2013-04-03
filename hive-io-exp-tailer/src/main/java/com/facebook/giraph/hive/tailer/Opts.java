@@ -27,7 +27,7 @@ import java.util.concurrent.TimeUnit;
 
 public class Opts {
   public static final int METASTORE_PORT = 9083;
-  public static final int METRICS_ROWS_UPDATE = 100000;
+  public static final int METRICS_UPDATE_ROWS = 10000;
 
   @Argument(alias = "h") public boolean help = false;
 
@@ -45,9 +45,10 @@ public class Opts {
   @Argument public String separator = "\t";
 
   @Argument public Integer requestNumSplits = 0;
-  @Argument public Integer splitsPerThread = 3;
+  @Argument public Integer requestSplitsPerThread = 3;
 
-  @Argument public Integer printMetricsSeconds = 0;
+  @Argument public Integer metricsUpdatePeriodRows = METRICS_UPDATE_ROWS;
+  @Argument public Integer metricsPrintPeriodSecs = 0;
 
   public Joiner joiner;
 
@@ -57,8 +58,8 @@ public class Opts {
 
   public void process() {
     joiner = Joiner.on(separator);
-    if (printMetricsSeconds > 0) {
-      metricsReporter().start(printMetricsSeconds, TimeUnit.SECONDS);
+    if (metricsPrintPeriodSecs > 0) {
+      metricsReporter().start(metricsPrintPeriodSecs, TimeUnit.SECONDS);
     }
   }
 }
