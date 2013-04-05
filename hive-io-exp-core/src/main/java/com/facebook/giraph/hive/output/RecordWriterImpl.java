@@ -43,7 +43,7 @@ class RecordWriterImpl extends RecordWriter<WritableComparable, HiveWritableReco
 
   // CHECKSTYLE: stop LineLength
   /** Base Hadoop RecordWriter */
-  private final org.apache.hadoop.mapred.RecordWriter<WritableComparable, Writable> baseWriter;
+  protected org.apache.hadoop.mapred.RecordWriter<WritableComparable, Writable> baseWriter;
   // CHECKSTYLE: resume LineLength
   /** Hive record serializer */
   private final Serializer serializer;

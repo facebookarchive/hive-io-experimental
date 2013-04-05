@@ -21,7 +21,11 @@ package com.facebook.giraph.hive.output;
 import org.apache.hadoop.conf.Configuration;
 
 import com.facebook.giraph.hive.common.Writables;
+import com.facebook.giraph.hive.conf.BooleanConfOption;
+import com.facebook.giraph.hive.conf.LongConfOption;
 import com.google.common.base.Objects;
+
+import java.util.concurrent.TimeUnit;
 
 /**
  * Hive Output configuration
@@ -33,6 +37,19 @@ class OutputConf {
   public static final String OUTPUT_TABLE_INFO_KEY = "table_info";
   /** Configuration key for description */
   public static final String OUTPUT_DESCRIPTION_KEY = "description";
+
+  /**
+   * Whether or not we should track the write speed, and try writing to a new file if write
+   * operations get too slow. Default is not resetting slow writes.
+   */
+  public static final BooleanConfOption RESET_SLOW_WRITES =
+      new BooleanConfOption(PREFIX_KEY + ".reset_slow_writes", false);
+  /**
+   * If resetting slow writes is used, how long should a write take in order for a new file to be
+   * created. Default is 10s as threshold for slow writes.
+   */
+  public static final LongConfOption WRITE_RESET_TIMEOUT =
+      new LongConfOption(PREFIX_KEY + ".write_reset_timeout", TimeUnit.SECONDS.toMillis(10));
 
   /** Hadoop Configuration */
   private final Configuration conf;
@@ -68,6 +85,14 @@ class OutputConf {
 
   public String getOutputDescriptionKey() {
     return getProfileId() + OUTPUT_DESCRIPTION_KEY;
+  }
+
+  public boolean shouldResetSlowWrites() {
+    return RESET_SLOW_WRITES.get(conf);
+  }
+
+  public long getWriteResetTimeout() {
+    return WRITE_RESET_TIMEOUT.get(conf);
   }
 
   /**
