@@ -60,6 +60,7 @@ import java.io.IOException;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * Hadoop compatible OutputFormat for writing to Hive.
@@ -71,6 +72,9 @@ public class HiveApiOutputFormat
 
   /** Default profile if none given */
   public static final String DEFAULT_PROFILE_ID = "output-profile";
+
+  /** Counter for the files created, so we would be able to get unique name for new files */
+  private static final AtomicInteger CREATED_FILES_COUNTER = new AtomicInteger(0);
 
   /** Which profile to lookup */
   private String myProfileId = DEFAULT_PROFILE_ID;
@@ -333,7 +337,13 @@ public class HiveApiOutputFormat
 
     StructObjectInspector soi = Inspectors.createFor(oti.getColumnInfo());
 
-    return new RecordWriterImpl(baseWriter, serializer, soi);
+    if (!outputConf.shouldResetSlowWrites()) {
+      return new RecordWriterImpl(baseWriter, serializer, soi);
+    } else {
+      long writeTimeout = outputConf.getWriteResetTimeout();
+      return new ResettableRecordWriterImpl(baseWriter, serializer, soi, taskAttemptContext,
+          baseOutputFormat, writeTimeout);
+    }
   }
 
   /**
@@ -344,12 +354,16 @@ public class HiveApiOutputFormat
    * @throws IOException Hadoop issues
    */
   // CHECKSTYLE: stop LineLengthCheck
-  private org.apache.hadoop.mapred.RecordWriter<WritableComparable, Writable> getBaseRecordWriter(
+  protected static org.apache.hadoop.mapred.RecordWriter<WritableComparable, Writable> getBaseRecordWriter(
     TaskAttemptContext taskAttemptContext,
     org.apache.hadoop.mapred.OutputFormat baseOutputFormat) throws IOException {
     // CHECKSTYLE: resume LineLengthCheck
     JobConf jobConf = new JobConf(taskAttemptContext.getConfiguration());
-    String name = FileOutputFormat.getUniqueName(jobConf, "part");
+    int fileId = CREATED_FILES_COUNTER.incrementAndGet();
+    String name = FileOutputFormat.getUniqueName(jobConf, "part-" + fileId);
+    if (LOG.isInfoEnabled()) {
+      LOG.info("getBaseRecordWriter: Created new with file " + name);
+    }
     Reporter reporter = new ProgressReporter(taskAttemptContext);
     return baseOutputFormat.getRecordWriter(null, jobConf, name, reporter);
   }
