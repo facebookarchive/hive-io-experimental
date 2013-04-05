@@ -25,6 +25,9 @@ import org.apache.hadoop.util.Tool;
 import com.facebook.giraph.hive.output.HiveApiOutputFormat;
 import com.facebook.giraph.hive.output.HiveOutputDescription;
 import com.facebook.giraph.hive.record.HiveWritableRecord;
+import com.google.common.collect.ImmutableMap;
+
+import java.util.Map;
 
 import static com.facebook.giraph.hive.mapreduce.SampleOutputFormat.SAMPLE_PROFILE_ID;
 
@@ -41,6 +44,10 @@ public class WritingTool extends Configured implements Tool {
   @Override
   public int run(String[] args) throws Exception {
     HiveOutputDescription outputDesc = new HiveOutputDescription();
+    outputDesc.setDbName("default");
+    outputDesc.setTableName("hive_io_test");
+    Map<String, String> partitionValues = ImmutableMap.of("ds", "2013-04-01");
+    outputDesc.setPartitionValues(partitionValues);
     HiveApiOutputFormat.initProfile(getConf(), outputDesc, SAMPLE_PROFILE_ID);
 
     Job job = new Job(getConf(), "hive-io-writing");

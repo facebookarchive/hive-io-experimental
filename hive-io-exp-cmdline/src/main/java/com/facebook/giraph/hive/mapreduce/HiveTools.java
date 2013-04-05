@@ -61,8 +61,7 @@ public class HiveTools {
   private HiveTools() {}
 
   public static HiveWritableRecord mapToHiveRecord(MapWritable value) {
-    HiveWritableRecord record = HiveRecordFactory
-        .newWritableRecord(HiveTools.NUM_COLUMNS);
+    HiveWritableRecord record = HiveRecordFactory.newWritableRecord(HiveTools.NUM_COLUMNS);
     for (Map.Entry<Writable, Writable> entry : value.entrySet()) {
       IntWritable intKey = (IntWritable) entry.getKey();
       LongWritable longValue = (LongWritable) entry.getValue();
