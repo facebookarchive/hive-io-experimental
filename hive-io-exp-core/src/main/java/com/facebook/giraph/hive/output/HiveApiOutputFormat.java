@@ -34,6 +34,7 @@ import org.apache.hadoop.io.Writable;
 import org.apache.hadoop.io.WritableComparable;
 import org.apache.hadoop.mapred.FileOutputFormat;
 import org.apache.hadoop.mapred.JobConf;
+import org.apache.hadoop.mapred.RecordWriter;
 import org.apache.hadoop.mapred.Reporter;
 import org.apache.hadoop.mapreduce.JobContext;
 import org.apache.hadoop.mapreduce.OutputCommitter;
@@ -60,6 +61,7 @@ import java.io.IOException;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * Hadoop compatible OutputFormat for writing to Hive.
@@ -71,6 +73,9 @@ public class HiveApiOutputFormat
 
   /** Default profile if none given */
   public static final String DEFAULT_PROFILE_ID = "output-profile";
+
+  /** Counter for the files created, so we would be able to get unique name for new files */
+  private static final AtomicInteger CREATED_FILES_COUNTER = new AtomicInteger(0);
 
   /** Which profile to lookup */
   private String myProfileId = DEFAULT_PROFILE_ID;
@@ -333,7 +338,13 @@ public class HiveApiOutputFormat
 
     StructObjectInspector soi = Inspectors.createFor(oti.getColumnInfo());
 
-    return new RecordWriterImpl(baseWriter, serializer, soi);
+    if (!outputConf.shouldResetSlowWrites()) {
+      return new RecordWriterImpl(baseWriter, serializer, soi);
+    } else {
+      BaseWriterCreator bwc = new BaseWriterCreator(taskAttemptContext, baseOutputFormat);
+      long writeTimeout = outputConf.getWriteResetTimeout();
+      return new ResettableRecordWriterImpl(baseWriter, serializer, soi, bwc, writeTimeout);
+    }
   }
 
   /**
@@ -349,7 +360,11 @@ public class HiveApiOutputFormat
     org.apache.hadoop.mapred.OutputFormat baseOutputFormat) throws IOException {
     // CHECKSTYLE: resume LineLengthCheck
     JobConf jobConf = new JobConf(taskAttemptContext.getConfiguration());
-    String name = FileOutputFormat.getUniqueName(jobConf, "part");
+    int fileId = CREATED_FILES_COUNTER.incrementAndGet();
+    String name = FileOutputFormat.getUniqueName(jobConf, "part-" + fileId);
+    if (LOG.isInfoEnabled()) {
+      LOG.info("getBaseRecordWriter: Created new with file " + name);
+    }
     Reporter reporter = new ProgressReporter(taskAttemptContext);
     return baseOutputFormat.getRecordWriter(null, jobConf, name, reporter);
   }
@@ -363,5 +378,43 @@ public class HiveApiOutputFormat
     JobConf jobConf = new JobConf(conf);
     OutputCommitter baseCommitter = jobConf.getOutputCommitter();
     return new HiveApiOutputCommitter(baseCommitter, myProfileId);
+  }
+
+  /** Class for creating new base record writers which will replace slow ones. */
+  class BaseWriterCreator {
+    /** Task attempt context */
+    private final TaskAttemptContext taskAttemptContext;
+    /** Base output format */
+    private final org.apache.hadoop.mapred.OutputFormat baseOutputFormat;
+
+    /**
+     * Constructor
+     *
+     * @param taskAttemptContext Task attempt context
+     * @param baseOutputFormat Base output format
+     */
+    BaseWriterCreator(TaskAttemptContext taskAttemptContext,
+        org.apache.hadoop.mapred.OutputFormat baseOutputFormat) {
+      this.taskAttemptContext = taskAttemptContext;
+      this.baseOutputFormat = baseOutputFormat;
+    }
+
+    /**
+     * Create new base record writer
+     *
+     * @return New base record writer
+     */
+    public RecordWriter<WritableComparable, Writable> createBaseWriter() throws IOException {
+      return getBaseRecordWriter(taskAttemptContext, baseOutputFormat);
+    }
+
+    /**
+     * Get task attempt context
+     *
+     * @return Task attempt context
+     */
+    public TaskAttemptContext getContext() {
+      return taskAttemptContext;
+    }
   }
 }
