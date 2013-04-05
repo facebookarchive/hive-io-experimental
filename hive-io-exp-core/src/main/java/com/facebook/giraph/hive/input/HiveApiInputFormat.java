@@ -250,13 +250,13 @@ public class HiveApiInputFormat
     HInputSplit split = (HInputSplit) inputSplit;
     split.setConf(jobConf);
 
+    int[] columnIds = split.getColumnIds();
+    HiveUtils.setReadColumnIds(jobConf, columnIds);
+
     // CHECKSTYLE: stop LineLength
     org.apache.hadoop.mapred.RecordReader<WritableComparable, Writable> baseRecordReader =
         split.getBaseRecordReader(jobConf, context);
     // CHECKSTYLE: resume LineLength
-
-    int[] columnIds = split.getColumnIds();
-    HiveUtils.setReadColumnIds(conf, columnIds);
 
     RecordParser<Writable> recordParser = getParser(baseRecordReader.createValue(),
         split.getTableSchema().getTableName(), split, columnIds);
