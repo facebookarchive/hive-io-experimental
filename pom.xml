@@ -32,7 +32,7 @@ under the License.
   <version>0.6-SNAPSHOT</version>
 
   <name>${project.artifactId}</name>
-  <url>https://github.com/facebook/${project.artifactId}</url>
+  <url>https://github.com/facebook/hive-io-experimental</url>
   <description>Library for reading / writing to Hive</description>
   <inceptionYear>2013</inceptionYear>
 
@@ -45,9 +45,9 @@ under the License.
   </licenses>
 
   <scm>
-    <connection>scm:git:git://github.com/facebook/${project.artifactId}.git</connection>
-    <developerConnection>scm:git:git@github.com:facebook/${project.artifactId}.git</developerConnection>
-    <url>https://github.com/facebook/${project.artifactId}</url>
+    <connection>scm:git:git://github.com/facebook/hive-io-experimental.git</connection>
+    <developerConnection>scm:git:git@github.com:facebook/hive-io-experimental.git</developerConnection>
+    <url>https://github.com/facebook/hive-io-experimental</url>
   </scm>
 
   <developers>
