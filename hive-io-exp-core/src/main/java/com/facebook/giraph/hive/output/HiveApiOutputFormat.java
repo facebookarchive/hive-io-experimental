@@ -222,6 +222,11 @@ public class HiveApiOutputFormat
     HiveOutputDescription description = outputConf.readOutputDescription();
     OutputInfo oti = outputConf.readOutputTableInfo();
 
+    if (description == null || oti == null) {
+      LOG.error("OutputConf information is null, nothing to check");
+      return;
+    }
+
     if (oti.hasPartitionInfo()) {
       if (!description.hasPartitionValues()) {
         throw new IOException("table is partitioned but user input isn't");
