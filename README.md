@@ -52,6 +52,9 @@ which is used to read each record.
 
 ### HiveTail ###
 This library comes with a hive reader, called hivetail, that can be used to stream through Hive data.
+<br/>
+It reads from a Hive table / partition and dumps rows to stdout.
+<br/>
 It is also a good starting point for implementing input with this library.
 <br/>
 The code is located [here](https://github.com/facebook/hive-io-experimental/tree/master/hive-io-exp-tailer/src/main/java/com/facebook/giraph/hive/tailer).
@@ -70,11 +73,16 @@ The Hive IO library conforms to Hadoop's
 [OutputFormat](http://hadoop.apache.org/docs/r0.23.6/api/org/apache/hadoop/mapreduce/OutputFormat.html) API.
 The class that implements this API is
 [HiveApiOutputFormat](hive-io-exp-core/src/main/java/com/facebook/giraph/hive/output/HiveApiOutputFormat.java).
+<br/>
 MapReduce creates the OutputFormat using reflection.
+<br/>
 It will call checkOutputSpecs() to verify that the output can be written.
+<br/>
 Then it will call createRecordWriter() on each map task host.
 These record writers will get passed each record to write.
+<br/>
 Finally it will call getOutputCommitter() and finalize the output.
+<br/>
 Because of its use of reflection, to make use of this library you will need to extend HiveApiOutputFormat (and potentially HiveApiRecordWriter).
 
 The best way to get started with output is to have a look at the example mapreduce
