@@ -36,10 +36,13 @@ import com.facebook.giraph.hive.record.HiveWritableRecord;
  */
 public class WritingTool extends Configured implements Tool {
   private static final Logger LOG = Logger.getLogger(WritingTool.class);
-  
+
   @Override
   public int run(String[] args) throws Exception {
     Job job = new Job(getConf(), "hive-io-writing");
+    if (job.getJar() == null) {
+      job.setJarByClass(getClass());
+    }
     job.setMapperClass(SampleMapper.class);
     job.setInputFormatClass(SampleInputFormat.class);
     job.setMapOutputKeyClass(NullWritable.class);

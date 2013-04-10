@@ -30,6 +30,7 @@ under the License.
   <packaging>jar</packaging>
 
   <properties>
+    <dep.hive.scope>provided</dep.hive.scope>
     <jar.main.class>com.facebook.giraph.hive.cmdline.Main</jar.main.class>
     <root.dir>..</root.dir>
   </properties>

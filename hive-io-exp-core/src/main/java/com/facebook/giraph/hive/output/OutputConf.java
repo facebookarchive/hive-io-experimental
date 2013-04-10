@@ -101,9 +101,12 @@ class OutputConf {
    * @return OutputInfo
    */
   public OutputInfo readOutputTableInfo() {
-    OutputInfo oti = new OutputInfo();
     String value = conf.get(getOutputTableInfoKey());
-    Writables.readFieldsFromEncodedStr(value, oti);
+    OutputInfo oti = null;
+    if (value != null) {
+      oti = new OutputInfo();
+      Writables.readFieldsFromEncodedStr(value, oti);
+    }
     return oti;
   }
 
@@ -122,9 +125,12 @@ class OutputConf {
    * @return HiveOutputDescription
    */
   public HiveOutputDescription readOutputDescription() {
-    HiveOutputDescription hod = new HiveOutputDescription();
     String value = conf.get(getOutputDescriptionKey());
-    Writables.readFieldsFromEncodedStr(value, hod);
+    HiveOutputDescription hod = null;
+    if (value != null) {
+      hod = new HiveOutputDescription();
+      Writables.readFieldsFromEncodedStr(value, hod);
+    }
     return hod;
   }
 

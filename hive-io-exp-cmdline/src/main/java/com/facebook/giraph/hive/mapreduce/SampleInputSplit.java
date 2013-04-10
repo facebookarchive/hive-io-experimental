@@ -17,12 +17,15 @@
  */
 package com.facebook.giraph.hive.mapreduce;
 
+import org.apache.hadoop.io.Writable;
 import org.apache.hadoop.mapreduce.InputSplit;
 
+import java.io.DataInput;
+import java.io.DataOutput;
 import java.io.IOException;
 
-public class SampleInputSplit extends InputSplit {
-  private final int num;
+public class SampleInputSplit extends InputSplit implements Writable {
+  private int num;
 
   public SampleInputSplit(int num) {
     this.num = num;
@@ -39,5 +42,13 @@ public class SampleInputSplit extends InputSplit {
   @Override public String[] getLocations()
       throws IOException, InterruptedException {
     return new String[0];
+  }
+
+  @Override public void readFields(DataInput in) throws IOException {
+    num = in.readInt();
+  }
+
+  @Override public void write(DataOutput out) throws IOException {
+    out.writeInt(num);
   }
 }

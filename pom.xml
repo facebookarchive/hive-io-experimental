@@ -71,6 +71,7 @@ under the License.
   </modules>
 
   <properties>
+    <dep.hive.scope>compile</dep.hive.scope>
     <dep.hive.version>0.10.0</dep.hive.version>
     <dep.jackson.version>2.1.4</dep.jackson.version>
 
@@ -472,6 +473,7 @@ under the License.
       <dependency>
         <groupId>org.apache.hive</groupId>
         <artifactId>hive-exec</artifactId>
+        <scope>${dep.hive.scope}</scope>
         <version>${dep.hive.version}</version>
         <exclusions>
           <exclusion>
@@ -487,6 +489,7 @@ under the License.
       <dependency>
         <groupId>org.apache.hive</groupId>
         <artifactId>hive-metastore</artifactId>
+        <scope>${dep.hive.scope}</scope>
         <version>${dep.hive.version}</version>
         <exclusions>
           <exclusion>

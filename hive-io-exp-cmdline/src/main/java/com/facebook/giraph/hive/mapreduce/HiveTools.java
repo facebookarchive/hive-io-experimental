@@ -17,19 +17,30 @@
  */
 package com.facebook.giraph.hive.mapreduce;
 
+import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.MapWritable;
 import org.apache.hadoop.io.Writable;
+import org.apache.log4j.Logger;
+import org.apache.thrift.TException;
 
+import com.facebook.giraph.hive.output.HiveApiOutputFormat;
+import com.facebook.giraph.hive.output.HiveOutputDescription;
 import com.facebook.giraph.hive.record.HiveRecordFactory;
 import com.facebook.giraph.hive.record.HiveWritableRecord;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 
+import static com.facebook.giraph.hive.mapreduce.SampleOutputFormat.SAMPLE_PROFILE_ID;
+
 public class HiveTools {
+  private static final Logger LOG = Logger.getLogger(HiveTools.class);
+  
   public static final int NUM_COLUMNS = 3;
 
   public static final MapWritable row1 = new MapWritable();
@@ -59,6 +70,21 @@ public class HiveTools {
   public static final List<MapWritable> mapperData2 = ImmutableList.of(row3, row4);
 
   private HiveTools() {}
+
+  public static void setupJob(Configuration conf) throws IOException {
+    HiveOutputDescription outputDesc = new HiveOutputDescription();
+    outputDesc.setDbName("default");
+    outputDesc.setTableName("hive_io_test");
+    Map<String, String> partitionValues = ImmutableMap.of("ds", "2013-04-01");
+    outputDesc.setPartitionValues(partitionValues);
+    LOG.info("Writing to " + outputDesc);
+    try {
+      HiveApiOutputFormat.initProfile(conf, outputDesc, SAMPLE_PROFILE_ID);
+    } catch (TException e) {
+      LOG.fatal("Failed to initialize profile " + outputDesc);
+      throw new IOException(e);
+    }
+  }
 
   public static HiveWritableRecord mapToHiveRecord(MapWritable value) {
     HiveWritableRecord record = HiveRecordFactory.newWritableRecord(HiveTools.NUM_COLUMNS);
