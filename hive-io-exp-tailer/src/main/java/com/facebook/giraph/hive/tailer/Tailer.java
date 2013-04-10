@@ -24,6 +24,7 @@ import org.apache.hadoop.mapreduce.InputSplit;
 import org.apache.hadoop.mapreduce.RecordReader;
 import org.apache.hadoop.mapreduce.TaskAttemptContext;
 import org.apache.hadoop.mapreduce.TaskAttemptID;
+import org.apache.log4j.Logger;
 
 import com.facebook.giraph.hive.common.HadoopNative;
 import com.facebook.giraph.hive.common.HiveMetastores;
@@ -53,7 +54,6 @@ import java.util.concurrent.FutureTask;
 import java.util.concurrent.RunnableFuture;
 
 import static com.facebook.giraph.hive.input.HiveApiInputFormat.DEFAULT_PROFILE_ID;
-import static com.facebook.giraph.hive.input.HiveApiInputFormat.LOG;
 
 public class Tailer {
   private static class Context {
@@ -76,12 +76,14 @@ public class Tailer {
     }
   }
 
+  private static final Logger LOG = Logger.getLogger(Tailer.class);
+
   public static void main(String[] args) throws Exception {
     Opts opts = new Opts();
     try {
       Args.parse(opts, args);
     } catch (IllegalArgumentException e) {
-      System.err.println(e.getMessage());
+      LOG.error(e.getMessage());
       Args.usage(opts);
       return;
     }
@@ -111,7 +113,7 @@ public class Tailer {
     inputDesc.setNumSplits(opts.requestNumSplits);
 
     HiveStats hiveStats = HiveUtils.statsOf(client, inputDesc);
-    System.err.println(hiveStats);
+    LOG.info(hiveStats);
 
     HiveConf hiveConf = new HiveConf(Tailer.class);
     HiveApiInputFormat.setProfileInputDesc(hiveConf, inputDesc, DEFAULT_PROFILE_ID);
@@ -120,7 +122,7 @@ public class Tailer {
     hapi.setMyProfileId(DEFAULT_PROFILE_ID);
 
     List<InputSplit> splits = hapi.getSplits(hiveConf, client);
-    System.err.println("Have " + splits.size() + " splits to read");
+    LOG.info("Have " + splits.size() + " splits to read");
 
     HiveTableName hiveTableName = new HiveTableName(opts.database, opts.table);
     HiveTableSchema schema = HiveTableSchemas.lookup(client, hiveTableName);
@@ -166,7 +168,7 @@ public class Tailer {
       try {
         numRows += Uninterruptibles.getUninterruptibly(futures.get(i));
       } catch (ExecutionException e) {
-        LOG.error("Could not get future " + i + " numRows");
+        LOG.error("Could not get future " + i + " numRows", e);
       }
     }
     return numRows;
@@ -180,8 +182,7 @@ public class Tailer {
       try {
         totalRows += readSplit(split, context);
       } catch (Exception e) {
-        System.err.println("Failed to read split " + split);
-        e.printStackTrace();
+        LOG.error("Failed to read split " + split, e);
       }
     }
     return totalRows;
@@ -226,7 +227,7 @@ public class Tailer {
     if (metastoreHostPort.host == null && opts.cluster != null) {
       ClusterData clustersData = new ClusterData();
       if (opts.clustersFile == null) {
-        System.err.println("ERROR: Cluster file not given");
+        LOG.error("Cluster file not given");
         Args.usage(opts);
         return null;
       }
@@ -237,7 +238,7 @@ public class Tailer {
       }
       List<HostPort> hostAndPorts = clustersData.data.get(opts.cluster);
       if (hostAndPorts == null) {
-        System.err.println("Cluster " + opts.cluster +
+        LOG.error("Cluster " + opts.cluster +
             " not found in data file " + opts.clustersFile);
         return null;
       }
