@@ -98,7 +98,8 @@ public class HadoopUtils {
    * @throws IOException I/O errors
    */
   public static void deleteOutputDir(Configuration conf) throws IOException {
-    FileSystem.get(conf).delete(getOutputPath(conf), true);
+    Path outputPath = getOutputPath(conf);
+    FileSystem.get(outputPath.toUri(), conf).delete(outputPath, true);
   }
 
   /**
