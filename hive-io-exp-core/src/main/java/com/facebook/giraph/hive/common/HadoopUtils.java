@@ -102,6 +102,24 @@ public class HadoopUtils {
   }
 
   /**
+   * Set number of map task attempts
+   * @param conf Configuration
+   * @param numAttempts number of attempts
+   */
+  public static void setMapAttempts(Configuration conf, int numAttempts) {
+    conf.setInt("mapred.map.max.attempts", numAttempts);
+  }
+
+  /**
+   * Set Hadoop Pool to use
+   * @param conf Configuration
+   * @param pool Hadoop pool to use
+   */
+  public static void setPool(Configuration conf, String pool) {
+    conf.set("mapred.fairscheduler.pool", pool);
+  }
+
+  /**
    * Check if output committer needs success marker
    * @param conf Configuration to use
    * @return true if success marker required

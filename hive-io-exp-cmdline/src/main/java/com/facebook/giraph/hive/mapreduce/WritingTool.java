@@ -17,12 +17,14 @@
  */
 package com.facebook.giraph.hive.mapreduce;
 
+import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.conf.Configured;
 import org.apache.hadoop.io.NullWritable;
 import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.util.Tool;
 import org.apache.log4j.Logger;
 
+import com.facebook.giraph.hive.common.HadoopUtils;
 import com.facebook.giraph.hive.record.HiveWritableRecord;
 
 /*
@@ -39,7 +41,12 @@ public class WritingTool extends Configured implements Tool {
 
   @Override
   public int run(String[] args) throws Exception {
-    Job job = new Job(getConf(), "hive-io-writing");
+    Configuration conf = getConf();
+    // TODO: make configurable through cmdline
+    HadoopUtils.setPool(conf, "di.nonsla");
+    HadoopUtils.setMapAttempts(conf, 1);
+
+    Job job = new Job(conf, "hive-io-writing");
     if (job.getJar() == null) {
       job.setJarByClass(getClass());
     }
