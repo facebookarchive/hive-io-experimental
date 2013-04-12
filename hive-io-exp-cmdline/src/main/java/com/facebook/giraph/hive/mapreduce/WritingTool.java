@@ -111,8 +111,9 @@ public class WritingTool extends Configured implements Tool {
   * @param name to add
   * @param values values for collection
   */
-  private static void addToStringCollection(
-          Configuration conf, String name, Collection<? extends String> values) {
+  private static void addToStringCollection(Configuration conf, String name,
+    Collection<? extends String> values)
+  {
     Collection<String> tmpfiles = conf.getStringCollection(name);
     tmpfiles.addAll(values);
     conf.setStrings(name, tmpfiles.toArray(new String[tmpfiles.size()]));
