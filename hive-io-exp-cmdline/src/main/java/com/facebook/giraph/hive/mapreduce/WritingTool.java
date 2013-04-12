@@ -26,6 +26,12 @@ import org.apache.log4j.Logger;
 
 import com.facebook.giraph.hive.common.HadoopUtils;
 import com.facebook.giraph.hive.record.HiveWritableRecord;
+import com.google.common.collect.Lists;
+
+import java.io.File;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.List;
 
 /*
   CREATE TABLE hive_io_test (
@@ -45,6 +51,7 @@ public class WritingTool extends Configured implements Tool {
     // TODO: make configurable through cmdline
     HadoopUtils.setPool(conf, "di.nonsla");
     HadoopUtils.setMapAttempts(conf, 1);
+    adjustConfigurationForHive(conf);
 
     Job job = new Job(conf, "hive-io-writing");
     if (job.getJar() == null) {
@@ -60,5 +67,54 @@ public class WritingTool extends Configured implements Tool {
 
     job.submit();
     return job.waitForCompletion(true) ? 0 : 1;
+  }
+
+  /**
+  * set hive configuration
+  */
+  private void adjustConfigurationForHive(Configuration conf) {
+    // when output partitions are used, workers register them to the
+    // metastore at cleanup stage, and on HiveConf's initialization, it
+    // looks for hive-site.xml.
+    addToStringCollection(conf, "tmpfiles",
+      conf.getClassLoader().getResource("hive-site.xml").toString());
+
+    // Or, more effectively, we can provide all the jars client needed to
+    // the workers as well
+    String[] hadoopJars = System.getenv("HADOOP_CLASSPATH").split(
+        File.pathSeparator);
+    List<String> hadoopJarURLs = Lists.newArrayList();
+    for (String jarPath : hadoopJars) {
+      File file = new File(jarPath);
+      if (file.exists() && file.isFile()) {
+        String jarURL = file.toURI().toString();
+        hadoopJarURLs.add(jarURL);
+      }
+    }
+    addToStringCollection(conf, "tmpjars", hadoopJarURLs);
+  }
+
+  /**
+  * add string to collection
+  * @param conf Configuration
+  * @param name name to add
+  * @param values values for collection
+  */
+  private static void addToStringCollection(Configuration conf, String name,
+                                            String... values) {
+    addToStringCollection(conf, name, Arrays.asList(values));
+  }
+
+  /**
+  * add string to collection
+  * @param conf Configuration
+  * @param name to add
+  * @param values values for collection
+  */
+  private static void addToStringCollection(
+          Configuration conf, String name, Collection<? extends String> values) {
+    Collection<String> tmpfiles = conf.getStringCollection(name);
+    tmpfiles.addAll(values);
+    conf.setStrings(name, tmpfiles.toArray(new String[tmpfiles.size()]));
   }
 }
