@@ -46,12 +46,13 @@ public class WritingTool extends Configured implements Tool {
   private static final Logger LOG = Logger.getLogger(WritingTool.class);
 
   @Override
-  public int run(String[] args) throws Exception {
+  public int run(String[] args) throws Exception
+  {
     Configuration conf = getConf();
-    // TODO: make configurable through cmdline
     HadoopUtils.setPool(conf, "di.nonsla");
     HadoopUtils.setMapAttempts(conf, 1);
     adjustConfigurationForHive(conf);
+    HiveTools.setupJob(conf);
 
     Job job = new Job(conf, "hive-io-writing");
     if (job.getJar() == null) {
