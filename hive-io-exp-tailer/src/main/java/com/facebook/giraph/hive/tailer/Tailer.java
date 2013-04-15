@@ -46,36 +46,10 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
-import java.util.Queue;
-import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Future;
-import java.util.concurrent.FutureTask;
-import java.util.concurrent.RunnableFuture;
 
 import static com.facebook.giraph.hive.input.HiveApiInputFormat.DEFAULT_PROFILE_ID;
 
 public class Tailer {
-  private static class Context {
-    public Queue<InputSplit> splitsQueue;
-    public HiveApiInputFormat hiveApiInputFormat;
-    public HiveConf hiveConf;
-    public HiveTableSchema schema;
-    public HiveStats hiveStats;
-    public Opts opts;
-    public Stats stats;
-
-    private Context(HiveApiInputFormat hiveApiInputFormat, HiveConf hiveConf,
-        HiveTableSchema schema, HiveStats hiveStats, Opts opts, Stats stats) {
-      this.hiveApiInputFormat = hiveApiInputFormat;
-      this.hiveConf = hiveConf;
-      this.schema = schema;
-      this.hiveStats = hiveStats;
-      this.opts = opts;
-      this.stats = stats;
-    }
-  }
-
   private static final Logger LOG = Logger.getLogger(Tailer.class);
 
   public static void main(String[] args) throws Exception {
@@ -133,89 +107,86 @@ public class Tailer {
 
     if (opts.threads == 1) {
       context.splitsQueue = Queues.newArrayDeque(splits);
-      stats.numRows = readSplits(context);
+      readSplits(context);
     } else {
       context.splitsQueue = Queues.newConcurrentLinkedQueue(splits);
-      stats.numRows = multiThreaded(context, opts.threads);
+      multiThreaded(context, opts.threads);
     }
 
-    stats.timeNanos = System.nanoTime() - startNanos;
-    stats.printEnd(hiveStats);
+    long timeNanos = System.nanoTime() - startNanos;
+    stats.printEnd(hiveStats, timeNanos);
   }
 
-  private static long multiThreaded(final Context context, int numThreads)
+  private static void multiThreaded(final Context context, int numThreads)
   {
-    List<Future<Long>> futures = Lists.newArrayList();
     List<Thread> threads = Lists.newArrayList();
     for (int i = 0; i < numThreads; ++i) {
-      RunnableFuture<Long> future = new FutureTask(new Callable<Long>() {
-        @Override public Long call() throws Exception {
-          return readSplits(context);
+      Thread thread = new Thread(new Runnable() {
+        @Override public void run() {
+          readSplits(context);
         }
       });
-
-      Thread thread = new Thread(future);
       thread.setName("readSplit-" + i);
       thread.start();
 
-      futures.add(future);
       threads.add(thread);
     }
 
-    long numRows = 0;
     for (int i = 0; i < threads.size(); ++i) {
       Uninterruptibles.joinUninterruptibly(threads.get(i));
-      try {
-        numRows += Uninterruptibles.getUninterruptibly(futures.get(i));
-      } catch (ExecutionException e) {
-        LOG.error("Could not get future " + i + " numRows", e);
-      }
     }
-    return numRows;
   }
 
-  private static long readSplits(Context context)
+  private static void readSplits(Context context)
   {
-    long totalRows = 0;
-    while (!context.splitsQueue.isEmpty()) {
+    while (context.hasMoreSplitsToRead()) {
       InputSplit split = context.splitsQueue.poll();
       try {
-        totalRows += readSplit(split, context);
+        readSplit(split, context);
       } catch (Exception e) {
         LOG.error("Failed to read split " + split, e);
       }
     }
-    return totalRows;
   }
 
-  private static long readSplit(InputSplit split, Context context)
+  private static void readSplit(InputSplit split, Context context)
       throws IOException, InterruptedException
   {
-    long numRows = 0;
     TaskAttemptID taskId = new TaskAttemptID();
     TaskAttemptContext taskContext = new TaskAttemptContext(context.hiveConf, taskId);
     RecordReader<WritableComparable, HiveReadableRecord> recordReader;
     recordReader = context.hiveApiInputFormat.createRecordReader(split, taskContext);
     recordReader.initialize(split, taskContext);
     String[] values = new String[context.schema.numColumns()];
-    while (recordReader.nextKeyValue()) {
+
+    int rowsParsed = 0;
+    while (recordReader.nextKeyValue() && !context.limitReached()) {
       HiveReadableRecord record = recordReader.getCurrentValue();
-      printRecord(record, context.schema.numColumns(), context.opts, values);
-      ++numRows;
-      if (numRows % context.opts.metricsUpdatePeriodRows == 0) {
+      printRecord(record, context.schema.numColumns(), context, values);
+      ++rowsParsed;
+      if (context.rowsParsed.incrementAndGet() > context.opts.limit) {
+        break;
+      }
+      if (rowsParsed % context.opts.metricsUpdatePeriodRows == 0) {
         context.stats.addRows(context.hiveStats, context.opts.metricsUpdatePeriodRows);
+        rowsParsed = 0;
       }
     }
-    return numRows;
+    context.stats.addRows(context.hiveStats, rowsParsed);
   }
 
   private static void printRecord(HiveReadableRecord record, int numColumns,
-      Opts opts, String[] values)
+      Context context, String[] values)
   {
+    StringBuilder sb = context.threadContext.get().stringBuilder;
+    sb.setLength(0);
     for (int index = 0; index < numColumns; ++index) {
-      values[index] = String.valueOf(record.get(index));
+      if (index > 0) {
+        sb.append(context.opts.separator);
+      }
+      sb.append(String.valueOf(record.get(index)));
     }
-    System.out.println(opts.joiner.join(values));
+    System.out.println(sb.toString());
   }
 
   private static HostPort getHostPort(Opts opts) throws IOException {
@@ -225,17 +196,14 @@ public class Tailer {
       metastoreHostPort.host = opts.metastoreHost;
     }
     if (metastoreHostPort.host == null && opts.cluster != null) {
-      ClusterData clustersData = new ClusterData();
       if (opts.clustersFile == null) {
         LOG.error("Cluster file not given");
         Args.usage(opts);
         return null;
       }
-      if (opts.clustersFile != null) {
-        ObjectMapper objectMapper = new ObjectMapper();
-        File file = new File(opts.clustersFile);
-        clustersData = objectMapper.readValue(file, ClusterData.class);
-      }
+      ObjectMapper objectMapper = new ObjectMapper();
+      File file = new File(opts.clustersFile);
+      ClusterData clustersData = objectMapper.readValue(file, ClusterData.class);
       List<HostPort> hostAndPorts = clustersData.data.get(opts.cluster);
       if (hostAndPorts == null) {
         LOG.error("Cluster " + opts.cluster +

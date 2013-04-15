@@ -17,7 +17,6 @@
  */
 package com.facebook.giraph.hive.tailer;
 
-import com.google.common.base.Joiner;
 import com.sampullara.cli.Argument;
 import com.yammer.metrics.Metrics;
 import com.yammer.metrics.core.MetricPredicate;
@@ -27,7 +26,6 @@ import java.util.concurrent.TimeUnit;
 
 public class Opts {
   public static final int METASTORE_PORT = 9083;
-  public static final int METRICS_UPDATE_ROWS = 10000;
 
   @Argument(alias = "h") public boolean help = false;
 
@@ -41,23 +39,22 @@ public class Opts {
   @Argument(required = true) public String table;
   @Argument(required = true) public String partitionFilter;
 
+  @Argument public Integer limit = Integer.MAX_VALUE;
+
   @Argument public Integer threads = 1;
   @Argument public String separator = "\t";
 
   @Argument public Integer requestNumSplits = 0;
   @Argument public Integer requestSplitsPerThread = 3;
 
-  @Argument public Integer metricsUpdatePeriodRows = METRICS_UPDATE_ROWS;
+  @Argument public Integer metricsUpdatePeriodRows = 1000;
   @Argument public Integer metricsPrintPeriodSecs = 0;
-
-  public Joiner joiner;
 
   public static ConsoleReporter metricsReporter() {
     return new ConsoleReporter(Metrics.defaultRegistry(), System.err, MetricPredicate.ALL);
   }
 
   public void process() {
-    joiner = Joiner.on(separator);
     if (metricsPrintPeriodSecs > 0) {
       metricsReporter().start(metricsPrintPeriodSecs, TimeUnit.SECONDS);
     }
