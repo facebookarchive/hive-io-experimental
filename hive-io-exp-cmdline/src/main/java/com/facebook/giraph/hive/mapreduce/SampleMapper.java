@@ -30,11 +30,6 @@ public class SampleMapper extends Mapper<NullWritable, MapWritable,
     NullWritable, HiveWritableRecord> {
   private static final Logger LOG = Logger.getLogger(SampleMapper.class);
 
-  @Override protected void setup(Context context)
-      throws IOException, InterruptedException {
-    HiveTools.setupJob(context.getConfiguration());
-  }
-
   @Override protected void map(NullWritable key, MapWritable value,
       Context context) throws IOException, InterruptedException {
     context.write(key, HiveTools.mapToHiveRecord(value));
