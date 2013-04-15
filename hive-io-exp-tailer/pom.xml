@@ -26,6 +26,7 @@ under the License.
     <version>0.7-SNAPSHOT</version>
   </parent>
 
+  <name>HiveTailer</name>
   <artifactId>hive-io-exp-tailer</artifactId>
   <packaging>jar</packaging>
 

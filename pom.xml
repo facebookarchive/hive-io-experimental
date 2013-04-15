@@ -31,8 +31,8 @@ under the License.
   <packaging>pom</packaging>
   <version>0.7-SNAPSHOT</version>
 
-  <name>${project.artifactId}</name>
-  <url>https://github.com/facebook/hive-io-experimental</url>
+  <name>Hive I/O</name>
+  <url>https://github.com/facebook/${repo.name}</url>
   <description>Library for reading / writing to Hive</description>
   <inceptionYear>2013</inceptionYear>
 
@@ -45,11 +45,33 @@ under the License.
   </licenses>
 
   <scm>
-    <connection>scm:git:git://github.com/facebook/hive-io-experimental.git</connection>
-    <developerConnection>scm:git:git@github.com:facebook/hive-io-experimental.git</developerConnection>
-    <url>https://github.com/facebook/hive-io-experimental</url>
+    <connection>scm:git:git@github.com/facebook/${repo.name}.git</connection>
+    <developerConnection>scm:git:git@github.com:facebook/${repo.name}.git</developerConnection>
+    <url>https://github.com/facebook/${repo.name}</url>
     <tag>HEAD</tag>
   </scm>
+
+  <!-- ======================================================================== -->
+  <!-- =                                                                      = -->
+  <!-- = Site deployment. These values are correct, to be able to deploy a    = -->
+  <!-- = site, you must add                                                   = -->
+  <!-- =                                                                      = -->
+  <!-- = <server>                                                             = -->
+  <!-- =   <id>github-project-site</id>                                       = -->
+  <!-- =   <username>git</username>                                           = -->
+  <!-- = </server>                                                            = -->
+  <!-- =                                                                      = -->
+  <!-- = to the <servers> section in your local ~/.m2/settings.xml file       = -->
+  <!-- =                                                                      = -->
+  <!-- = Otherwise, site deploy will fail!                                    = -->
+  <!-- =                                                                      = -->
+  <!-- ======================================================================== -->
+  <distributionManagement>
+    <site>
+      <id>github-project-site</id>
+      <url>gitsite:git@github.com/facebook/${repo.name}.git</url>
+    </site>
+  </distributionManagement>
 
   <developers>
     <developer>
@@ -82,11 +104,31 @@ under the License.
     <dep.plugin.checkstyle.version>2.10</dep.plugin.checkstyle.version>
     <dep.plugin.javadoc.version>2.9</dep.plugin.javadoc.version>
     <dep.plugin.findbugs.version>2.5.1</dep.plugin.findbugs.version>
+    <dep.plugin.scm.version>1.8.1</dep.plugin.scm.version>
 
+    <repo.name>hive-io-experimental</repo.name>
     <root.dir>.</root.dir>
   </properties>
 
   <build>
+    <extensions>
+      <extension>
+        <groupId>org.apache.maven.scm</groupId>
+        <artifactId>maven-scm-provider-gitexe</artifactId>
+        <version>${dep.plugin.scm.version}</version>
+      </extension>
+      <extension>
+        <groupId>org.apache.maven.scm</groupId>
+        <artifactId>maven-scm-manager-plexus</artifactId>
+        <version>${dep.plugin.scm.version}</version>
+      </extension>
+      <extension>
+        <groupId>com.github.stephenc.wagon</groupId>
+        <artifactId>wagon-gitsite</artifactId>
+        <version>0.4.1</version>
+      </extension>
+    </extensions>
+
     <pluginManagement>
       <plugins>
         <plugin>
