@@ -32,6 +32,8 @@ under the License.
   <properties>
     <jar.main.class>com.facebook.giraph.hive.Empty</jar.main.class>
     <root.dir>..</root.dir>
+    <dep.hadoop.scope>compile</dep.hadoop.scope>
+    <dep.hive.scope>compile</dep.hive.scope>
   </properties>
 
   <build>
