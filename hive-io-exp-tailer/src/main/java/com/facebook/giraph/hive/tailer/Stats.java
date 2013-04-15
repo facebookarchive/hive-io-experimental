@@ -30,8 +30,6 @@ import static java.util.concurrent.TimeUnit.SECONDS;
 
 @ThreadSafe
 class Stats {
-  public long timeNanos;
-  public long numRows;
   public Meter rowMeter;
   public Meter rawMBMeter;
   public Meter totalMBMeter;
@@ -49,19 +47,24 @@ class Stats {
     totalMBMeter.mark((long) (rowsFraction * hiveStats.getTotalSizeInMB()));
   }
 
-  public void printEnd(HiveStats hiveStats) {
+  public void printEnd(HiveStats hiveStats, long timeNanos) {
     Opts.metricsReporter().run();
-    final double nsPerRow = timeNanos / (double) numRows;
+
+    final double nsPerRow = Math.floor(timeNanos / (double) rowMeter.count());
     final double msecPerRow = NANOSECONDS.toMillis((long) nsPerRow);
     final double rawMBPerNs = hiveStats.getRawSizeInMB() / timeNanos;
     final double rawMBPerSec = SECONDS.toNanos((long) rawMBPerNs);
     final double totalMBPerNs = hiveStats.getTotalSizeInMB() / timeNanos;
     final double totalMBPerSec = BYTE.toMB(SECONDS.toNanos((long) totalMBPerNs));
+
     err.println("Finished.");
-    err.println("  " + numRows + " rows");
+    err.println("  " + rowMeter.count() + " rows");
     err.println("  " + NANOSECONDS.toSeconds(timeNanos) + " seconds");
+    err.println("  " + nsPerRow + " ns / row");
     err.println("  " + msecPerRow + " msec / row");
+    err.println("  " + rawMBPerNs + " raw MB / ns");
     err.println("  " + rawMBPerSec + " raw MB / second");
+    err.println("  " + totalMBPerNs + " total MB / ns");
     err.println("  " + totalMBPerSec + " total MB / second");
   }
 }

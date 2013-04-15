@@ -30,10 +30,12 @@ under the License.
   <packaging>jar</packaging>
 
   <properties>
-    <jar.main.class>com.facebook.giraph.hive.tailer.Tailer</jar.main.class>
     <root.dir>..</root.dir>
+
     <dep.hadoop.scope>compile</dep.hadoop.scope>
     <dep.hive.scope>compile</dep.hive.scope>
+
+    <jar.main.class>com.facebook.giraph.hive.tailer.Tailer</jar.main.class>
   </properties>
 
   <build>
