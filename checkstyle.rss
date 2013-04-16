@@ -2,14 +2,14 @@
 
 <rss version="0.91">
   <channel>
-    <title>hive-io-experimental - Checkstyle report</title>
+    <title>Hive I/O - Checkstyle report</title>
     <link>https://github.com/facebook/hive-io-experimental</link>
-    <description>hive-io-experimental - Checkstyle report</description>
+    <description>Hive I/O - Checkstyle report</description>
     <language>en-us</language>
     <copyright>&#169;2013</copyright>
     <item>
-      <title>File: 88,
-             Errors: 2042,
+      <title>File: 87,
+             Errors: 2038,
              Warnings: 0,
              Infos: 0
       </title>
@@ -295,20 +295,6 @@
               </tr>
                           <tr>
                 <td>
-                  <a href="https://github.com/facebook/hive-io-experimental/checkstyle.html#com.facebook.giraph.hive.common.Inspectors.java">com/facebook/giraph/hive/common/Inspectors.java</a>
-                </td>
-                <td>
-                  0
-                </td>
-                <td>
-                  0
-                </td>
-                <td>
-                  6
-                </td>
-              </tr>
-                          <tr>
-                <td>
                   <a href="https://github.com/facebook/hive-io-experimental/checkstyle.html#com.facebook.giraph.hive.conf.IntConfOption.java">com/facebook/giraph/hive/conf/IntConfOption.java</a>
                 </td>
                 <td>
@@ -319,6 +305,20 @@
                 </td>
                 <td>
                   25
+                </td>
+              </tr>
+                          <tr>
+                <td>
+                  <a href="https://github.com/facebook/hive-io-experimental/checkstyle.html#com.facebook.giraph.hive.common.Inspectors.java">com/facebook/giraph/hive/common/Inspectors.java</a>
+                </td>
+                <td>
+                  0
+                </td>
+                <td>
+                  0
+                </td>
+                <td>
+                  6
                 </td>
               </tr>
                           <tr>
@@ -599,20 +599,6 @@
                 </td>
                 <td>
                   37
-                </td>
-              </tr>
-                          <tr>
-                <td>
-                  <a href="https://github.com/facebook/hive-io-experimental/checkstyle.html#com.facebook.giraph.hive.Empty.java">com/facebook/giraph/hive/Empty.java</a>
-                </td>
-                <td>
-                  0
-                </td>
-                <td>
-                  0
-                </td>
-                <td>
-                  4
                 </td>
               </tr>
                           <tr>
@@ -1177,20 +1163,6 @@
               </tr>
                           <tr>
                 <td>
-                  <a href="https://github.com/facebook/hive-io-experimental/checkstyle.html#com.facebook.giraph.hive.output.HiveApiOutputCommitter.java">com/facebook/giraph/hive/output/HiveApiOutputCommitter.java</a>
-                </td>
-                <td>
-                  0
-                </td>
-                <td>
-                  0
-                </td>
-                <td>
-                  26
-                </td>
-              </tr>
-                          <tr>
-                <td>
                   <a href="https://github.com/facebook/hive-io-experimental/checkstyle.html#com.facebook.giraph.hive.common.SerDes.java">com/facebook/giraph/hive/common/SerDes.java</a>
                 </td>
                 <td>
@@ -1201,6 +1173,20 @@
                 </td>
                 <td>
                   20
+                </td>
+              </tr>
+                          <tr>
+                <td>
+                  <a href="https://github.com/facebook/hive-io-experimental/checkstyle.html#com.facebook.giraph.hive.output.HiveApiOutputCommitter.java">com/facebook/giraph/hive/output/HiveApiOutputCommitter.java</a>
+                </td>
+                <td>
+                  0
+                </td>
+                <td>
+                  0
+                </td>
+                <td>
+                  26
                 </td>
               </tr>
                           <tr>
