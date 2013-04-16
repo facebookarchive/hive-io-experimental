@@ -13,8 +13,9 @@ with Hive as demand grows.
 # Building #
 
 This project uses [Maven](http://maven.apache.org/) for its build.<br/>
-There is a free [Maven Guide](http://www.sonatype.com/books/mvnref-book/reference/) available.<br/>
+To build the code yourself clone this repository and run `mvn clean install`
 
+# Using #
 To use this library in your project with maven add this to you pom.xml:
 
     <dependency>
@@ -26,6 +27,13 @@ To use this library in your project with maven add this to you pom.xml:
 You can also browse the
 [released builds](http://search.maven.org/#search%7Cga%7C1%7Ccom.facebook.giraph.hive)
 and download the jars directly.
+
+# Reference #
+
+The project's [maven site](http://facebook.github.io/hive-io-experimental/) is generated with each release.
+<br/>
+API information is available here: 
+[JavaDocs](http://facebook.github.io/hive-io-experimental/apidocs/index.html).
 
 # Design #
 The input and output classes have a notion of profiles.
@@ -89,7 +97,7 @@ The best way to get started with output is to have a look at the example mapred
 [code](hive-io-exp-cmdline/src/main/java/com/facebook/giraph/hive/).
 This is a simple example of using the library that should be used as a starting point for projects. 
 
-# References #
+# Real World Examples #
 [Giraph](http://giraph.apache.org/) uses Hive IO to read and write graphs from Hive.
 It is another good example that can be used for starter code.
 <br/>
