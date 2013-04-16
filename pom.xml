@@ -29,7 +29,7 @@ under the License.
   <groupId>com.facebook.giraph.hive</groupId>
   <artifactId>hive-io-exp-parent</artifactId>
   <packaging>pom</packaging>
-  <version>0.7-SNAPSHOT</version>
+  <version>0.7</version>
 
   <name>Hive I/O</name>
   <url>https://github.com/facebook/${repo.name}</url>
@@ -48,7 +48,7 @@ under the License.
     <connection>scm:git:git@github.com/facebook/${repo.name}.git</connection>
     <developerConnection>scm:git:git@github.com:facebook/${repo.name}.git</developerConnection>
     <url>https://github.com/facebook/${repo.name}</url>
-    <tag>HEAD</tag>
+    <tag>hive-io-exp-parent-0.7</tag>
   </scm>
 
   <!-- ======================================================================== -->

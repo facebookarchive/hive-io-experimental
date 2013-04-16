@@ -23,7 +23,7 @@ under the License.
   <parent>
     <groupId>com.facebook.giraph.hive</groupId>
     <artifactId>hive-io-exp-parent</artifactId>
-    <version>0.7-SNAPSHOT</version>
+    <version>0.7</version>
   </parent>
 
   <name>Cmdline Hive Tools</name>
