@@ -1,0 +1,149 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+
+<rss version="0.91">
+  <channel>
+    <title>Cmdline Hive Tools - Checkstyle report</title>
+    <link>https://github.com/facebook/hive-io-experimental/hive-io-exp-cmdline</link>
+    <description>Cmdline Hive Tools - Checkstyle report</description>
+    <language>en-us</language>
+    <copyright>&#169;2013</copyright>
+    <item>
+      <title>File: 8,
+             Errors: 117,
+             Warnings: 0,
+             Infos: 0
+      </title>
+            <link>https://github.com/facebook/hive-io-experimental/hive-io-exp-cmdline/checkstyle.html</link>
+      <description>
+        <p>Click <a href="https://github.com/facebook/hive-io-experimental/hive-io-exp-cmdline/checkstyle.html">here</a> for the full Checkstyle report.</p>
+
+        <table summary="Files" boder="1">
+          <thead>
+            <tr>
+              <th>Files</th>
+              <th style="width:30px;"><abbr title="Info">I</abbr></th>
+              <th style="width:30px;"><abbr title="Warning">W</abbr></th>
+              <th style="width:30px;"><abbr title="Error">E</abbr></th>
+            </tr>
+          </thead>
+          <tbody>
+                          <tr>
+                <td>
+                  <a href="https://github.com/facebook/hive-io-experimental/hive-io-exp-cmdline/checkstyle.html#com.facebook.giraph.hive.mapreduce.SampleOutputFormat.java">com/facebook/giraph/hive/mapreduce/SampleOutputFormat.java</a>
+                </td>
+                <td>
+                  0
+                </td>
+                <td>
+                  0
+                </td>
+                <td>
+                  3
+                </td>
+              </tr>
+                          <tr>
+                <td>
+                  <a href="https://github.com/facebook/hive-io-experimental/hive-io-exp-cmdline/checkstyle.html#com.facebook.giraph.hive.mapreduce.WritingTool.java">com/facebook/giraph/hive/mapreduce/WritingTool.java</a>
+                </td>
+                <td>
+                  0
+                </td>
+                <td>
+                  0
+                </td>
+                <td>
+                  27
+                </td>
+              </tr>
+                          <tr>
+                <td>
+                  <a href="https://github.com/facebook/hive-io-experimental/hive-io-exp-cmdline/checkstyle.html#com.facebook.giraph.hive.mapreduce.SplitReader.java">com/facebook/giraph/hive/mapreduce/SplitReader.java</a>
+                </td>
+                <td>
+                  0
+                </td>
+                <td>
+                  0
+                </td>
+                <td>
+                  15
+                </td>
+              </tr>
+                          <tr>
+                <td>
+                  <a href="https://github.com/facebook/hive-io-experimental/hive-io-exp-cmdline/checkstyle.html#com.facebook.giraph.hive.mapreduce.SampleInputFormat.java">com/facebook/giraph/hive/mapreduce/SampleInputFormat.java</a>
+                </td>
+                <td>
+                  0
+                </td>
+                <td>
+                  0
+                </td>
+                <td>
+                  6
+                </td>
+              </tr>
+                          <tr>
+                <td>
+                  <a href="https://github.com/facebook/hive-io-experimental/hive-io-exp-cmdline/checkstyle.html#com.facebook.giraph.hive.mapreduce.SampleMapper.java">com/facebook/giraph/hive/mapreduce/SampleMapper.java</a>
+                </td>
+                <td>
+                  0
+                </td>
+                <td>
+                  0
+                </td>
+                <td>
+                  6
+                </td>
+              </tr>
+                          <tr>
+                <td>
+                  <a href="https://github.com/facebook/hive-io-experimental/hive-io-exp-cmdline/checkstyle.html#com.facebook.giraph.hive.mapreduce.SampleInputSplit.java">com/facebook/giraph/hive/mapreduce/SampleInputSplit.java</a>
+                </td>
+                <td>
+                  0
+                </td>
+                <td>
+                  0
+                </td>
+                <td>
+                  14
+                </td>
+              </tr>
+                          <tr>
+                <td>
+                  <a href="https://github.com/facebook/hive-io-experimental/hive-io-exp-cmdline/checkstyle.html#com.facebook.giraph.hive.mapreduce.HiveTools.java">com/facebook/giraph/hive/mapreduce/HiveTools.java</a>
+                </td>
+                <td>
+                  0
+                </td>
+                <td>
+                  0
+                </td>
+                <td>
+                  41
+                </td>
+              </tr>
+                          <tr>
+                <td>
+                  <a href="https://github.com/facebook/hive-io-experimental/hive-io-exp-cmdline/checkstyle.html#com.facebook.giraph.hive.cmdline.Main.java">com/facebook/giraph/hive/cmdline/Main.java</a>
+                </td>
+                <td>
+                  0
+                </td>
+                <td>
+                  0
+                </td>
+                <td>
+                  5
+                </td>
+              </tr>
+                      </tbody>
+        </table>
+        
+      </description>
+    </item>
+  </channel>
+</rss>
+
