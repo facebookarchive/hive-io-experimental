@@ -1,0 +1,11 @@
+com.barney4j.utils.unit
+com.facebook.giraph.hive
+com.facebook.giraph.hive.common
+com.facebook.giraph.hive.conf
+com.facebook.giraph.hive.input
+com.facebook.giraph.hive.input.parser
+com.facebook.giraph.hive.input.parser.array
+com.facebook.giraph.hive.input.parser.hive
+com.facebook.giraph.hive.output
+com.facebook.giraph.hive.record
+com.facebook.giraph.hive.schema
