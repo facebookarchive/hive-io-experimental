@@ -92,8 +92,8 @@ class HiveApiOutputCommitter extends OutputCommitter {
     if (!HadoopUtils.needSuccessMarker(conf)) {
       return;
     }
-    Path outputPath = new Path(HadoopUtils.getOutputDir(conf));
-    FileSystem fs = FileSystem.get(conf);
+    Path outputPath = HadoopUtils.getOutputPath(conf);
+    FileSystem fs = FileSystem.get(outputPath.toUri(), conf);
     if (fs.exists(outputPath)) {
       Path successPath = new Path(outputPath, "_SUCCESS");
       if (!fs.exists(successPath)) {
@@ -163,9 +163,9 @@ class HiveApiOutputCommitter extends OutputCommitter {
   private void noPartitionsCopyData(Configuration conf, OutputInfo oti)
     throws IOException {
     Preconditions.checkArgument(!oti.hasPartitionInfo());
-    FileSystem fs = FileSystem.get(conf);
     Path tablePath = new Path(oti.getTableRoot());
     Path writePath = new Path(oti.getPartitionPath());
+    FileSystem fs = FileSystem.get(tablePath.toUri(), conf);
     FileSystems.move(fs, writePath, writePath, tablePath);
     fs.delete(writePath, true);
   }
