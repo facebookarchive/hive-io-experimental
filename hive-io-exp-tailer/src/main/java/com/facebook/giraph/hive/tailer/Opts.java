@@ -39,7 +39,7 @@ public class Opts {
   @Argument(required = true) public String table;
   @Argument(required = true) public String partitionFilter;
 
-  @Argument public Integer limit = Integer.MAX_VALUE;
+  @Argument public Long limit = Long.MAX_VALUE;
 
   @Argument public Integer threads = 1;
   @Argument public String separator = "\t";

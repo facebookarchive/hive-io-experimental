@@ -168,7 +168,7 @@ class ArrayRecord implements HiveReadableRecord {
   @Override
   public String toString() {
     Objects.ToStringHelper tsh = Objects.toStringHelper(this);
-    for (int i = 0; i < booleans.length; ++i) {
+    for (int i = 0; i < getSize(); ++i) {
       tsh.add("row[" + i + "]", get(i));
     }
     return tsh.toString();

@@ -23,6 +23,8 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.Writable;
+import org.apache.hadoop.mapred.JobConf;
+import org.apache.hadoop.mapred.JobConfigurable;
 import org.apache.hadoop.mapreduce.TaskAttemptContext;
 import org.apache.hadoop.mapreduce.lib.output.FileOutputCommitter;
 import org.apache.log4j.Logger;
@@ -50,6 +52,17 @@ public class HadoopUtils {
   public static void setConfIfPossible(Object object, Configuration conf) {
     if (object instanceof Configurable) {
       ((Configurable) object).setConf(conf);
+    }
+  }
+
+  /**
+   * Set JobConf if object is JobConfigurable
+   * @param object Object to check
+   * @param conf JobConf to set
+   */
+  public static void setConfIfPossible(Object object, JobConf jobConf) {
+    if (object instanceof JobConfigurable) {
+      ((JobConfigurable) object).configure(jobConf);
     }
   }
 

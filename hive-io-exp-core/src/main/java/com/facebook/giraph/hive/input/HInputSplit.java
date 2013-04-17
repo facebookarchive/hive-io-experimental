@@ -41,6 +41,7 @@ import com.google.common.base.Preconditions;
 import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -206,10 +207,11 @@ class HInputSplit extends InputSplit
   public String toString() {
     return Objects.toStringHelper(this)
         .add("baseInputFormat class", baseInputFormat.getClass())
-        .add("baseSplit class", baseSplit.getClass())
         .add("tableSchema", tableSchema)
         .add("inputSplitData", inputSplitData)
-        .add("columnIds", columnIds)
+        .add("columnIds", Arrays.toString(columnIds))
+        .add("baseSplitClass", baseSplit.getClass())
+        .add("baseSplit", baseSplit)
         .toString();
   }
 }
