@@ -87,8 +87,7 @@ under the License.
   <modules>
     <module>hive-io-exp-core</module>
     <module>hive-io-exp-cmdline</module>
-    <module>hive-io-exp-benchmark</module>
-    <module>hive-io-exp-tailer</module>
+    <module>hive-io-exp-mapreduce</module>
   </modules>
 
   <properties>
@@ -496,11 +495,6 @@ under the License.
         <groupId>com.fasterxml.jackson.core</groupId>
         <artifactId>jackson-databind</artifactId>
         <version>${dep.jackson.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>com.github.spullara.cli-parser</groupId>
-        <artifactId>cli-parser</artifactId>
-        <version>1.1</version>
       </dependency>
       <dependency>
         <groupId>com.google.guava</groupId>

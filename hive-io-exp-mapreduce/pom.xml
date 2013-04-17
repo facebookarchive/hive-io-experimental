@@ -26,12 +26,11 @@ under the License.
     <version>0.8-SNAPSHOT</version>
   </parent>
 
-  <name>Cmdline Hive Tools</name>
-  <artifactId>hive-io-exp-cmdline</artifactId>
+  <name>MapReduce Examples</name>
+  <artifactId>hive-io-exp-mapreduce</artifactId>
   <packaging>jar</packaging>
 
   <properties>
-    <jar.main.class>com.facebook.giraph.com.facebook.giraph.com.facebook.hiveio.cmdline.Main</jar.main.class>
     <root.dir>..</root.dir>
   </properties>
 
@@ -108,15 +107,6 @@ under the License.
     <dependency>
       <groupId>com.yammer.metrics</groupId>
       <artifactId>metrics-core</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>io.airlift</groupId>
-      <artifactId>airline</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>javax.validation</groupId>
-      <artifactId>validation-api</artifactId>
-      <version>1.0.0.GA</version>
     </dependency>
     <dependency>
       <groupId>org.apache.hive</groupId>

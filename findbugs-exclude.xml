@@ -19,19 +19,19 @@
 
 <FindBugsFilter>
   <Match>
-    <Class name="com.facebook.giraph.hive.input.parser.array.ArrayParserData"/>
+    <Class name="com.facebook.giraph.com.facebook.giraph.hive.input.parser.array.ArrayParserData"/>
     <Bug pattern="EI_EXPOSE_REP2"/>
   </Match>
   <Match>
-    <Class name="com.facebook.giraph.hive.input.parser.array.BytesParser"/>
+    <Class name="com.facebook.giraph.com.facebook.giraph.hive.input.parser.array.BytesParser"/>
     <Bug pattern="NP_BOOLEAN_RETURN_NULL"/>
   </Match>
   <Match>
-    <Class name="com.facebook.giraph.hive.input.parser.hive.DefaultRecord"/>
+    <Class name="com.facebook.giraph.com.facebook.giraph.hive.input.parser.com.facebook.giraph.hive.DefaultRecord"/>
     <Bug pattern="EI_EXPOSE_REP2"/>
   </Match>
   <Match>
-    <Class name="com.facebook.giraph.hive.input.parser.hive.DefaultParser"/>
+    <Class name="com.facebook.giraph.com.facebook.giraph.hive.input.parser.com.facebook.giraph.hive.DefaultParser"/>
     <Bug pattern="EI_EXPOSE_REP2"/>
   </Match>
 </FindBugsFilter>
