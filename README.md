@@ -1,5 +1,7 @@
 # Overview #
 
+[![Build Status](https://travis-ci.org/nitay/hive-io-experimental.png?branch=master)](https://travis-ci.org/nitay/hive-io-experimental)
+
 A Hive Input/Output Library in Java.
 
 The Hive project is built to be used through command line HQL and as such does
