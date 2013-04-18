@@ -21,8 +21,8 @@ package com.facebook.hiveio.benchmark;
 import org.apache.hadoop.io.Writable;
 import org.apache.hadoop.io.WritableComparable;
 
-import com.facebook.giraph.hive.input.HiveApiInputObserver;
-import com.facebook.giraph.hive.record.HiveReadableRecord;
+import com.facebook.hiveio.input.HiveApiInputObserver;
+import com.facebook.hiveio.record.HiveReadableRecord;
 import com.yammer.metrics.Metrics;
 import com.yammer.metrics.core.MetricName;
 import com.yammer.metrics.core.Timer;

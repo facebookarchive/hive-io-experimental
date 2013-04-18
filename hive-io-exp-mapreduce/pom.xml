@@ -21,12 +21,12 @@ under the License.
   <modelVersion>4.0.0</modelVersion>
 
   <parent>
-    <groupId>com.facebook.giraph.hive</groupId>
+    <groupId>com.facebook.hiveio</groupId>
     <artifactId>hive-io-exp-parent</artifactId>
     <version>0.8-SNAPSHOT</version>
   </parent>
 
-  <name>MapReduce Examples</name>
+  <name>HiveIO MapReduce</name>
   <artifactId>hive-io-exp-mapreduce</artifactId>
   <packaging>jar</packaging>
 
@@ -85,7 +85,7 @@ under the License.
 
   <dependencies>
     <dependency>
-      <groupId>com.facebook.giraph.hive</groupId>
+      <groupId>com.facebook.hiveio</groupId>
       <artifactId>hive-io-exp-core</artifactId>
     </dependency>
     <dependency>

@@ -26,15 +26,12 @@ import org.apache.hadoop.mapreduce.RecordReader;
 import org.apache.hadoop.mapreduce.TaskAttemptContext;
 import org.apache.hadoop.mapreduce.TaskAttemptID;
 import org.apache.log4j.Logger;
-import org.apache.thrift.transport.TTransportException;
 
-import com.facebook.giraph.hive.common.HadoopNative;
-import com.facebook.giraph.hive.common.HiveMetastores;
-import com.facebook.giraph.hive.input.HiveApiInputFormat;
-import com.facebook.giraph.hive.input.HiveInputDescription;
-import com.facebook.giraph.hive.record.HiveReadableRecord;
-import com.google.common.base.Optional;
-import com.sampullara.cli.Args;
+import com.facebook.hiveio.common.HadoopNative;
+import com.facebook.hiveio.common.HiveMetastores;
+import com.facebook.hiveio.input.HiveApiInputFormat;
+import com.facebook.hiveio.input.HiveInputDescription;
+import com.facebook.hiveio.record.HiveReadableRecord;
 import com.yammer.metrics.Metrics;
 import com.yammer.metrics.core.Timer;
 import com.yammer.metrics.core.TimerContext;
@@ -47,78 +44,32 @@ import java.util.concurrent.TimeUnit;
 /**
  * Benchmark for input reading
  */
-public class InputBenchmark {
+class InputBenchmark {
   /** Logger */
   private static final Logger LOG = Logger.getLogger(InputBenchmark.class);
 
-  /** Don't construct */
-  protected InputBenchmark() { }
+  public InputBenchmark() { }
 
-  /**
-   * Main Entry point
-   *
-   * @param args Command line arguments
-   * @throws TTransportException thrift errors
-   * @throws IOException I/O errors
-   * @throws InterruptedException thread errors
-   */
-  public static void main(String[] args) throws Exception
-  {
+  public void run(InputBenchmarkCmd args) throws Exception {
     HadoopNative.requireHadoopNative();
-
-    Optional<BenchmarkArgs> parsedArgs = handleCommandLine(args);
-    if (!parsedArgs.isPresent()) {
-      return;
-    }
 
     Timer allTime = Metrics.newTimer(InputBenchmark.class, "all-time", TimeUnit.MILLISECONDS, TimeUnit.MILLISECONDS);
     TimerContext allTimerContext = allTime.time();
-    run(parsedArgs.get());
-    allTimerContext.stop();
 
-    new ConsoleReporter(System.err).run();
-  }
-
-  /**
-   * Parse command line, create hive input
-   *
-   * @param args Command line arguments
-   * @return Parsed arguments
-   */
-  private static Optional<BenchmarkArgs> handleCommandLine(String[] args) {
-    BenchmarkArgs parsedArgs = new BenchmarkArgs();
-    try {
-      Args.parse(parsedArgs, args);
-    } catch (IllegalArgumentException e) {
-      System.err.println("ERROR: " + e);
-      Args.usage(parsedArgs);
-      return Optional.absent();
-    }
-    if (parsedArgs.isHelp()) {
-      Args.usage(parsedArgs);
-      return Optional.absent();
-    }
-
-    return Optional.of(parsedArgs);
-  }
-
-  private static void run(BenchmarkArgs parsedArgs)
-      throws TTransportException, IOException, InterruptedException {
     HiveInputDescription input = new HiveInputDescription();
-    input.setDbName(parsedArgs.getDatabase());
-    input.setTableName(parsedArgs.getTable());
-    input.setPartitionFilter(parsedArgs.getPartitionFilter());
+    input.setDbName(args.database);
+    input.setTableName(args.table);
+    input.setPartitionFilter(args.partitionFilter);
 
     HiveConf hiveConf = new HiveConf(InputBenchmark.class);
-    ThriftHiveMetastore.Iface client = HiveMetastores
-        .create(parsedArgs.getHiveHost(), parsedArgs.getHivePort());
+    ThriftHiveMetastore.Iface client = HiveMetastores.create(args.hiveHost, args.hivePort);
 
     System.err.println("Initialize profile with input data");
     HiveApiInputFormat.setProfileInputDesc(hiveConf, input, HiveApiInputFormat.DEFAULT_PROFILE_ID);
 
     HiveApiInputFormat defaultInputFormat = new HiveApiInputFormat();
-    if (parsedArgs.isTrackMetrics()) {
-      defaultInputFormat.setObserver(new MetricsObserver("default", parsedArgs.getRecordPrintPeriod()));
+    if (args.trackMetrics) {
+      defaultInputFormat.setObserver(new MetricsObserver("default", args.recordPrintPeriod));
     }
 
     List<InputSplit> splits = defaultInputFormat.getSplits(hiveConf, client);
@@ -129,7 +80,7 @@ public class InputBenchmark {
       InputSplit split = splits.get(i);
       TaskAttemptID taskID = new TaskAttemptID();
       TaskAttemptContext taskContext = new TaskAttemptContext(hiveConf, taskID);
-      if (i % parsedArgs.getSplitPrintPeriod() == 0) {
+      if (i % args.splitPrintPeriod == 0) {
         System.err.println("Handling split " + i + " of " + splits.size());
       }
       RecordReader<WritableComparable, HiveReadableRecord> reader =
@@ -139,6 +90,10 @@ public class InputBenchmark {
     }
 
     System.err.println("Parsed " + numRows + " rows");
+
+    allTimerContext.stop();
+
+    new ConsoleReporter(System.err).run();
   }
 
   /**

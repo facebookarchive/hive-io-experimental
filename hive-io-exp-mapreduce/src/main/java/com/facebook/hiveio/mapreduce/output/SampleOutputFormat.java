@@ -17,7 +17,7 @@
  */
 package com.facebook.hiveio.mapreduce.output;
 
-import com.facebook.giraph.hive.output.HiveApiOutputFormat;
+import com.facebook.hiveio.output.HiveApiOutputFormat;
 
 public class SampleOutputFormat extends HiveApiOutputFormat {
   public static final String SAMPLE_PROFILE_ID = "sample-profile";

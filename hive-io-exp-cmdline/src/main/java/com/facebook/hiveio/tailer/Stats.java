@@ -17,9 +17,11 @@
  */
 package com.facebook.hiveio.tailer;
 
-import com.facebook.giraph.hive.common.HiveStats;
+import com.facebook.hiveio.common.HiveStats;
 import com.yammer.metrics.Metrics;
 import com.yammer.metrics.core.Meter;
+import com.yammer.metrics.core.MetricPredicate;
+import com.yammer.metrics.reporting.ConsoleReporter;
 
 import javax.annotation.concurrent.ThreadSafe;
 
@@ -47,8 +49,12 @@ class Stats {
     totalMBMeter.mark((long) (rowsFraction * hiveStats.getTotalSizeInMB()));
   }
 
+  public static ConsoleReporter metricsReporter() {
+    return new ConsoleReporter(Metrics.defaultRegistry(), System.err, MetricPredicate.ALL);
+  }
+
   public void printEnd(HiveStats hiveStats, long timeNanos) {
-    Opts.metricsReporter().run();
+    metricsReporter().run();
 
     final double nsPerRow = Math.floor(timeNanos / (double) rowMeter.count());
     final double msecPerRow = NANOSECONDS.toMillis((long) nsPerRow);

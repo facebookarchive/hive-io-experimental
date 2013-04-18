@@ -17,15 +17,21 @@
  */
 package com.facebook.hiveio.cmdline;
 
+import com.facebook.hiveio.benchmark.InputBenchmarkCmd;
+import com.facebook.hiveio.tailer.TailerCmd;
 import io.airlift.command.Cli;
 import io.airlift.command.Help;
 
 public class Main {
   public static void main(String[] args) throws Exception {
-    Cli.CliBuilder<Runnable> builder = Cli.<Runnable>builder("hiveio")
+    Cli.CliBuilder<Runnable> builder = Cli.<Runnable>builder("hio")
         .withDefaultCommand(Help.class)
-        .withCommands(Help.class);
+        .withCommands(Help.class,
+            InputBenchmarkCmd.class,
+            TailerCmd.class,
+            ConfOptionsCmd.class);
     Cli<Runnable> cli = builder.build();
     cli.parse(args).run();
   }
+
 }

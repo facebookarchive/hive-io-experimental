@@ -22,7 +22,7 @@ import org.apache.hadoop.io.NullWritable;
 import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.log4j.Logger;
 
-import com.facebook.giraph.hive.record.HiveWritableRecord;
+import com.facebook.hiveio.record.HiveWritableRecord;
 
 import java.io.IOException;
 

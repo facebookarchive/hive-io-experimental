@@ -26,12 +26,12 @@ under the License.
     <version>7</version>
   </parent>
 
-  <groupId>com.facebook.giraph.hive</groupId>
+  <groupId>com.facebook.hiveio</groupId>
   <artifactId>hive-io-exp-parent</artifactId>
   <packaging>pom</packaging>
   <version>0.8-SNAPSHOT</version>
 
-  <name>Hive I/O</name>
+  <name>HiveIO Parent</name>
   <url>https://github.com/facebook/${repo.name}</url>
   <description>Library for reading / writing to Hive</description>
   <inceptionYear>2013</inceptionYear>
@@ -165,7 +165,6 @@ under the License.
               <manifestEntries>
                 <Build-Jdk>${java.version}</Build-Jdk>
                 <Build-Time>${maven.build.timestamp}</Build-Time>
-                <Giraph-Version>${giraph.version}</Giraph-Version>
                 <Git-Commit-Branch>${mvngit.branch}</Git-Commit-Branch>
                 <Git-Commit-Hash>${mvngit.commit.id}</Git-Commit-Hash>
                 <Git-Commit-Date>${mvngit.commit.committer.date}</Git-Commit-Date>
@@ -326,6 +325,11 @@ under the License.
           <version>3.2</version>
         </plugin>
         <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-surefire-plugin</artifactId>
+          <version>2.14.1</version>
+        </plugin>
+        <plugin>
           <groupId>org.apache.rat</groupId>
           <artifactId>apache-rat-plugin</artifactId>
           <version>0.8</version>
@@ -338,23 +342,23 @@ under the License.
             </execution>
           </executions>
           <configuration>
-             <excludeSubProjects>false</excludeSubProjects>
-             <numUnapprovedLicenses>0</numUnapprovedLicenses>
-             <excludes>
-                <exclude>CODE_CONVENTIONS</exclude>
-                <!-- generated content -->
-                <exclude>**/target/**</exclude>
-                <exclude>_bsp/**</exclude>
-                <exclude>.checkstyle</exclude>
-                <!-- source control and IDEs -->
-                <exclude>.reviewboardrc</exclude>
-                <exclude>.git/**</exclude>
-                <exclude>.gitignore</exclude>
-                <exclude>*.patch</exclude>
-                <exclude>.idea/**</exclude>
-                <exclude>**/*.iml</exclude>
-                <exclude>**/*.ipr</exclude>
-             </excludes>
+            <excludeSubProjects>false</excludeSubProjects>
+            <numUnapprovedLicenses>0</numUnapprovedLicenses>
+            <excludes>
+              <exclude>CODE_CONVENTIONS</exclude>
+              <!-- generated content -->
+              <exclude>**/target/**</exclude>
+              <exclude>.checkstyle</exclude>
+              <exclude>derby.log</exclude>
+              <!-- source control and IDEs -->
+              <exclude>.reviewboardrc</exclude>
+              <exclude>.git/**</exclude>
+              <exclude>.gitignore</exclude>
+              <exclude>*.patch</exclude>
+              <exclude>.idea/**</exclude>
+              <exclude>**/*.iml</exclude>
+              <exclude>**/*.ipr</exclude>
+            </excludes>
           </configuration>
         </plugin>
       </plugins>
@@ -471,7 +475,7 @@ under the License.
   <dependencyManagement>
     <dependencies>
       <dependency>
-        <groupId>com.facebook.giraph.hive</groupId>
+        <groupId>com.facebook.hiveio</groupId>
         <artifactId>hive-io-exp-core</artifactId>
         <version>${project.version}</version>
       </dependency>
@@ -507,9 +511,24 @@ under the License.
         <version>2.2.0</version>
       </dependency>
       <dependency>
+        <groupId>io.airlift</groupId>
+        <artifactId>airline</artifactId>
+        <version>0.5</version>
+      </dependency>
+      <dependency>
         <groupId>log4j</groupId>
         <artifactId>log4j</artifactId>
         <version>1.2.17</version>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.commons</groupId>
+        <artifactId>commons-io</artifactId>
+        <version>1.3.2</version>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.hive</groupId>
+        <artifactId>hive-builtins</artifactId>
+        <version>${dep.hive.version}</version>
       </dependency>
       <dependency>
         <groupId>org.apache.hive</groupId>
@@ -532,10 +551,26 @@ under the License.
         <artifactId>hive-metastore</artifactId>
         <scope>${dep.hive.scope}</scope>
         <version>${dep.hive.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.hive</groupId>
+        <artifactId>hive-service</artifactId>
+        <version>${dep.hive.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>org.testng</groupId>
+        <artifactId>testng</artifactId>
+        <version>6.8.1</version>
+        <scope>test</scope>
         <exclusions>
           <exclusion>
             <groupId>commons-logging</groupId>
             <artifactId>commons-logging-api</artifactId>
+          </exclusion>
+          <exclusion>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
           </exclusion>
         </exclusions>
       </dependency>

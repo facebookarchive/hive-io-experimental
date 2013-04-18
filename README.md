@@ -50,12 +50,12 @@ See example code mentioned below for more information.
 The Hive IO library conforms to Hadoop's
 [OutputFormat](http://hadoop.apache.org/docs/r0.23.6/api/org/apache/hadoop/mapreduce/InputFormat.html) API.
 The class that implements this API is
-[HiveApiInputFormat](hive-io-exp-core/src/main/java/com/facebook/giraph/hive/input/HiveApiInputFormat.java).
+[HiveApiInputFormat](hive-io-exp-core/src/main/java/com/facebook/hiveio/input/HiveApiInputFormat.java).
 MapReduce creates the InputFormat using reflection.
 It will call getSplits() to generate splits on the hive tables to read.
 Each split is then sent to some worker, which then calls createRecordReader(split).
 This creates a
-[RecordReaderImpl](hive-io-exp-core/src/main/java/com/facebook/giraph/hive/input/RecordReaderImpl.java)
+[RecordReaderImpl](hive-io-exp-core/src/main/java/com/facebook/hiveio/input/RecordReaderImpl.java)
 which is used to read each record.
 
 ### HiveTail ###
@@ -65,7 +65,8 @@ It reads from a Hive table / partition and dumps rows to stdout.
 <br/>
 It is also a good starting point for implementing input with this library.
 <br/>
-The code is located [here](https://github.com/facebook/hive-io-experimental/tree/master/hive-io-exp-tailer/src/main/java/com/facebook/giraph/hive/tailer).
+The code is located
+[here](hive-io-exp-cmdline/src/main/java/com/facebook/hiveio/tailer/).
 <br/>
 To use it first build the code or download the jar from
 [Maven Central](http://search.maven.org/#artifactdetails%7Ccom.facebook.giraph.hive%7Chive-io-exp-tailer%7C0.6%7Cjar).
@@ -75,12 +76,13 @@ Then on your machine run `java -jar hive-io-exp-tailer-0.6-SNAPSHOT-jar-with-dep
 Using Hive IO we were able to read from Hive at **140 MB/s**.
 For comparison, using the hive command line on the same partition reads at around 35 MB/s.
 This benchmark is an evolving piece of work and we still have performance tweaks to make.
+Code for the benchmark is located [here](hive-io-exp-cmdline/src/main/java/com/facebook/hiveio/benchmark/).
 
 # Output #
 The Hive IO library conforms to Hadoop's
 [OutputFormat](http://hadoop.apache.org/docs/r0.23.6/api/org/apache/hadoop/mapreduce/OutputFormat.html) API.
 The class that implements this API is
-[HiveApiOutputFormat](hive-io-exp-core/src/main/java/com/facebook/giraph/hive/output/HiveApiOutputFormat.java).
+[HiveApiOutputFormat](hive-io-exp-core/src/main/java/com/facebook/hiveio/output/HiveApiOutputFormat.java).
 <br/>
 MapReduce creates the OutputFormat using reflection.
 <br/>
@@ -94,7 +96,8 @@ Finally it will call getOutputCommitter() and finalize the output.
 Because of its use of reflection, to make use of this library you will need to extend HiveApiOutputFormat (and potentially HiveApiRecordWriter).
 
 The best way to get started with output is to have a look at the example mapreduce
-[code](hive-io-exp-cmdline/src/main/java/com/facebook/giraph/hive/).
+[code](hive-io-exp-mapreduce/src/main/java/com/facebook/hiveio/).
+<br/>
 This is a simple example of using the library that should be used as a starting point for projects. 
 
 # Real World Examples #

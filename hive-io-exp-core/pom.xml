@@ -21,17 +21,16 @@ under the License.
   <modelVersion>4.0.0</modelVersion>
 
   <parent>
-    <groupId>com.facebook.giraph.hive</groupId>
+    <groupId>com.facebook.hiveio</groupId>
     <artifactId>hive-io-exp-parent</artifactId>
     <version>0.8-SNAPSHOT</version>
   </parent>
 
-  <name>Hive I/O Core</name>
+  <name>HiveIO Core</name>
   <artifactId>hive-io-exp-core</artifactId>
   <packaging>jar</packaging>
 
   <properties>
-    <jar.main.class>com.facebook.giraph.com.facebook.giraph.hive.input.benchmark.InputBenchmark</jar.main.class>
     <root.dir>..</root.dir>
   </properties>
 
@@ -98,12 +97,31 @@ under the License.
       <artifactId>hadoop-core</artifactId>
     </dependency>
     <dependency>
+      <groupId>org.apache.commons</groupId>
+      <artifactId>commons-io</artifactId>
+    </dependency>
+    <dependency>
       <groupId>org.apache.hive</groupId>
       <artifactId>hive-exec</artifactId>
     </dependency>
     <dependency>
       <groupId>org.apache.hive</groupId>
       <artifactId>hive-metastore</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>org.apache.hive</groupId>
+      <artifactId>hive-builtins</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.hive</groupId>
+      <artifactId>hive-service</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.testng</groupId>
+      <artifactId>testng</artifactId>
     </dependency>
   </dependencies>
 </project>

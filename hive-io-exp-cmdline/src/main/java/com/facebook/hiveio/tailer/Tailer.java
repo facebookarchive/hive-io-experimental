@@ -26,46 +26,41 @@ import org.apache.hadoop.mapreduce.TaskAttemptContext;
 import org.apache.hadoop.mapreduce.TaskAttemptID;
 import org.apache.log4j.Logger;
 
-import com.facebook.giraph.hive.common.HadoopNative;
-import com.facebook.giraph.hive.common.HiveMetastores;
-import com.facebook.giraph.hive.common.HiveStats;
-import com.facebook.giraph.hive.common.HiveTableName;
-import com.facebook.giraph.hive.common.HiveUtils;
-import com.facebook.giraph.hive.input.HiveApiInputFormat;
-import com.facebook.giraph.hive.input.HiveInputDescription;
-import com.facebook.giraph.hive.record.HiveReadableRecord;
-import com.facebook.giraph.hive.schema.HiveTableSchema;
-import com.facebook.giraph.hive.schema.HiveTableSchemas;
+import com.facebook.hiveio.common.HadoopNative;
+import com.facebook.hiveio.common.HiveMetastores;
+import com.facebook.hiveio.common.HiveStats;
+import com.facebook.hiveio.common.HiveTableName;
+import com.facebook.hiveio.common.HiveUtils;
+import com.facebook.hiveio.input.HiveApiInputFormat;
+import com.facebook.hiveio.input.HiveInputDescription;
+import com.facebook.hiveio.record.HiveReadableRecord;
+import com.facebook.hiveio.schema.HiveTableSchema;
+import com.facebook.hiveio.schema.HiveTableSchemas;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Queues;
 import com.google.common.util.concurrent.Uninterruptibles;
-import com.sampullara.cli.Args;
+import io.airlift.command.Help;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
-import static com.facebook.giraph.hive.input.HiveApiInputFormat.DEFAULT_PROFILE_ID;
+import static com.facebook.hiveio.input.HiveApiInputFormat.DEFAULT_PROFILE_ID;
 
-public class Tailer {
+class Tailer {
   private static final Logger LOG = Logger.getLogger(Tailer.class);
 
-  public static void main(String[] args) throws Exception {
-    Opts opts = new Opts();
-    try {
-      Args.parse(opts, args);
-    } catch (IllegalArgumentException e) {
-      LOG.error(e.getMessage());
-      Args.usage(opts);
-      return;
+  public void initMetrics(int metricsPrintPeriodSecs) {
+    if (metricsPrintPeriodSecs > 0) {
+      Stats.metricsReporter().start(metricsPrintPeriodSecs, TimeUnit.SECONDS);
     }
-    if (opts.help) {
-      Args.usage(opts);
-      return;
-    }
-    opts.process();
+  }
+
+  public void run(TailerCmd opts) throws Exception {
+    initMetrics(opts.metricsPrintPeriodSecs);
 
     HadoopNative.requireHadoopNative();
 
@@ -90,7 +85,8 @@ public class Tailer {
     LOG.info(hiveStats);
 
     HiveConf hiveConf = new HiveConf(Tailer.class);
-    HiveApiInputFormat.setProfileInputDesc(hiveConf, inputDesc, DEFAULT_PROFILE_ID);
+    HiveApiInputFormat
+        .setProfileInputDesc(hiveConf, inputDesc, DEFAULT_PROFILE_ID);
 
     HiveApiInputFormat hapi = new HiveApiInputFormat();
     hapi.setMyProfileId(DEFAULT_PROFILE_ID);
@@ -189,25 +185,25 @@ public class Tailer {
     System.out.println(sb.toString());
   }
 
-  private static HostPort getHostPort(Opts opts) throws IOException {
+  private static HostPort getHostPort(TailerCmd args) throws IOException {
     HostPort metastoreHostPort = new HostPort();
-    metastoreHostPort.port = opts.metastorePort;
-    if (opts.metastoreHost != null) {
-      metastoreHostPort.host = opts.metastoreHost;
+    metastoreHostPort.port = args.metastorePort;
+    if (args.metastoreHost != null) {
+      metastoreHostPort.host = args.metastoreHost;
     }
-    if (metastoreHostPort.host == null && opts.cluster != null) {
-      if (opts.clustersFile == null) {
+    if (metastoreHostPort.host == null && args.cluster != null) {
+      if (args.clustersFile == null) {
         LOG.error("Cluster file not given");
-        Args.usage(opts);
+        new Help().run();
         return null;
       }
       ObjectMapper objectMapper = new ObjectMapper();
-      File file = new File(opts.clustersFile);
+      File file = new File(args.clustersFile);
       ClusterData clustersData = objectMapper.readValue(file, ClusterData.class);
-      List<HostPort> hostAndPorts = clustersData.data.get(opts.cluster);
+      List<HostPort> hostAndPorts = clustersData.data.get(args.cluster);
       if (hostAndPorts == null) {
-        LOG.error("Cluster " + opts.cluster +
-            " not found in data file " + opts.clustersFile);
+        LOG.error("Cluster " + args.cluster +
+            " not found in data file " + args.clustersFile);
         return null;
       }
       Collections.shuffle(hostAndPorts);

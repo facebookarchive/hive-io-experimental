@@ -25,10 +25,10 @@ import org.apache.hadoop.io.Writable;
 import org.apache.log4j.Logger;
 import org.apache.thrift.TException;
 
-import com.facebook.giraph.hive.output.HiveApiOutputFormat;
-import com.facebook.giraph.hive.output.HiveOutputDescription;
-import com.facebook.giraph.hive.record.HiveRecordFactory;
-import com.facebook.giraph.hive.record.HiveWritableRecord;
+import com.facebook.hiveio.output.HiveApiOutputFormat;
+import com.facebook.hiveio.output.HiveOutputDescription;
+import com.facebook.hiveio.record.HiveRecordFactory;
+import com.facebook.hiveio.record.HiveWritableRecord;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 

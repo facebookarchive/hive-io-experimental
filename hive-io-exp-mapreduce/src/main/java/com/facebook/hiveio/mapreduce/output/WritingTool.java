@@ -29,8 +29,8 @@ import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.util.Tool;
 import org.apache.log4j.Logger;
 
-import com.facebook.giraph.hive.common.HadoopUtils;
-import com.facebook.giraph.hive.record.HiveWritableRecord;
+import com.facebook.hiveio.common.HadoopUtils;
+import com.facebook.hiveio.record.HiveWritableRecord;
 import com.google.common.collect.Lists;
 
 import java.io.File;

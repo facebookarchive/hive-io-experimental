@@ -20,9 +20,9 @@ package com.facebook.hiveio.tailer;
 import org.apache.hadoop.hive.conf.HiveConf;
 import org.apache.hadoop.mapreduce.InputSplit;
 
-import com.facebook.giraph.hive.common.HiveStats;
-import com.facebook.giraph.hive.input.HiveApiInputFormat;
-import com.facebook.giraph.hive.schema.HiveTableSchema;
+import com.facebook.hiveio.common.HiveStats;
+import com.facebook.hiveio.input.HiveApiInputFormat;
+import com.facebook.hiveio.schema.HiveTableSchema;
 
 import javax.annotation.concurrent.ThreadSafe;
 import java.util.Queue;
@@ -36,7 +36,7 @@ class Context {
   public final HiveStats hiveStats;
   public Queue<InputSplit> splitsQueue;
 
-  public final Opts opts;
+  public final TailerCmd opts;
   public final Stats stats;
   public final AtomicLong rowsParsed;
 
@@ -47,7 +47,7 @@ class Context {
   };
 
   Context(HiveApiInputFormat hiveApiInputFormat, HiveConf hiveConf,
-      HiveTableSchema schema, HiveStats hiveStats, Opts opts, Stats stats) {
+      HiveTableSchema schema, HiveStats hiveStats, TailerCmd opts, Stats stats) {
     this.hiveApiInputFormat = hiveApiInputFormat;
     this.hiveConf = hiveConf;
     this.schema = schema;
