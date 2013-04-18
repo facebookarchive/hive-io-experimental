@@ -92,12 +92,15 @@ public class BytesParser implements RecordParser {
         }
         break;
       case STRING:
-        record.setString(column, new String(bytes, start,
-            start + length, Charsets.UTF_8));
+        record.setString(column, parseString(bytes, start, length));
         break;
       default:
         break;
     }
+  }
+
+  public static String parseString(byte[] bytes, int start, int length) {
+    return new String(bytes, start, length, Charsets.UTF_8);
   }
 
   public static Boolean parseBoolean(byte[] bytes, int start, int length) {

@@ -87,7 +87,6 @@ public class HiveApiInputFormatTest {
 
     TaskAttemptContext taskContext = new TaskAttemptContext(hiveConf, new TaskAttemptID());
     InputSplit split = splits.get(0);
-    System.out.println("nnn InputSplit: " + split);
     RecordReader<WritableComparable, HiveReadableRecord> recordReader =
         haif.createRecordReader(split, taskContext);
     recordReader.initialize(split, taskContext);
