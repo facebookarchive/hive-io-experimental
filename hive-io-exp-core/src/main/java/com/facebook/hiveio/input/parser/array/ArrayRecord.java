@@ -169,7 +169,8 @@ class ArrayRecord implements HiveReadableRecord {
   public String toString() {
     Objects.ToStringHelper tsh = Objects.toStringHelper(this);
     for (int i = 0; i < getSize(); ++i) {
-      tsh.add("row[" + i + "]", get(i));
+      tsh.add("type[" + i + "]", hiveTypes[i]);
+      tsh.add("data[" + i + "]", get(i));
     }
     return tsh.toString();
   }

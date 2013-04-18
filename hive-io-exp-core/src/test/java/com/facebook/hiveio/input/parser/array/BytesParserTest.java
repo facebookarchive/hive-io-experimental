@@ -23,12 +23,22 @@ import com.google.common.base.Charsets;
 
 import static com.facebook.hiveio.input.parser.array.BytesParser.parseDouble;
 import static com.facebook.hiveio.input.parser.array.BytesParser.parseLong;
+import static com.facebook.hiveio.input.parser.array.BytesParser.parseString;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertNull;
 import static org.testng.Assert.assertTrue;
 
 public class BytesParserTest {
+  @Test
+  public void testParseString() {
+    String str = "abcdefghijklmn";
+    byte[] bytes = str.getBytes(Charsets.UTF_8);
+    assertEquals(parseString(bytes, 0, str.length()), str);
+    assertEquals(parseString(bytes, 2, 3), "cde");
+    assertEquals(parseString(bytes, 6, 2), "gh");
+  }
+
   @Test
   public void testParseBoolean() {
     assertTrue(parseBoolean("true"));
