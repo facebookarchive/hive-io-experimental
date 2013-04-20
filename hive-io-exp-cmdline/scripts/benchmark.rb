@@ -48,12 +48,12 @@ end
   args = [
     "tail",
     "--table '#{table}'",
-    "--partitionFilter \"ds='#{date}'\"",
+    "--partition-filter \"ds='#{date}'\"",
     "--threads #{threads}",
     "--limit #{num_rows}",
     "--append-stats-to #{benchmark_file}",
-    "--metricsPrintPeriodSecs 20",
-    "--parseOnly",
+    "--metrics-print-period-secs 20",
+    "--parse-only",
   ]
   puts "=== Run with #{threads} threads ==="
   system("java -jar #{jar} #{args.join(' ')}")

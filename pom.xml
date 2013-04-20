@@ -462,6 +462,23 @@ under the License.
   <!--For javax.jdo:jdo2-api:2.3-ec-->
   <repositories>
     <repository>
+      <id>central</id>
+      <url>http://repo1.maven.org/maven2</url>
+      <releases>
+        <enabled>true</enabled>
+      </releases>
+    </repository>
+    <repository>
+      <id>sonatype</id>
+      <url>https://oss.sonatype.org/content/groups/public/</url>
+      <releases>
+        <enabled>true</enabled>
+      </releases>
+      <snapshots>
+        <enabled>true</enabled>
+      </snapshots>
+    </repository>
+    <repository>
       <id>cloudera cdh</id>
       <url>https://repository.cloudera.com/artifactory/cloudera-repos</url>
       <releases>
