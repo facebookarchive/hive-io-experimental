@@ -89,6 +89,8 @@ class Tailer {
     LOG.info("{}", hiveStats);
 
     HiveConf hiveConf = new HiveConf(Tailer.class);
+
+    LOG.info("Setting up input using {}", inputDesc);
     HiveApiInputFormat.setProfileInputDesc(hiveConf, inputDesc,
         DEFAULT_PROFILE_ID);
 
@@ -118,7 +120,7 @@ class Tailer {
 
     if (context.opts.appendStatsTo != null) {
       OutputStream out = new FileOutputStream(context.opts.appendStatsTo, true);
-      stats.printEndBenchmark(timeNanos, out);
+      stats.printEndBenchmark(context, timeNanos, out);
     }
   }
 

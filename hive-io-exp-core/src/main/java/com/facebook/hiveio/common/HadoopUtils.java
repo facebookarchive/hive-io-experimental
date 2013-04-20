@@ -113,7 +113,7 @@ public class HadoopUtils {
    */
   public static void deleteOutputDir(Configuration conf) throws IOException {
     Path outputPath = getOutputPath(conf);
-    FileSystem.get(outputPath.toUri(), conf).delete(outputPath, true);
+    outputPath.getFileSystem(conf).delete(outputPath, true);
   }
 
   /**

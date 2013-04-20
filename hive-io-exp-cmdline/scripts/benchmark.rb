@@ -26,6 +26,23 @@ jar = ARGV.shift
 table = 'dim_friendlist'
 date = '2013-04-15'
 max_threads = 200
+num_rows = 100_000_000
+benchmark_file = "bench-out.txt"
+
+header_line = [
+  "Rows",
+  "Raw MBs",
+  "Total MBs",
+  "Total Seconds",
+  "Threads",
+  "msec / row",
+  "raw MB / sec",
+  "total MB / sec",
+].join(",")
+
+open(benchmark_file, 'w') do |f|
+  f.puts(header_line)
+end
 
 (1..max_threads).step(5) do |threads|
   args = [
@@ -33,7 +50,11 @@ max_threads = 200
     "--table '#{table}'",
     "--partitionFilter \"ds='#{date}'\"",
     "--threads #{threads}",
-    "--append-benchmark-to bench-out.txt",
+    "--limit #{num_rows}",
+    "--append-stats-to #{benchmark_file}",
+    "--metricsPrintPeriodSecs 20",
+    "--parseOnly",
   ]
+  puts "=== Run with #{threads} threads ==="
   system("java -jar #{jar} #{args.join(' ')}")
 end

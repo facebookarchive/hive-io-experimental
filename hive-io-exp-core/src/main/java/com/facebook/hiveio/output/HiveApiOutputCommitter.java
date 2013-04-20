@@ -30,6 +30,8 @@ import org.apache.hadoop.mapreduce.JobContext;
 import org.apache.hadoop.mapreduce.JobStatus;
 import org.apache.hadoop.mapreduce.OutputCommitter;
 import org.apache.hadoop.mapreduce.TaskAttemptContext;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.facebook.hiveio.common.FileSystems;
 import com.facebook.hiveio.common.HadoopUtils;
@@ -43,6 +45,8 @@ import java.util.List;
  * OutputCommitter for Hive output
  */
 class HiveApiOutputCommitter extends OutputCommitter {
+  private static final Logger LOG = LoggerFactory.getLogger(HiveApiOutputCommitter.class);
+
   /** Base Hadoop output committer */
   private final OutputCommitter baseCommitter;
   /** Profile ID to use */
@@ -93,7 +97,7 @@ class HiveApiOutputCommitter extends OutputCommitter {
       return;
     }
     Path outputPath = HadoopUtils.getOutputPath(conf);
-    FileSystem fs = FileSystem.get(outputPath.toUri(), conf);
+    FileSystem fs = outputPath.getFileSystem(conf);
     if (fs.exists(outputPath)) {
       Path successPath = new Path(outputPath, "_SUCCESS");
       if (!fs.exists(successPath)) {
@@ -165,9 +169,16 @@ class HiveApiOutputCommitter extends OutputCommitter {
     Preconditions.checkArgument(!oti.hasPartitionInfo());
     Path tablePath = new Path(oti.getTableRoot());
     Path writePath = new Path(oti.getPartitionPath());
-    FileSystem fs = FileSystem.get(tablePath.toUri(), conf);
-    FileSystems.move(fs, writePath, writePath, tablePath);
-    fs.delete(writePath, true);
+    FileSystem tableFs = tablePath.getFileSystem(conf);
+    FileSystem writePathFs = writePath.getFileSystem(conf);
+    if (!tableFs.getUri().equals(writePathFs.getUri())) {
+      LOG.error("Table's root path fs {} is not on same as its partition path fs {}",
+          tableFs.getUri(), writePathFs.getUri());
+      throw new IllegalStateException("Table's root path fs " + tableFs.getUri() +
+          " is not on same as its partition path fs " + writePathFs.getUri());
+    }
+    FileSystems.move(tableFs, writePath, writePath, tablePath);
+    tableFs.delete(writePath, true);
   }
 
   @Override @Deprecated

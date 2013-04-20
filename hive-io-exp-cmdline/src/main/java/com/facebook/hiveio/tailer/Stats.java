@@ -22,6 +22,7 @@ import org.slf4j.LoggerFactory;
 
 import com.barney4j.utils.unit.ByteUnit;
 import com.facebook.hiveio.common.HiveStats;
+import com.google.common.base.Joiner;
 import com.yammer.metrics.Metrics;
 import com.yammer.metrics.core.Gauge;
 import com.yammer.metrics.core.Meter;
@@ -99,12 +100,12 @@ class Stats {
   public void printEnd(long timeNanos) throws IOException {
     metricsReporter().run();
 
-    final double nsPerRow = Math.floor(timeNanos / (double) rowMeter.count());
-    final double msecPerRow = NANOSECONDS.toMillis((long) nsPerRow);
-    final double rawMBPerNs = hiveStats.getRawSizeInMB() / timeNanos;
-    final double rawMBPerSec = SECONDS.toNanos((long) rawMBPerNs);
-    final double totalMBPerNs = hiveStats.getTotalSizeInMB() / timeNanos;
-    final double totalMBPerSec = BYTE.toMB(SECONDS.toNanos((long) totalMBPerNs));
+    double nsPerRow = Math.floor(timeNanos / (double) rowMeter.count());
+    double msecPerRow = NANOSECONDS.toMillis((long) nsPerRow);
+    double rawMBPerNs = hiveStats.getRawSizeInMB() / timeNanos;
+    double rawMBPerSec = SECONDS.toNanos((long) rawMBPerNs);
+    double totalMBPerNs = hiveStats.getTotalSizeInMB() / timeNanos;
+    double totalMBPerSec = BYTE.toMB(SECONDS.toNanos((long) totalMBPerNs));
 
     err.println("Finished.");
     err.println("  " + rowMeter.count() + " rows");
@@ -117,25 +118,21 @@ class Stats {
     err.println("  " + totalMBPerSec + " total MB / second");
   }
 
-  public void printEndBenchmark(long timeNanos, OutputStream stream) throws IOException {
-    final PrintWriter writer = new PrintWriter(new BufferedWriter(new OutputStreamWriter(stream)));
+  public void printEndBenchmark(Context context, long timeNanos,
+      OutputStream stream) throws IOException {
+    PrintWriter writer = new PrintWriter(new BufferedWriter(new OutputStreamWriter(stream)));
+    Joiner joiner = Joiner.on(",");
 
-    final double nsPerRow = Math.floor(timeNanos / (double) rowMeter.count());
-    final double msecPerRow = NANOSECONDS.toMillis((long) nsPerRow);
-    final double rawMBPerNs = hiveStats.getRawSizeInMB() / timeNanos;
-    final double rawMBPerSec = SECONDS.toNanos((long) rawMBPerNs);
-    final double totalMBPerNs = hiveStats.getTotalSizeInMB() / timeNanos;
-    final double totalMBPerSec = BYTE.toMB(SECONDS.toNanos((long) totalMBPerNs));
+    long seconds = NANOSECONDS.toSeconds(timeNanos);
+    double nsPerRow = Math.floor(timeNanos / (double) rowMeter.count());
+    double msecPerRow = NANOSECONDS.toMillis((long) nsPerRow);
+    double rawMBPerNs = hiveStats.getRawSizeInMB() / timeNanos;
+    double rawMBPerSec = SECONDS.toNanos((long) rawMBPerNs);
+    double totalMBPerNs = hiveStats.getTotalSizeInMB() / timeNanos;
+    double totalMBPerSec = BYTE.toMB(SECONDS.toNanos((long) totalMBPerNs));
 
-
-    writer.println("Finished.");
-    writer.println("  " + rowMeter.count() + " rows");
-    writer.println("  " + NANOSECONDS.toSeconds(timeNanos) + " seconds");
-    writer.println("  " + nsPerRow + " ns / row");
-    writer.println("  " + msecPerRow + " msec / row");
-    writer.println("  " + rawMBPerNs + " raw MB / ns");
-    writer.println("  " + rawMBPerSec + " raw MB / second");
-    writer.println("  " + totalMBPerNs + " total MB / ns");
-    writer.println("  " + totalMBPerSec + " total MB / second");
+    writer.println(joiner.join(rowMeter.count(), rawMBMeter.count(),
+        seconds, context.opts.threads, msecPerRow, rawMBPerSec, totalMBPerSec));
+    writer.flush();
   }
 }

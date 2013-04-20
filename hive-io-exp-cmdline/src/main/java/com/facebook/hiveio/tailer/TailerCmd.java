@@ -41,7 +41,7 @@ public class TailerCmd extends BaseCmd
   @Inject
   public TableOptions tableOpts = new TableOptions();
 
-  @Option(name = {"--parseOnly", "--dontPrint"}, description = "Don't print, just measure performance")
+  @Option(name = {"--parse-only", "--dont-print"}, description = "Don't print, just measure performance")
   public boolean parseOnly = false;
 
   @Option(name = {"-l", "--limit"}, description = "Limit on number of rows to process")
@@ -53,19 +53,19 @@ public class TailerCmd extends BaseCmd
   @Option(name = "--separator", description = "Separator between columns")
   public String separator = Defaults.SEPARATOR;
 
-  @Option(name = "--recordBufferFlush", description = "How many records to buffer before printing")
+  @Option(name = "--record-buffer-flush", description = "How many records to buffer before printing")
   public int recordBufferFlush = 1;
 
-  @Option(name = "--requestNumSplits", description = "Number of splits to request")
+  @Option(name = "--request-num_splits", description = "Number of splits to request")
   public int requestNumSplits = 0;
 
-  @Option(name = "--requestSplitsPerThread", description = "Number of splits per thread")
+  @Option(name = "--request-splits-per-thread", description = "Number of splits per thread")
   public int requestSplitsPerThread = 3;
 
-  @Option(name = "--metricsUpdatePeriodRows", description = "Update metrics every this many records")
+  @Option(name = "--metrics-update-period-rows", description = "Update metrics every this many records")
   public int metricsUpdatePeriodRows = 1000;
 
-  @Option(name = "--metricsPrintPeriodSecs", description = "How often to dump metrics to stderr")
+  @Option(name = "--metrics-print-period-secs", description = "How often to dump metrics to stderr")
   public int metricsPrintPeriodSecs = 0;
 
   @Option(name = "--append-stats-to",description = "Append final stats to a file")
