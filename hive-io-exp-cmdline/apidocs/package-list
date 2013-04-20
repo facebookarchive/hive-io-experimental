@@ -1,2 +1,4 @@
-com.facebook.giraph.hive.cmdline
-com.facebook.giraph.hive.mapreduce
+com.facebook.hiveio.benchmark
+com.facebook.hiveio.cmdline
+com.facebook.hiveio.options
+com.facebook.hiveio.tailer

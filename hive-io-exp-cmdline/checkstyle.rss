@@ -2,14 +2,14 @@
 
 <rss version="0.91">
   <channel>
-    <title>Cmdline Hive Tools - Checkstyle report</title>
+    <title>hive-io-exp-cmdline - Checkstyle report</title>
     <link>https://github.com/facebook/hive-io-experimental/hive-io-exp-cmdline</link>
-    <description>Cmdline Hive Tools - Checkstyle report</description>
+    <description>hive-io-exp-cmdline - Checkstyle report</description>
     <language>en-us</language>
     <copyright>&#169;2013</copyright>
     <item>
-      <title>File: 8,
-             Errors: 117,
+      <title>File: 23,
+             Errors: 303,
              Warnings: 0,
              Infos: 0
       </title>
@@ -29,7 +29,91 @@
           <tbody>
                           <tr>
                 <td>
-                  <a href="https://github.com/facebook/hive-io-experimental/hive-io-exp-cmdline/checkstyle.html#com.facebook.giraph.hive.mapreduce.SampleOutputFormat.java">com/facebook/giraph/hive/mapreduce/SampleOutputFormat.java</a>
+                  <a href="https://github.com/facebook/hive-io-experimental/hive-io-exp-cmdline/checkstyle.html#com.facebook.hiveio.tailer.package-info.java">com/facebook/hiveio/tailer/package-info.java</a>
+                </td>
+                <td>
+                  0
+                </td>
+                <td>
+                  0
+                </td>
+                <td>
+                  0
+                </td>
+              </tr>
+                          <tr>
+                <td>
+                  <a href="https://github.com/facebook/hive-io-experimental/hive-io-exp-cmdline/checkstyle.html#com.facebook.hiveio.options.SocksProxyOptions.java">com/facebook/hiveio/options/SocksProxyOptions.java</a>
+                </td>
+                <td>
+                  0
+                </td>
+                <td>
+                  0
+                </td>
+                <td>
+                  8
+                </td>
+              </tr>
+                          <tr>
+                <td>
+                  <a href="https://github.com/facebook/hive-io-experimental/hive-io-exp-cmdline/checkstyle.html#com.facebook.hiveio.options.TableOptions.java">com/facebook/hiveio/options/TableOptions.java</a>
+                </td>
+                <td>
+                  0
+                </td>
+                <td>
+                  0
+                </td>
+                <td>
+                  9
+                </td>
+              </tr>
+                          <tr>
+                <td>
+                  <a href="https://github.com/facebook/hive-io-experimental/hive-io-exp-cmdline/checkstyle.html#com.facebook.hiveio.options.MetastoreOptions.java">com/facebook/hiveio/options/MetastoreOptions.java</a>
+                </td>
+                <td>
+                  0
+                </td>
+                <td>
+                  0
+                </td>
+                <td>
+                  7
+                </td>
+              </tr>
+                          <tr>
+                <td>
+                  <a href="https://github.com/facebook/hive-io-experimental/hive-io-exp-cmdline/checkstyle.html#com.facebook.hiveio.benchmark.package-info.java">com/facebook/hiveio/benchmark/package-info.java</a>
+                </td>
+                <td>
+                  0
+                </td>
+                <td>
+                  0
+                </td>
+                <td>
+                  0
+                </td>
+              </tr>
+                          <tr>
+                <td>
+                  <a href="https://github.com/facebook/hive-io-experimental/hive-io-exp-cmdline/checkstyle.html#com.facebook.hiveio.tailer.TailerCmd.java">com/facebook/hiveio/tailer/TailerCmd.java</a>
+                </td>
+                <td>
+                  0
+                </td>
+                <td>
+                  0
+                </td>
+                <td>
+                  49
+                </td>
+              </tr>
+                          <tr>
+                <td>
+                  <a href="https://github.com/facebook/hive-io-experimental/hive-io-exp-cmdline/checkstyle.html#com.facebook.hiveio.tailer.ClusterData.java">com/facebook/hiveio/tailer/ClusterData.java</a>
                 </td>
                 <td>
                   0
@@ -43,7 +127,7 @@
               </tr>
                           <tr>
                 <td>
-                  <a href="https://github.com/facebook/hive-io-experimental/hive-io-exp-cmdline/checkstyle.html#com.facebook.giraph.hive.mapreduce.WritingTool.java">com/facebook/giraph/hive/mapreduce/WritingTool.java</a>
+                  <a href="https://github.com/facebook/hive-io-experimental/hive-io-exp-cmdline/checkstyle.html#com.facebook.hiveio.benchmark.InputBenchmark.java">com/facebook/hiveio/benchmark/InputBenchmark.java</a>
                 </td>
                 <td>
                   0
@@ -52,12 +136,110 @@
                   0
                 </td>
                 <td>
-                  27
+                  18
                 </td>
               </tr>
                           <tr>
                 <td>
-                  <a href="https://github.com/facebook/hive-io-experimental/hive-io-exp-cmdline/checkstyle.html#com.facebook.giraph.hive.mapreduce.SplitReader.java">com/facebook/giraph/hive/mapreduce/SplitReader.java</a>
+                  <a href="https://github.com/facebook/hive-io-experimental/hive-io-exp-cmdline/checkstyle.html#com.facebook.hiveio.benchmark.CounterRatioGauge.java">com/facebook/hiveio/benchmark/CounterRatioGauge.java</a>
+                </td>
+                <td>
+                  0
+                </td>
+                <td>
+                  0
+                </td>
+                <td>
+                  9
+                </td>
+              </tr>
+                          <tr>
+                <td>
+                  <a href="https://github.com/facebook/hive-io-experimental/hive-io-exp-cmdline/checkstyle.html#com.facebook.hiveio.cmdline.ConfOptionsCmd.java">com/facebook/hiveio/cmdline/ConfOptionsCmd.java</a>
+                </td>
+                <td>
+                  0
+                </td>
+                <td>
+                  0
+                </td>
+                <td>
+                  2
+                </td>
+              </tr>
+                          <tr>
+                <td>
+                  <a href="https://github.com/facebook/hive-io-experimental/hive-io-exp-cmdline/checkstyle.html#com.facebook.hiveio.tailer.DefaultRecordPrinter.java">com/facebook/hiveio/tailer/DefaultRecordPrinter.java</a>
+                </td>
+                <td>
+                  0
+                </td>
+                <td>
+                  0
+                </td>
+                <td>
+                  8
+                </td>
+              </tr>
+                          <tr>
+                <td>
+                  <a href="https://github.com/facebook/hive-io-experimental/hive-io-exp-cmdline/checkstyle.html#com.facebook.hiveio.benchmark.MetricsObserver.java">com/facebook/hiveio/benchmark/MetricsObserver.java</a>
+                </td>
+                <td>
+                  0
+                </td>
+                <td>
+                  0
+                </td>
+                <td>
+                  25
+                </td>
+              </tr>
+                          <tr>
+                <td>
+                  <a href="https://github.com/facebook/hive-io-experimental/hive-io-exp-cmdline/checkstyle.html#com.facebook.hiveio.tailer.HostPort.java">com/facebook/hiveio/tailer/HostPort.java</a>
+                </td>
+                <td>
+                  0
+                </td>
+                <td>
+                  0
+                </td>
+                <td>
+                  13
+                </td>
+              </tr>
+                          <tr>
+                <td>
+                  <a href="https://github.com/facebook/hive-io-experimental/hive-io-exp-cmdline/checkstyle.html#com.facebook.hiveio.tailer.Stats.java">com/facebook/hiveio/tailer/Stats.java</a>
+                </td>
+                <td>
+                  0
+                </td>
+                <td>
+                  0
+                </td>
+                <td>
+                  33
+                </td>
+              </tr>
+                          <tr>
+                <td>
+                  <a href="https://github.com/facebook/hive-io-experimental/hive-io-exp-cmdline/checkstyle.html#com.facebook.hiveio.tailer.BufferedRecordPrinter.java">com/facebook/hiveio/tailer/BufferedRecordPrinter.java</a>
+                </td>
+                <td>
+                  0
+                </td>
+                <td>
+                  0
+                </td>
+                <td>
+                  4
+                </td>
+              </tr>
+                          <tr>
+                <td>
+                  <a href="https://github.com/facebook/hive-io-experimental/hive-io-exp-cmdline/checkstyle.html#com.facebook.hiveio.benchmark.InputBenchmarkCmd.java">com/facebook/hiveio/benchmark/InputBenchmarkCmd.java</a>
                 </td>
                 <td>
                   0
@@ -71,7 +253,7 @@
               </tr>
                           <tr>
                 <td>
-                  <a href="https://github.com/facebook/hive-io-experimental/hive-io-exp-cmdline/checkstyle.html#com.facebook.giraph.hive.mapreduce.SampleInputFormat.java">com/facebook/giraph/hive/mapreduce/SampleInputFormat.java</a>
+                  <a href="https://github.com/facebook/hive-io-experimental/hive-io-exp-cmdline/checkstyle.html#com.facebook.hiveio.tailer.RecordPrinter.java">com/facebook/hiveio/tailer/RecordPrinter.java</a>
                 </td>
                 <td>
                   0
@@ -80,12 +262,12 @@
                   0
                 </td>
                 <td>
-                  6
+                  2
                 </td>
               </tr>
                           <tr>
                 <td>
-                  <a href="https://github.com/facebook/hive-io-experimental/hive-io-exp-cmdline/checkstyle.html#com.facebook.giraph.hive.mapreduce.SampleMapper.java">com/facebook/giraph/hive/mapreduce/SampleMapper.java</a>
+                  <a href="https://github.com/facebook/hive-io-experimental/hive-io-exp-cmdline/checkstyle.html#com.facebook.hiveio.tailer.Context.java">com/facebook/hiveio/tailer/Context.java</a>
                 </td>
                 <td>
                   0
@@ -94,12 +276,12 @@
                   0
                 </td>
                 <td>
-                  6
+                  36
                 </td>
               </tr>
                           <tr>
                 <td>
-                  <a href="https://github.com/facebook/hive-io-experimental/hive-io-exp-cmdline/checkstyle.html#com.facebook.giraph.hive.mapreduce.SampleInputSplit.java">com/facebook/giraph/hive/mapreduce/SampleInputSplit.java</a>
+                  <a href="https://github.com/facebook/hive-io-experimental/hive-io-exp-cmdline/checkstyle.html#com.facebook.hiveio.options.Defaults.java">com/facebook/hiveio/options/Defaults.java</a>
                 </td>
                 <td>
                   0
@@ -113,7 +295,7 @@
               </tr>
                           <tr>
                 <td>
-                  <a href="https://github.com/facebook/hive-io-experimental/hive-io-exp-cmdline/checkstyle.html#com.facebook.giraph.hive.mapreduce.HiveTools.java">com/facebook/giraph/hive/mapreduce/HiveTools.java</a>
+                  <a href="https://github.com/facebook/hive-io-experimental/hive-io-exp-cmdline/checkstyle.html#com.facebook.hiveio.cmdline.Main.java">com/facebook/hiveio/cmdline/Main.java</a>
                 </td>
                 <td>
                   0
@@ -122,12 +304,12 @@
                   0
                 </td>
                 <td>
-                  41
+                  4
                 </td>
               </tr>
                           <tr>
                 <td>
-                  <a href="https://github.com/facebook/hive-io-experimental/hive-io-exp-cmdline/checkstyle.html#com.facebook.giraph.hive.cmdline.Main.java">com/facebook/giraph/hive/cmdline/Main.java</a>
+                  <a href="https://github.com/facebook/hive-io-experimental/hive-io-exp-cmdline/checkstyle.html#com.facebook.hiveio.tailer.ThreadContext.java">com/facebook/hiveio/tailer/ThreadContext.java</a>
                 </td>
                 <td>
                   0
@@ -136,7 +318,35 @@
                   0
                 </td>
                 <td>
-                  5
+                  8
+                </td>
+              </tr>
+                          <tr>
+                <td>
+                  <a href="https://github.com/facebook/hive-io-experimental/hive-io-exp-cmdline/checkstyle.html#com.facebook.hiveio.tailer.Tailer.java">com/facebook/hiveio/tailer/Tailer.java</a>
+                </td>
+                <td>
+                  0
+                </td>
+                <td>
+                  0
+                </td>
+                <td>
+                  30
+                </td>
+              </tr>
+                          <tr>
+                <td>
+                  <a href="https://github.com/facebook/hive-io-experimental/hive-io-exp-cmdline/checkstyle.html#com.facebook.hiveio.options.BaseCmd.java">com/facebook/hiveio/options/BaseCmd.java</a>
+                </td>
+                <td>
+                  0
+                </td>
+                <td>
+                  0
+                </td>
+                <td>
+                  6
                 </td>
               </tr>
                       </tbody>
