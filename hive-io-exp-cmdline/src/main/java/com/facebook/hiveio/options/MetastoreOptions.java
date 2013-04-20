@@ -21,10 +21,10 @@ import io.airlift.command.Option;
 
 public class MetastoreOptions {
   /** Hive host */
-  @Option(name = {"--metastoreHost"}, description = "Hive Metastore host")
+  @Option(name = {"--metastore-host"}, description = "Hive Metastore host")
   public String hiveHost = Defaults.METASTORE_HOST;
 
   /** Hive port */
-  @Option(name = {"-metastorePort"}, description = "Hive Metatstore port")
+  @Option(name = {"-metastore-port"}, description = "Hive Metatstore port")
   public int hivePort = Defaults.METASTORE_PORT;
 }

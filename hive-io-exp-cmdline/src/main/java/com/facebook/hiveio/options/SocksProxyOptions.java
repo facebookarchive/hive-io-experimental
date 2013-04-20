@@ -18,13 +18,12 @@
 package com.facebook.hiveio.options;
 
 import io.airlift.command.Option;
-import io.airlift.command.OptionType;
 
 public class SocksProxyOptions {
-  @Option(name = "--socksProxyHost", hidden = true)
+  @Option(name = "--socks-proxy-host", hidden = true)
   public String host = "localhost";
 
-  @Option(name = "--socksProxyPort", hidden = true)
+  @Option(name = "--socks-proxy-port", hidden = true)
   public int port = -1;
 
   public void process() {
