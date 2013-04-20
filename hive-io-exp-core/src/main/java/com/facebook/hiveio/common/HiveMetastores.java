@@ -22,13 +22,14 @@ import org.apache.hadoop.hive.conf.HiveConf;
 import org.apache.hadoop.hive.metastore.HiveMetaStoreClient;
 import org.apache.hadoop.hive.metastore.api.MetaException;
 import org.apache.hadoop.hive.metastore.api.ThriftHiveMetastore;
-import org.apache.log4j.Logger;
 import org.apache.thrift.TException;
 import org.apache.thrift.protocol.TBinaryProtocol;
 import org.apache.thrift.protocol.TProtocol;
 import org.apache.thrift.transport.TSocket;
 import org.apache.thrift.transport.TTransport;
 import org.apache.thrift.transport.TTransportException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.lang.reflect.Field;
 import java.net.URI;
@@ -42,7 +43,7 @@ public class HiveMetastores {
   public static final int DEFAULT_TIMEOUT_MS = 20 * 1000;
 
   /** Logger */
-  private static final Logger LOG = Logger.getLogger(HiveMetastores.class);
+  private static final Logger LOG = LoggerFactory.getLogger(HiveMetastores.class);
 
   /** Don't construct */
   private HiveMetastores() { }
@@ -146,8 +147,7 @@ public class HiveMetastores {
       try {
         return create(uri.getHost(), uri.getPort());
       } catch (TTransportException e) {
-        LOG.warn("Failed to connect to " + uri.getHost() +
-            ":" + uri.getPort(), e);
+        LOG.warn("Failed to connect to {}:{}", uri.getHost(), uri.getPort(), e);
       }
     }
     return null;

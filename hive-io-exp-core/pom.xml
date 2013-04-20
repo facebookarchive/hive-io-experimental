@@ -26,7 +26,7 @@ under the License.
     <version>0.8-SNAPSHOT</version>
   </parent>
 
-  <name>HiveIO Core</name>
+  <name>${project.artifactId}</name>
   <artifactId>hive-io-exp-core</artifactId>
   <packaging>jar</packaging>
 
@@ -89,15 +89,11 @@ under the License.
       <artifactId>metrics-core</artifactId>
     </dependency>
     <dependency>
-      <groupId>log4j</groupId>
-      <artifactId>log4j</artifactId>
-    </dependency>
-    <dependency>
       <groupId>com.facebook.hadoop</groupId>
       <artifactId>hadoop-core</artifactId>
     </dependency>
     <dependency>
-      <groupId>org.apache.commons</groupId>
+      <groupId>commons-io</groupId>
       <artifactId>commons-io</artifactId>
     </dependency>
     <dependency>
@@ -108,15 +104,18 @@ under the License.
       <groupId>org.apache.hive</groupId>
       <artifactId>hive-metastore</artifactId>
     </dependency>
+    <dependency>
+      <groupId>org.apache.hive</groupId>
+      <artifactId>hive-service</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-api</artifactId>
+    </dependency>
 
     <dependency>
       <groupId>org.apache.hive</groupId>
       <artifactId>hive-builtins</artifactId>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.hive</groupId>
-      <artifactId>hive-service</artifactId>
       <scope>test</scope>
     </dependency>
     <dependency>

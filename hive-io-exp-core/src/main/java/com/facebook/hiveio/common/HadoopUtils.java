@@ -27,7 +27,8 @@ import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapred.JobConfigurable;
 import org.apache.hadoop.mapreduce.TaskAttemptContext;
 import org.apache.hadoop.mapreduce.lib.output.FileOutputCommitter;
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 
@@ -36,7 +37,7 @@ import java.io.IOException;
  */
 public class HadoopUtils {
   /** Logger */
-  private static final Logger LOG = Logger.getLogger(HadoopUtils.class);
+  private static final Logger LOG = LoggerFactory.getLogger(HadoopUtils.class);
 
   /** Key in Configuration for output directory */
   private static final String OUTPUT_DIR_KEY = "mapred.output.dir";

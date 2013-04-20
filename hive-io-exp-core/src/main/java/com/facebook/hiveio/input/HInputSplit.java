@@ -27,7 +27,8 @@ import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapred.Reporter;
 import org.apache.hadoop.mapreduce.InputSplit;
 import org.apache.hadoop.util.Progressable;
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.facebook.hiveio.common.HadoopUtils;
 import com.facebook.hiveio.common.ProgressReporter;
@@ -50,7 +51,7 @@ import java.util.List;
 class HInputSplit extends InputSplit
     implements org.apache.hadoop.mapred.InputSplit, Configurable {
   /** Logger */
-  public static final Logger LOG = Logger.getLogger(HInputSplit.class);
+  private static final Logger LOG = LoggerFactory.getLogger(HInputSplit.class);
 
   /** Hadoop InputFormat for reading records */
   private org.apache.hadoop.mapred.InputFormat baseInputFormat;

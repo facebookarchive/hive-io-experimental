@@ -28,7 +28,8 @@ import org.apache.hadoop.mapred.InputFormat;
 import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapred.TextInputFormat;
 import org.apache.hadoop.util.ReflectionUtils;
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.facebook.hiveio.common.Classes;
 import com.facebook.hiveio.common.Writables;
@@ -45,7 +46,7 @@ import java.util.List;
  */
 class InputPartition implements Writable {
   /** Logger */
-  private static final Logger LOG = Logger.getLogger(InputPartition.class);
+  private static final Logger LOG = LoggerFactory.getLogger(InputPartition.class);
 
   /** Data for this partition */
   private final InputSplitData inputSplitData;

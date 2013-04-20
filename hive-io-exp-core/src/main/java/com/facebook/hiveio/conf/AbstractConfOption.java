@@ -17,7 +17,8 @@
  */
 package com.facebook.hiveio.conf;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Objects;
 import com.google.common.collect.ComparisonChain;
@@ -28,7 +29,7 @@ import com.google.common.collect.ComparisonChain;
 public abstract class AbstractConfOption
     implements Comparable<AbstractConfOption> {
   /** Logger */
-  private static final Logger LOG = Logger.getLogger(AbstractConfOption.class);
+  private static final Logger LOG = LoggerFactory.getLogger(AbstractConfOption.class);
 
   /** Key for configuration */
   private final String key;

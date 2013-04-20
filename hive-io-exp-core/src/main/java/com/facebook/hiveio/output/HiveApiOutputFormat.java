@@ -40,8 +40,9 @@ import org.apache.hadoop.mapreduce.OutputCommitter;
 import org.apache.hadoop.mapreduce.OutputFormat;
 import org.apache.hadoop.mapreduce.TaskAttemptContext;
 import org.apache.hadoop.util.ReflectionUtils;
-import org.apache.log4j.Logger;
 import org.apache.thrift.TException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.facebook.hiveio.common.FileSystems;
 import com.facebook.hiveio.common.HadoopUtils;
@@ -68,7 +69,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class HiveApiOutputFormat
     extends OutputFormat<WritableComparable, HiveWritableRecord> {
   /** Logger */
-  public static final Logger LOG = Logger.getLogger(HiveApiOutputFormat.class);
+  private static final Logger LOG = LoggerFactory.getLogger(HiveApiOutputFormat.class);
 
   /** Default profile if none given */
   public static final String DEFAULT_PROFILE_ID = "output-profile";
@@ -168,7 +169,7 @@ public class HiveApiOutputFormat
     outputConf.writeOutputDescription(outputDesc);
     outputConf.writeOutputTableInfo(oti);
 
-    LOG.info("initProfile '" + profileId + "' using " + outputDesc);
+    LOG.info("initProfile '{}' using {}", profileId, outputDesc);
   }
 
   /**
@@ -367,7 +368,7 @@ public class HiveApiOutputFormat
     int fileId = CREATED_FILES_COUNTER.incrementAndGet();
     String name = FileOutputFormat.getUniqueName(jobConf, "part-" + fileId);
     if (LOG.isInfoEnabled()) {
-      LOG.info("getBaseRecordWriter: Created new with file " + name);
+      LOG.info("getBaseRecordWriter: Created new with file {}", name);
     }
     Reporter reporter = new ProgressReporter(taskAttemptContext);
     return baseOutputFormat.getRecordWriter(null, jobConf, name, reporter);

@@ -15,16 +15,24 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.facebook.hiveio.cmdline;
+package com.facebook.hiveio.tailer;
 
-public abstract class BaseCmd implements Runnable {
-  @Override public void run() {
-    try {
-      execute();
-    } catch (Exception e) {
-      e.printStackTrace();
-    }
+import com.facebook.hiveio.record.HiveReadableRecord;
+
+class DefaultRecordPrinter implements RecordPrinter {
+  @Override public void printRecord(HiveReadableRecord record, int numColumns,
+      Context context) {
+    addRecordToStringBuilder(record, numColumns, context);
+    context.perThread.get().flushBuffer();
   }
 
-  public abstract void execute() throws Exception;
+  public static void addRecordToStringBuilder(HiveReadableRecord record,
+      int numColumns, Context context) {
+    StringBuilder sb = context.perThread.get().stringBuilder;
+    sb.append(String.valueOf(record.get(0)));
+    for (int index = 1; index < numColumns; ++index) {
+      sb.append(context.opts.separator);
+      sb.append(String.valueOf(record.get(index)));
+    }
+  }
 }

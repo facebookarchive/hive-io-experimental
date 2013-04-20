@@ -18,7 +18,8 @@
 package com.facebook.hiveio.conf;
 
 import org.apache.hadoop.conf.Configuration;
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Class configuration option
@@ -26,7 +27,7 @@ import org.apache.log4j.Logger;
  */
 public class ClassConfOption<C> extends AbstractConfOption {
   /** Logger */
-  private static final Logger LOG = Logger.getLogger(ClassConfOption.class);
+  private static final Logger LOG = LoggerFactory.getLogger(ClassConfOption.class);
 
   /** Base interface for class */
   private final Class<C> interfaceClass;

@@ -17,56 +17,72 @@
  */
 package com.facebook.hiveio.tailer;
 
-import com.facebook.hiveio.cmdline.BaseCmd;
-import com.facebook.hiveio.cmdline.Defaults;
+import com.facebook.hiveio.options.BaseCmd;
+import com.facebook.hiveio.options.Defaults;
+import com.facebook.hiveio.options.MetastoreOptions;
+import com.facebook.hiveio.options.TableOptions;
 import io.airlift.command.Command;
 import io.airlift.command.Option;
 
+import javax.inject.Inject;
+
 @Command(name = "tail", description = "Dump a Hive table")
-public class TailerCmd extends BaseCmd {
-  @Option(name = "--clustersFile")
+public class TailerCmd extends BaseCmd
+{
+  @Option(name = "--clustersFile", description = "File of Hive metastore clusters")
   public String clustersFile;
 
-  @Option(name = "--cluster")
-  public String cluster;
+  @Option(name = "--cluster", description = "Cluster to use")
+  public String cluster = "silver";
 
-  @Option(name = "--metastoreHost")
-  public String metastoreHost;
+  @Inject
+  public MetastoreOptions metastoreOpts = new MetastoreOptions();
 
-  @Option(name = "--metastorePort")
-  public int metastorePort = Defaults.METASTORE_PORT;
+  @Inject
+  public TableOptions tableOpts = new TableOptions();
 
-  @Option(name = "--database")
-  public String database = Defaults.DATABASE;
+  @Option(name = {"--parseOnly", "--dontPrint"}, description = "Don't print, just measure performance")
+  public boolean parseOnly = false;
 
-  @Option(name = {"-t", "--table"})
-  public String table;
-
-  @Option(name = {"-f", "--partitionFilter"})
-  public String partitionFilter = Defaults.PARTITION_FILTER;
-
-  @Option(name = {"-l", "--limit"})
+  @Option(name = {"-l", "--limit"}, description = "Limit on number of rows to process")
   public long limit = Long.MAX_VALUE;
 
-  @Option(name = "--threads")
+  @Option(name = "--threads", description = "Number of threads to use")
   public int threads = 1;
 
-  @Option(name = "--separator")
+  @Option(name = "--separator", description = "Separator between columns")
   public String separator = Defaults.SEPARATOR;
 
-  @Option(name = "--requestNumSplits")
+  @Option(name = "--recordBufferFlush", description = "How many records to buffer before printing")
+  public int recordBufferFlush = 1;
+
+  @Option(name = "--requestNumSplits", description = "Number of splits to request")
   public int requestNumSplits = 0;
 
-  @Option(name = "--requestSplitsPerThread")
+  @Option(name = "--requestSplitsPerThread", description = "Number of splits per thread")
   public int requestSplitsPerThread = 3;
 
-  @Option(name = "--metricsUpdatePeriodRows")
+  @Option(name = "--metricsUpdatePeriodRows", description = "Update metrics every this many records")
   public int metricsUpdatePeriodRows = 1000;
 
-  @Option(name = "--metricsPrintPeriodSecs")
+  @Option(name = "--metricsPrintPeriodSecs", description = "How often to dump metrics to stderr")
   public int metricsPrintPeriodSecs = 0;
 
+  @Option(name = "--append-stats-to",description = "Append final stats to a file")
+  public String appendStatsTo;
+
+  public RecordPrinter recordPrinter;
+
+  public void init() {
+    if (recordBufferFlush > 1) {
+      recordPrinter = new BufferedRecordPrinter();
+    } else {
+      recordPrinter = new DefaultRecordPrinter();
+    }
+  }
+
   @Override public void execute() throws Exception {
+    init();
     new Tailer().run(this);
   }
 }

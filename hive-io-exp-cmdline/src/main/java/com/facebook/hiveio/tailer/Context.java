@@ -40,7 +40,7 @@ class Context {
   public final Stats stats;
   public final AtomicLong rowsParsed;
 
-  public final ThreadLocal<ThreadContext> threadContext = new ThreadLocal<ThreadContext>() {
+  public final ThreadLocal<ThreadContext> perThread = new ThreadLocal<ThreadContext>() {
     @Override protected ThreadContext initialValue() {
       return new ThreadContext();
     }

@@ -17,10 +17,21 @@
  */
 package com.facebook.hiveio.tailer;
 
-import com.facebook.hiveio.cmdline.Defaults;
+import com.facebook.hiveio.options.Defaults;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 class HostPort {
   @JsonProperty public String host;
   @JsonProperty public int port = Defaults.METASTORE_PORT;
+
+  public HostPort() {}
+
+  public HostPort(String host, int port) {
+    this.host = host;
+    this.port = port;
+  }
+
+  @Override public String toString() {
+    return host + ":" + port;
+  }
 }

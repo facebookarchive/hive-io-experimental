@@ -17,32 +17,21 @@
  */
 package com.facebook.hiveio.benchmark;
 
-import com.facebook.hiveio.cmdline.BaseCmd;
-import com.facebook.hiveio.cmdline.Defaults;
+import com.facebook.hiveio.options.BaseCmd;
+import com.facebook.hiveio.options.MetastoreOptions;
+import com.facebook.hiveio.options.TableOptions;
 import io.airlift.command.Command;
 import io.airlift.command.Option;
 
+import javax.inject.Inject;
+
 @Command(name = "input-benchmark", description = "Benchmark for Input")
 public class InputBenchmarkCmd extends BaseCmd {
-  /** Hive host */
-  @Option(name = {"-h", "--host"}, description = "Hive Metastore host")
-  public String hiveHost = Defaults.METASTORE_HOST;
+  @Inject
+  public MetastoreOptions metastoreOpts = new MetastoreOptions();
 
-  /** Hive port */
-  @Option(name = {"-p", "--port"}, description = "Hive Metatstore port")
-  public int hivePort = Defaults.METASTORE_PORT;
-
-  /** Hive database */
-  @Option(name = "--database", description = "Hive database to use")
-  public String database = Defaults.DATABASE;
-
-  /** Hive table */
-  @Option(name = {"-t", "--table"}, description = "Hive table to query")
-  public String table = "inference_sims";
-
-  /** Partition filter */
-  @Option(name = {"-f", "--partitionFilter"}, description = "Input partition filter")
-  public String partitionFilter = "ds='2013-01-01' and feature='test_nz'";
+  @Inject
+  public TableOptions tableOpts = new TableOptions();
 
   /** Whether to track metrics */
   @Option(name = "--trackMetrics", description = "Track metrics while running")

@@ -21,9 +21,16 @@ import javax.annotation.concurrent.NotThreadSafe;
 
 @NotThreadSafe
 class ThreadContext {
+  public int recordsInBuffer;
   public final StringBuilder stringBuilder;
 
   public ThreadContext() {
+    recordsInBuffer = 0;
     stringBuilder = new StringBuilder(1000);
+  }
+
+  public void flushBuffer() {
+    System.out.println(stringBuilder.toString());
+    stringBuilder.setLength(0);
   }
 }

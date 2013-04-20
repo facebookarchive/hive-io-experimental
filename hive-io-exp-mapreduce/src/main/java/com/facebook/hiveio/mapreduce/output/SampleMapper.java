@@ -20,7 +20,8 @@ package com.facebook.hiveio.mapreduce.output;
 import org.apache.hadoop.io.MapWritable;
 import org.apache.hadoop.io.NullWritable;
 import org.apache.hadoop.mapreduce.Mapper;
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.facebook.hiveio.record.HiveWritableRecord;
 
@@ -28,7 +29,7 @@ import java.io.IOException;
 
 public class SampleMapper extends Mapper<NullWritable, MapWritable,
     NullWritable, HiveWritableRecord> {
-  private static final Logger LOG = Logger.getLogger(SampleMapper.class);
+  private static final Logger LOG = LoggerFactory.getLogger(SampleMapper.class);
 
   @Override protected void map(NullWritable key, MapWritable value,
       Context context) throws IOException, InterruptedException {

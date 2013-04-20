@@ -17,7 +17,8 @@
  */
 package com.facebook.hiveio.conf;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.facebook.hiveio.output.OutputConf;
 import com.google.common.collect.Lists;
@@ -30,7 +31,7 @@ import java.util.List;
  */
 public class AllOptions {
   /** Logger */
-  private static final Logger LOG = Logger.getLogger(AllOptions.class);
+  private static final Logger LOG = LoggerFactory.getLogger(AllOptions.class);
 
   /** Configuration options */
   private static final List<AbstractConfOption> CONF_OPTIONS =

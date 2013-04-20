@@ -25,7 +25,7 @@ import org.apache.hadoop.mapreduce.InputSplit;
 import org.apache.hadoop.mapreduce.RecordReader;
 import org.apache.hadoop.mapreduce.TaskAttemptContext;
 import org.apache.hadoop.mapreduce.TaskAttemptID;
-import org.apache.log4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.facebook.hiveio.common.HadoopNative;
 import com.facebook.hiveio.common.HiveMetastores;
@@ -39,30 +39,31 @@ import com.yammer.metrics.reporting.ConsoleReporter;
 
 import java.io.IOException;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
+
+import static java.util.concurrent.TimeUnit.MILLISECONDS;
 
 /**
  * Benchmark for input reading
  */
 class InputBenchmark {
   /** Logger */
-  private static final Logger LOG = Logger.getLogger(InputBenchmark.class);
+  private static final org.slf4j.Logger LOG = LoggerFactory.getLogger(InputBenchmark.class);
 
   public InputBenchmark() { }
 
   public void run(InputBenchmarkCmd args) throws Exception {
     HadoopNative.requireHadoopNative();
 
-    Timer allTime = Metrics.newTimer(InputBenchmark.class, "all-time", TimeUnit.MILLISECONDS, TimeUnit.MILLISECONDS);
+    Timer allTime = Metrics.newTimer(InputBenchmark.class, "all-time", MILLISECONDS, MILLISECONDS);
     TimerContext allTimerContext = allTime.time();
 
     HiveInputDescription input = new HiveInputDescription();
-    input.setDbName(args.database);
-    input.setTableName(args.table);
-    input.setPartitionFilter(args.partitionFilter);
+    input.setDbName(args.tableOpts.database);
+    input.setTableName(args.tableOpts.table);
+    input.setPartitionFilter(args.tableOpts.partitionFilter);
 
     HiveConf hiveConf = new HiveConf(InputBenchmark.class);
-    ThriftHiveMetastore.Iface client = HiveMetastores.create(args.hiveHost, args.hivePort);
+    ThriftHiveMetastore.Iface client = HiveMetastores.create(args.metastoreOpts.hiveHost, args.metastoreOpts.hivePort);
 
     System.err.println("Initialize profile with input data");
     HiveApiInputFormat.setProfileInputDesc(hiveConf, input, HiveApiInputFormat.DEFAULT_PROFILE_ID);

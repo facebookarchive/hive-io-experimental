@@ -24,7 +24,8 @@ import org.apache.hadoop.io.Writable;
 import org.apache.hadoop.io.WritableComparable;
 import org.apache.hadoop.mapred.RecordWriter;
 import org.apache.hadoop.mapreduce.TaskAttemptContext;
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.facebook.hiveio.common.ProgressReporter;
 import com.facebook.hiveio.record.HiveWritableRecord;
@@ -38,7 +39,7 @@ import java.io.IOException;
  */
 public class ResettableRecordWriterImpl extends RecordWriterImpl {
   /** Class logger */
-  private static Logger LOG = Logger.getLogger(ResettableRecordWriterImpl.class);
+  private static final Logger LOG = LoggerFactory.getLogger(ResettableRecordWriterImpl.class);
 
   /** Task attempt context */
   private final TaskAttemptContext taskAttemptContext;
@@ -75,8 +76,7 @@ public class ResettableRecordWriterImpl extends RecordWriterImpl {
     long elapsedTime = System.currentTimeMillis() - startTime;
     if (elapsedTime > writeTimeoutMs) {
       if (LOG.isInfoEnabled()) {
-        LOG.info("write: Write taking too long (" + elapsedTime +
-            "s), creating new file to write to");
+        LOG.info("write: Write taking too long ({}s), creating new file to write to", elapsedTime);
       }
       baseWriter.close(new ProgressReporter(taskAttemptContext));
       baseWriter = HiveApiOutputFormat.getBaseRecordWriter(taskAttemptContext, baseOutputFormat);

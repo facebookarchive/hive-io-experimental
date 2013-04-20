@@ -22,7 +22,8 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.hive.conf.HiveConf;
 import org.apache.hadoop.hive.metastore.api.Table;
 import org.apache.hadoop.hive.metastore.api.ThriftHiveMetastore;
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.facebook.hiveio.common.HiveMetastores;
 import com.facebook.hiveio.common.HiveTableName;
@@ -37,7 +38,7 @@ public class HiveTableSchemas {
   public static final String PROFILE_KEY_PREFIX = "hive.io.schema.profile.";
 
   /** Logger */
-  private static final Logger LOG = Logger.getLogger(HiveTableSchemas.class);
+  private static final Logger LOG = LoggerFactory.getLogger(HiveTableSchemas.class);
 
   /** Don't construct */
   protected HiveTableSchemas() { }

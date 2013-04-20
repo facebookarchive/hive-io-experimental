@@ -25,7 +25,8 @@ import org.apache.hadoop.hive.serde2.objectinspector.ObjectInspector.Category;
 import org.apache.hadoop.hive.serde2.objectinspector.ObjectInspectorUtils;
 import org.apache.hadoop.hive.serde2.objectinspector.StructObjectInspector;
 import org.apache.hadoop.io.Writable;
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.facebook.hiveio.record.HiveRecord;
 import com.google.common.base.Objects;
@@ -40,7 +41,7 @@ import java.util.List;
  */
 public class DefaultRecord implements HiveRecord {
   /** Logger */
-  public static final Logger LOG = Logger.getLogger(DefaultRecord.class);
+  private static final Logger LOG = LoggerFactory.getLogger(DefaultRecord.class);
 
   /** Partition data */
   private final String[] partitionValues;

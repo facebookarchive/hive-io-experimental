@@ -18,6 +18,8 @@
 package com.facebook.hiveio.common;
 
 import org.apache.hadoop.hive.ql.stats.StatsSetupConst;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.barney4j.utils.unit.ByteUnit;
 import com.google.common.base.Objects;
@@ -30,6 +32,8 @@ import static java.lang.Long.parseLong;
  * Information about a table or partition. See "DESC FORMATTED table"
  */
 public class HiveStats {
+  private static final Logger LOG = LoggerFactory.getLogger(HiveStats.class);
+
   private long totalSize;
   private long rawSize;
   private long numRows;
@@ -73,6 +77,7 @@ public class HiveStats {
   }
 
   public static HiveStats fromParams(Map<String, String> params) {
+    LOG.info("Table params: {}", params);
     long totalSize = parseLong(params.get(StatsSetupConst.TOTAL_SIZE));
     long rawSize = parseLong(params.get(StatsSetupConst.RAW_DATA_SIZE));
     long numRows = parseLong(params.get(StatsSetupConst.ROW_COUNT));

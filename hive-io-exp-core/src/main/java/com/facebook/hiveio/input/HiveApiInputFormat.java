@@ -31,8 +31,9 @@ import org.apache.hadoop.mapreduce.InputFormat;
 import org.apache.hadoop.mapreduce.InputSplit;
 import org.apache.hadoop.mapreduce.JobContext;
 import org.apache.hadoop.mapreduce.TaskAttemptContext;
-import org.apache.log4j.Logger;
 import org.apache.thrift.TException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.facebook.hiveio.common.HadoopUtils;
 import com.facebook.hiveio.common.HiveMetastores;
@@ -62,7 +63,7 @@ import static com.google.common.collect.Lists.transform;
 public class HiveApiInputFormat
     extends InputFormat<WritableComparable, HiveReadableRecord> {
   /** Logger */
-  public static final Logger LOG = Logger.getLogger(HiveApiInputFormat.class);
+  private static final Logger LOG = LoggerFactory.getLogger(HiveApiInputFormat.class);
 
   /** Default profile ID if none given */
   public static final String DEFAULT_PROFILE_ID = "input-profile";
@@ -133,7 +134,7 @@ public class HiveApiInputFormat
   public List<InputSplit> getSplits(JobContext jobContext)
     throws IOException, InterruptedException
   {
-    LOG.info("getSplits for profile " + myProfileId);
+    LOG.info("getSplits for profile {}", myProfileId);
 
     HiveConf conf = new HiveConf(jobContext.getConfiguration(), HiveApiInputFormat.class);
 
@@ -182,10 +183,9 @@ public class HiveApiInputFormat
 
       org.apache.hadoop.mapred.InputSplit[] baseSplits =
           baseInputFormat.getSplits(new JobConf(conf), inputDesc.getNumSplits());
-      LOG.info("Requested " + inputDesc.getNumSplits() + " splits from partition (" +
-          (partitionNum+1) + " out of " + Iterables.size(partitions) +
-          ") partition values: " + inputPartition.getInputSplitData().getPartitionValues() +
-          ", got " + baseSplits.length + " splits from inputFormat " +
+      LOG.info("Requested {} splits from partition ({} out of {}) partition values: {}, got {} splits from inputFormat {}",
+          inputDesc.getNumSplits(), partitionNum+1, Iterables.size(partitions),
+          inputPartition.getInputSplitData().getPartitionValues(), baseSplits.length,
           baseInputFormat.getClass().getCanonicalName());
 
       for (org.apache.hadoop.mapred.InputSplit baseSplit : baseSplits)  {

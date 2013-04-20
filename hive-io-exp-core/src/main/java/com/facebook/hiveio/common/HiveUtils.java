@@ -26,8 +26,9 @@ import org.apache.hadoop.hive.metastore.api.MetaException;
 import org.apache.hadoop.hive.metastore.api.Partition;
 import org.apache.hadoop.hive.metastore.api.ThriftHiveMetastore;
 import org.apache.hadoop.hive.serde2.ColumnProjectionUtils;
-import org.apache.log4j.Logger;
 import org.apache.thrift.TException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.facebook.hiveio.input.HiveInputDescription;
 import com.google.common.base.Function;
@@ -58,7 +59,7 @@ public class HiveUtils {
       };
 
   /** Logger */
-  private static final Logger LOG = Logger.getLogger(HiveUtils.class);
+  private static final Logger LOG = LoggerFactory.getLogger(HiveUtils.class);
 
   /** Don't construct, allow inheritance */
   protected HiveUtils() { }
@@ -73,7 +74,10 @@ public class HiveUtils {
     HiveStats hiveStats = new HiveStats();
 
     for (int i = 0; i < partitions.size(); ++i) {
-      hiveStats.add(HiveStats.fromParams(partitions.get(i).getParameters()));
+      Partition partition = partitions.get(i);
+      HiveStats partitionStats = HiveStats.fromParams(partition.getParameters());
+      LOG.info("Adding HiveStats for partition {}: {}", partition.getValues(), partitionStats);
+      hiveStats.add(partitionStats);
     }
 
     return hiveStats;
@@ -98,8 +102,7 @@ public class HiveUtils {
         continue;
       }
       if (uri.getScheme() == null) {
-        LOG.error("URI '" + parts[i] + "' from key " + key +
-            " does not have a scheme");
+        LOG.error("URI '{}' from key {} does not have a scheme", parts[i], key);
       } else {
         uris.add(uri);
       }

@@ -27,7 +27,8 @@ import org.apache.hadoop.conf.Configured;
 import org.apache.hadoop.io.NullWritable;
 import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.util.Tool;
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.facebook.hiveio.common.HadoopUtils;
 import com.facebook.hiveio.record.HiveWritableRecord;
@@ -48,7 +49,7 @@ import java.util.List;
   TBLPROPERTIES ('RETENTION_PLATINUM'='90')
  */
 public class WritingTool extends Configured implements Tool {
-  private static final Logger LOG = Logger.getLogger(WritingTool.class);
+  private static final Logger LOG = LoggerFactory.getLogger(WritingTool.class);
 
   @Override
   public int run(String[] args) throws Exception {

@@ -18,10 +18,11 @@
 package com.facebook.hiveio.cmdline;
 
 import com.facebook.hiveio.conf.AllOptions;
+import com.facebook.hiveio.options.BaseCmd;
 import io.airlift.command.Command;
 
 @Command(name = "conf-options", description = "Print Configuration Options")
-public class ConfOptionsCmd extends BaseCmd {
+class ConfOptionsCmd extends BaseCmd {
   @Override public void execute() throws Exception {
     AllOptions.main(new String[0]);
   }

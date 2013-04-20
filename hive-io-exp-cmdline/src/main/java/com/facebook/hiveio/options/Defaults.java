@@ -15,13 +15,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.facebook.hiveio.cmdline;
+package com.facebook.hiveio.options;
 
 public class Defaults {
-  private static final String PLATINUM_METASTORE_HOST = "";
-  private static final String SILVER_METASTORE_HOST = "hadoopminimstr032.frc1.facebook.com";
+  private static final String PLATINUM_METASTORE_HOST = "hadoopminimstr032.frc1.facebook.com";
+  private static final String SILVER_METASTORE_HOST = "hadoopminimstr001.prn1.facebook.com";
 
-  public static final String METASTORE_HOST = SILVER_METASTORE_HOST;
+  public static final String METASTORE_HOST = PLATINUM_METASTORE_HOST;
   public static final int METASTORE_PORT = 9083;
 
   public static final String DATABASE = "default";

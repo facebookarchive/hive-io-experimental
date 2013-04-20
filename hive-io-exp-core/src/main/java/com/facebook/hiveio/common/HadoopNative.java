@@ -22,7 +22,8 @@ import org.apache.hadoop.hive.ql.io.CodecPool;
 import org.apache.hadoop.io.compress.CompressionCodec;
 import org.apache.hadoop.io.compress.CompressionCodecFactory;
 import org.apache.hadoop.util.NativeCodeLoader;
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.google.common.collect.Lists;
 import com.google.common.io.Files;
@@ -39,7 +40,7 @@ import java.util.List;
 import java.util.Set;
 
 public class HadoopNative {
-  private static final Logger LOG = Logger.getLogger(HadoopNative.class);
+  private static final Logger LOG = LoggerFactory.getLogger(HadoopNative.class);
 
   private static boolean loaded = false;
   private static Throwable error = null;
@@ -68,7 +69,7 @@ public class HadoopNative {
 
       List<Class<? extends CompressionCodec>> codecs =
           CompressionCodecFactory.getCodecClasses(new Configuration());
-      LOG.info("Compression Codecs: " + codecs);
+      LOG.info("Compression Codecs: {}", codecs);
 
       loaded = true;
     } catch (Throwable t) {

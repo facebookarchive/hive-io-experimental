@@ -22,8 +22,9 @@ import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.MapWritable;
 import org.apache.hadoop.io.Writable;
-import org.apache.log4j.Logger;
 import org.apache.thrift.TException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.facebook.hiveio.output.HiveApiOutputFormat;
 import com.facebook.hiveio.output.HiveOutputDescription;
@@ -37,7 +38,7 @@ import java.util.List;
 import java.util.Map;
 
 public class HiveTools {
-  private static final Logger LOG = Logger.getLogger(HiveTools.class);
+  private static final Logger LOG = LoggerFactory.getLogger(HiveTools.class);
   
   public static final int NUM_COLUMNS = 3;
 
@@ -75,11 +76,11 @@ public class HiveTools {
     outputDesc.setTableName("hive_io_test");
     Map<String, String> partitionValues = ImmutableMap.of("ds", "2013-04-01");
     outputDesc.setPartitionValues(partitionValues);
-    LOG.info("Writing to " + outputDesc);
+    LOG.info("Writing to {}", outputDesc);
     try {
       HiveApiOutputFormat.initProfile(conf, outputDesc, SampleOutputFormat.SAMPLE_PROFILE_ID);
     } catch (TException e) {
-      LOG.fatal("Failed to initialize profile " + outputDesc);
+      LOG.error("Failed to initialize profile {}", outputDesc);
       throw new IOException(e);
     }
   }

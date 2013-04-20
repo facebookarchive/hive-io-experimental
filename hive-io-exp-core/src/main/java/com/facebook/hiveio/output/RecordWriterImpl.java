@@ -26,7 +26,8 @@ import org.apache.hadoop.io.Writable;
 import org.apache.hadoop.io.WritableComparable;
 import org.apache.hadoop.mapreduce.RecordWriter;
 import org.apache.hadoop.mapreduce.TaskAttemptContext;
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.facebook.hiveio.common.ProgressReporter;
 import com.facebook.hiveio.record.HiveWritableRecord;
@@ -39,7 +40,7 @@ import java.util.List;
  */
 class RecordWriterImpl extends RecordWriter<WritableComparable, HiveWritableRecord> {
   /** Logger */
-  private static final Logger LOG = Logger.getLogger(RecordWriterImpl.class);
+  private static final Logger LOG = LoggerFactory.getLogger(RecordWriterImpl.class);
 
   // CHECKSTYLE: stop LineLength
   /** Base Hadoop RecordWriter */

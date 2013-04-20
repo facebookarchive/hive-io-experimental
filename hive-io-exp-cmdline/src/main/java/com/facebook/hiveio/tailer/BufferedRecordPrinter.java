@@ -15,22 +15,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.facebook.hiveio.cmdline;
+package com.facebook.hiveio.tailer;
 
-import com.facebook.hiveio.benchmark.InputBenchmarkCmd;
-import com.facebook.hiveio.tailer.TailerCmd;
-import io.airlift.command.Cli;
-import io.airlift.command.Help;
+import com.facebook.hiveio.record.HiveReadableRecord;
 
-public class Main {
-  public static void main(String[] args) throws Exception {
-    Cli.CliBuilder<Runnable> builder = Cli.<Runnable>builder("hio");
-    builder.withDefaultCommand(Help.class);
-    builder.withCommand(Help.class);
-    builder.withCommand(InputBenchmarkCmd.class);
-    builder.withCommand(TailerCmd.class);
-    builder.withCommand(ConfOptionsCmd.class);
-    Cli<Runnable> cli = builder.build();
-    cli.parse(args).run();
+class BufferedRecordPrinter implements RecordPrinter {
+  @Override public void printRecord(HiveReadableRecord record, int numColumns,
+      Context context) {
+    DefaultRecordPrinter.addRecordToStringBuilder(record, numColumns, context);
+
+    ThreadContext perThread = context.perThread.get();
+    ++perThread.recordsInBuffer;
+    if (perThread.recordsInBuffer >= context.opts.recordBufferFlush) {
+      perThread.flushBuffer();
+    }
   }
 }

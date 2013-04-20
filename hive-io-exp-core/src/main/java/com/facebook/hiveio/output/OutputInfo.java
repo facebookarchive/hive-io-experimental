@@ -28,7 +28,8 @@ import org.apache.hadoop.io.Writable;
 import org.apache.hadoop.io.WritableUtils;
 import org.apache.hadoop.mapred.OutputFormat;
 import org.apache.hadoop.util.ReflectionUtils;
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.facebook.hiveio.common.Classes;
 import com.facebook.hiveio.common.SerDes;
@@ -48,7 +49,7 @@ import java.util.Map;
  */
 class OutputInfo implements Writable {
   /** Logger */
-  public static final Logger LOG = Logger.getLogger(OutputInfo.class);
+  private static final Logger LOG = LoggerFactory.getLogger(OutputInfo.class);
 
   /** Parameters for Hive table */
   private final Map<String, String> tableParams;

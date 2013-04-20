@@ -23,7 +23,8 @@ import org.apache.hadoop.hive.serde2.columnar.BytesRefArrayWritable;
 import org.apache.hadoop.hive.serde2.objectinspector.ObjectInspector;
 import org.apache.hadoop.hive.serde2.objectinspector.PrimitiveObjectInspector;
 import org.apache.hadoop.io.Writable;
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.facebook.hiveio.common.HiveTableName;
 import com.facebook.hiveio.common.HiveType;
@@ -32,7 +33,7 @@ import com.facebook.hiveio.input.parser.array.ArrayParserData;
 import com.facebook.hiveio.input.parser.array.BytesParser;
 
 public class Parsers {
-  private static final Logger LOG = Logger.getLogger(Parsers.class);
+  private static final Logger LOG = LoggerFactory.getLogger(Parsers.class);
 
   public static RecordParser<Writable> bestParser(Deserializer deserializer,
       int numColumns, int[] columnIndexes, HiveTableName tableName,
@@ -68,8 +69,8 @@ public class Parsers {
       parser = new ArrayParser(partitionValues, numColumns, data);
     }
 
-    LOG.info("Using " + parser.getClass().getSimpleName() +
-        " to parse hive records from table " + tableName.dotString());
+    LOG.info("Using {} to parse hive records from table {}",
+        parser.getClass().getSimpleName(), tableName.dotString());
     return parser;
   }
 }

@@ -23,7 +23,8 @@ import org.apache.hadoop.hive.metastore.api.SerDeInfo;
 import org.apache.hadoop.hive.metastore.api.StorageDescriptor;
 import org.apache.hadoop.hive.serde2.Deserializer;
 import org.apache.hadoop.io.Writable;
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.facebook.hiveio.common.SerDes;
 import com.facebook.hiveio.common.Writables;
@@ -44,7 +45,7 @@ import java.util.Map;
  */
 class InputSplitData implements Writable {
   /** Logger */
-  public static final Logger LOG = Logger.getLogger(InputSplitData.class);
+  private static final Logger LOG = LoggerFactory.getLogger(InputSplitData.class);
 
   /** CLass for Deserializer */
   private Class<? extends Deserializer> deserializerClass;
@@ -93,7 +94,7 @@ class InputSplitData implements Writable {
       // CHECKSTYLE: stop IllegalCatch
     } catch (Exception e) {
       // CHECKSTYLE: resume IllegalCatch
-      LOG.fatal("Could not instantiate Deserializer " + deserializerClass, e);
+      LOG.error("Could not instantiate Deserializer {}", deserializerClass, e);
     }
     return deserializer;
   }

@@ -27,7 +27,8 @@ import org.apache.hadoop.hive.serde2.Deserializer;
 import org.apache.hadoop.hive.serde2.SerDe;
 import org.apache.hadoop.hive.serde2.SerDeException;
 import org.apache.hadoop.hive.serde2.Serializer;
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.List;
 import java.util.Map;
@@ -38,7 +39,7 @@ import java.util.Properties;
  */
 public class SerDes {
   /** Logger */
-  private static final Logger LOG = Logger.getLogger(SerDes.class);
+  private static final Logger LOG = LoggerFactory.getLogger(SerDes.class);
 
   /** Don't construct */
   protected SerDes() { }

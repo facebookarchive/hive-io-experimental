@@ -15,22 +15,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.facebook.hiveio.cmdline;
+package com.facebook.hiveio.options;
 
-import com.facebook.hiveio.benchmark.InputBenchmarkCmd;
-import com.facebook.hiveio.tailer.TailerCmd;
-import io.airlift.command.Cli;
-import io.airlift.command.Help;
+import io.airlift.command.Option;
 
-public class Main {
-  public static void main(String[] args) throws Exception {
-    Cli.CliBuilder<Runnable> builder = Cli.<Runnable>builder("hio");
-    builder.withDefaultCommand(Help.class);
-    builder.withCommand(Help.class);
-    builder.withCommand(InputBenchmarkCmd.class);
-    builder.withCommand(TailerCmd.class);
-    builder.withCommand(ConfOptionsCmd.class);
-    Cli<Runnable> cli = builder.build();
-    cli.parse(args).run();
-  }
+public class TableOptions {
+  @Option(name = "--database", description = "Database to use")
+  public String database = Defaults.DATABASE;
+
+  @Option(name = {"-t", "--table"}, description = "Table to read from")
+  public String table = "inference_sims";
+
+  @Option(name = {"-f", "--partitionFilter"}, description = "Partition filter")
+  public String partitionFilter = Defaults.PARTITION_FILTER;
 }
