@@ -1,6 +1,6 @@
 # Overview #
 
-[![Build Status](https://travis-ci.org/nitay/hive-io-experimental.png?branch=master)](https://travis-ci.org/nitay/hive-io-experimental)
+[![Build Status](https://travis-ci.org/facebook/hive-io-experimental.png?branch=master)](https://travis-ci.org/facebook/hive-io-experimental)
 
 A Hive Input/Output Library in Java.
 
