@@ -24,8 +24,5 @@ public class TableOptions {
   public String database = Defaults.DATABASE;
 
   @Option(name = {"-t", "--table"}, description = "Table to read from")
-  public String table = "inference_sims";
-
-  @Option(name = {"-f", "--partition-filter"}, description = "Partition filter")
-  public String partitionFilter = Defaults.PARTITION_FILTER;
+  public String table;
 }

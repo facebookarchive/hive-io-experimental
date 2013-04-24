@@ -259,7 +259,7 @@ public class HiveApiInputFormat
     // CHECKSTYLE: resume LineLength
 
     RecordParser<Writable> recordParser = getParser(baseRecordReader.createValue(),
-        split.getTableSchema().getTableName(), split, columnIds);
+        split.getTableSchema().getTableName(), split, columnIds, conf);
 
     RecordReaderImpl reader = new RecordReaderImpl(baseRecordReader, recordParser);
     reader.setObserver(observer);
@@ -268,12 +268,13 @@ public class HiveApiInputFormat
   }
 
   private RecordParser<Writable> getParser(Writable exampleValue,
-    HiveTableName tableName, HInputSplit split, int[] columnIds)
+    HiveTableName tableName, HInputSplit split, int[] columnIds,
+      Configuration conf)
   {
     Deserializer deserializer = split.getDeserializer();
     String[] partitionValues = split.getPartitionValues();
     int numColumns = split.getTableSchema().numColumns();
     return Parsers.bestParser(deserializer, numColumns, columnIds, tableName,
-        partitionValues, exampleValue);
+        partitionValues, exampleValue, conf);
   }
 }

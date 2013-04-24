@@ -35,12 +35,14 @@ import java.lang.reflect.Field;
 import java.net.URI;
 import java.util.List;
 
+import static java.util.concurrent.TimeUnit.SECONDS;
+
 /**
  * Wrapper around Thrift MetasStore client with helper methods.
  */
 public class HiveMetastores {
   /** Connect timeout in milliseconds */
-  public static final int DEFAULT_TIMEOUT_MS = 20 * 1000;
+  public static final int DEFAULT_TIMEOUT_MS = (int) SECONDS.toMillis(20);
 
   /** Logger */
   private static final Logger LOG = LoggerFactory.getLogger(HiveMetastores.class);
@@ -57,7 +59,8 @@ public class HiveMetastores {
    * @throws TTransportException Connection errors
    */
   public static ThriftHiveMetastore.Iface create(String host, int port,
-    int timeoutMillis) throws TTransportException {
+    int timeoutMillis) throws TTransportException
+  {
     TTransport transport = new TSocket(host, port, timeoutMillis);
     transport.open();
     TProtocol protocol = new TBinaryProtocol(transport);
@@ -97,7 +100,7 @@ public class HiveMetastores {
   }
 
   /**
-   * Create client by instantiating Hive's own client and using relfection to
+   * Create client by instantiating Hive's own client and using reflection to
    * grab the thrift client out of that.
    *
    * @param hiveConf HiveConf to use

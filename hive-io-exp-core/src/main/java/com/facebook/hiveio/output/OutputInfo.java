@@ -150,16 +150,20 @@ class OutputInfo implements Writable {
     return partitionPath;
   }
 
-  public void setPartitionPath(String partitionPath) {
+  public OutputInfo setPartitionPath(String partitionPath) {
+    LOG.info("Setting partition path to {}", partitionPath);
     this.partitionPath = partitionPath;
+    return this;
   }
 
   public String getFinalOutputPath() {
     return finalOutputPath;
   }
 
-  public void setFinalOutputPath(String finalOutputPath) {
+  public OutputInfo setFinalOutputPath(String finalOutputPath) {
+    LOG.info("Setting final output path to {}", finalOutputPath);
     this.finalOutputPath = finalOutputPath;
+    return this;
   }
 
   /**

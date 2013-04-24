@@ -21,12 +21,12 @@ import com.facebook.hiveio.record.HiveReadableRecord;
 
 class BufferedRecordPrinter implements RecordPrinter {
   @Override public void printRecord(HiveReadableRecord record, int numColumns,
-      Context context) {
-    DefaultRecordPrinter.addRecordToStringBuilder(record, numColumns, context);
+      Context context, TailerArgs args) {
+    DefaultRecordPrinter.addRecordToStringBuilder(record, numColumns, context, args);
 
     ThreadContext perThread = context.perThread.get();
     ++perThread.recordsInBuffer;
-    if (perThread.recordsInBuffer >= context.opts.recordBufferFlush) {
+    if (perThread.recordsInBuffer >= args.recordBufferFlush) {
       perThread.flushBuffer();
     }
   }

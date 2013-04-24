@@ -15,17 +15,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.facebook.hiveio.cmdline;
+package com.facebook.hiveio.output;
 
-import com.facebook.hiveio.conf.AllOptions;
-import com.facebook.hiveio.options.BaseCmd;
-import com.facebook.hiveio.output.OutputConf;
-import io.airlift.command.Command;
+import com.facebook.hiveio.options.MetastoreOptions;
+import com.facebook.hiveio.options.MultiThreadOptions;
+import com.facebook.hiveio.options.OutputTableOptions;
 
-@Command(name = "conf-options", description = "Print Configuration Options")
-public class ConfOptionsCmd extends BaseCmd {
-  @Override public void execute() throws Exception {
-    Class klass = OutputConf.class;
-    AllOptions.main(new String[0]);
-  }
+import javax.inject.Inject;
+
+class OutputArgs {
+  @Inject MetastoreOptions metastore = new MetastoreOptions();
+  @Inject OutputTableOptions table = new OutputTableOptions();
+  @Inject MultiThreadOptions multiThread = new MultiThreadOptions();
 }

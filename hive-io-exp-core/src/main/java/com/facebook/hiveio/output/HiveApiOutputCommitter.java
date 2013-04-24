@@ -21,11 +21,10 @@ package com.facebook.hiveio.output;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
-import org.apache.hadoop.hive.conf.HiveConf;
-import org.apache.hadoop.hive.metastore.HiveMetaStoreClient;
 import org.apache.hadoop.hive.metastore.api.Partition;
 import org.apache.hadoop.hive.metastore.api.StorageDescriptor;
 import org.apache.hadoop.hive.metastore.api.Table;
+import org.apache.hadoop.hive.metastore.api.ThriftHiveMetastore;
 import org.apache.hadoop.mapreduce.JobContext;
 import org.apache.hadoop.mapreduce.JobStatus;
 import org.apache.hadoop.mapreduce.OutputCommitter;
@@ -47,10 +46,11 @@ import java.util.List;
 class HiveApiOutputCommitter extends OutputCommitter {
   private static final Logger LOG = LoggerFactory.getLogger(HiveApiOutputCommitter.class);
 
-  /** Base Hadoop output committer */
-  private final OutputCommitter baseCommitter;
   /** Profile ID to use */
   private final String profileId;
+
+  /** Base Hadoop output committer */
+  private final OutputCommitter baseCommitter;
 
   /**
    * Constructor
@@ -58,19 +58,22 @@ class HiveApiOutputCommitter extends OutputCommitter {
    * @param baseCommitter Base Hadoop committer
    * @param profileId Profile ID
    */
-  public HiveApiOutputCommitter(OutputCommitter baseCommitter,
-                                String profileId) {
+  public HiveApiOutputCommitter(OutputCommitter baseCommitter, String profileId) {
     this.baseCommitter = baseCommitter;
     this.profileId = profileId;
   }
 
   @Override
-  public void setupJob(JobContext jobContext) throws IOException {
+  public void setupJob(JobContext jobContext) throws IOException
+  {
+    LOG.info("OutputCommitter::setupJob");
     baseCommitter.setupJob(jobContext);
   }
 
   @Override
-  public void commitJob(JobContext jobContext) throws IOException {
+  public void commitJob(JobContext jobContext) throws IOException
+  {
+    LOG.info("OutputCommitter::commitJob");
     baseCommitter.commitJob(jobContext);
 
     Configuration conf = jobContext.getConfiguration();
@@ -101,6 +104,7 @@ class HiveApiOutputCommitter extends OutputCommitter {
     if (fs.exists(outputPath)) {
       Path successPath = new Path(outputPath, "_SUCCESS");
       if (!fs.exists(successPath)) {
+        LOG.info("Writing success file to {}", successPath);
         fs.create(successPath).close();
       }
     }
@@ -114,19 +118,17 @@ class HiveApiOutputCommitter extends OutputCommitter {
    * @param outputInfo Internal output information
    * @throws IOException
    */
-  private void registerPartitions(Configuration conf,
-    HiveOutputDescription outputDesc, OutputInfo outputInfo)
-    throws IOException {
-    HiveConf hiveConf = new HiveConf(conf, HiveApiOutputCommitter.class);
-
+  private void registerPartitions(Configuration conf, HiveOutputDescription outputDesc,
+      OutputInfo outputInfo) throws IOException
+  {
     String dbName = outputDesc.getDbName();
     String tableName = outputDesc.getTableName();
 
-    HiveMetaStoreClient client;
+    ThriftHiveMetastore.Iface client;
     Table hiveTable;
     try {
-      client = new HiveMetaStoreClient(hiveConf);
-      hiveTable = client.getTable(dbName, tableName);
+      client = outputDesc.metastoreClient(conf);
+      hiveTable = client.get_table(dbName, tableName);
       // CHECKSTYLE: stop IllegalCatch
     } catch (Exception e) {
       // CHECKSTYLE: resume IllegalCatch
@@ -137,9 +139,8 @@ class HiveApiOutputCommitter extends OutputCommitter {
     partition.setDbName(dbName);
     partition.setTableName(tableName);
     partition.setParameters(outputInfo.getTableParams());
-    List<String> partitionValues = HiveUtils
-        .orderedPartitionValues(hiveTable.getPartitionKeys(),
-            outputDesc.getPartitionValues());
+    List<String> partitionValues = HiveUtils.orderedPartitionValues(
+        hiveTable.getPartitionKeys(), outputDesc.getPartitionValues());
     partition.setValues(partitionValues);
 
     StorageDescriptor sd = new StorageDescriptor(hiveTable.getSd());
@@ -148,6 +149,8 @@ class HiveApiOutputCommitter extends OutputCommitter {
     sd.setCols(outputInfo.getColumnInfo());
     partition.setSd(sd);
 
+    LOG.info("Registering partition with values {} located at {}",
+        outputInfo.getSerializerParams(), outputInfo.getFinalOutputPath());
     try {
       client.add_partition(partition);
       // CHECKSTYLE: stop IllegalCatch
@@ -177,41 +180,54 @@ class HiveApiOutputCommitter extends OutputCommitter {
       throw new IllegalStateException("Table's root path fs " + tableFs.getUri() +
           " is not on same as its partition path fs " + writePathFs.getUri());
     }
+    LOG.info("No partitions, just copying data from {} to {}", writePath, tablePath);
     FileSystems.move(tableFs, writePath, writePath, tablePath);
     tableFs.delete(writePath, true);
   }
 
   @Override @Deprecated
-  public void cleanupJob(JobContext jobContext) throws IOException {
+  public void cleanupJob(JobContext jobContext) throws IOException
+  {
+    LOG.info("OutputCommitter::cleanupJob");
     baseCommitter.cleanupJob(jobContext);
   }
 
   @Override
   public void abortJob(JobContext jobContext, JobStatus.State state)
-    throws IOException {
+    throws IOException
+  {
+    LOG.info("OutputCommitter::abortJob");
     baseCommitter.abortJob(jobContext, state);
     HadoopUtils.deleteOutputDir(jobContext.getConfiguration());
   }
 
   @Override
-  public void setupTask(TaskAttemptContext taskContext) throws IOException {
+  public void setupTask(TaskAttemptContext taskContext) throws IOException
+  {
+    LOG.info("OutputCommitter::setupTask");
     baseCommitter.setupTask(taskContext);
   }
 
   @Override
   public boolean needsTaskCommit(TaskAttemptContext taskContext)
-    throws IOException {
+    throws IOException
+  {
+    LOG.info("OutputCommitter::needsTaskCommit");
     return baseCommitter.needsTaskCommit(taskContext);
   }
 
   @Override
-  public void commitTask(TaskAttemptContext taskContext) throws IOException {
+  public void commitTask(TaskAttemptContext taskContext) throws IOException
+  {
+    LOG.info("OutputCommitter::commitTask");
     HadoopUtils.setWorkOutputDir(taskContext);
     baseCommitter.commitTask(taskContext);
   }
 
   @Override
-  public void abortTask(TaskAttemptContext taskContext) throws IOException {
+  public void abortTask(TaskAttemptContext taskContext) throws IOException
+  {
+    LOG.info("OutputCommitter::abortTask");
     baseCommitter.abortTask(taskContext);
   }
 }

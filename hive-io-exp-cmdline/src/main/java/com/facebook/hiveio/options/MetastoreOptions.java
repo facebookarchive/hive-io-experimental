@@ -17,14 +17,22 @@
  */
 package com.facebook.hiveio.options;
 
+import org.apache.hadoop.hive.metastore.api.ThriftHiveMetastore;
+import org.apache.thrift.transport.TTransportException;
+
+import com.facebook.hiveio.common.HiveMetastores;
 import io.airlift.command.Option;
 
 public class MetastoreOptions {
   /** Hive host */
-  @Option(name = {"--metastore-host"}, description = "Hive Metastore host")
-  public String hiveHost = Defaults.METASTORE_HOST;
+  @Option(name = {"--metastore-host"}, description = "Hive Metastore Host")
+  public String host = Defaults.METASTORE_HOST;
 
   /** Hive port */
-  @Option(name = {"--metastore-port"}, description = "Hive Metatstore port")
-  public int hivePort = Defaults.METASTORE_PORT;
+  @Option(name = {"--metastore-port"}, description = "Hive Metatstore Port")
+  public int port = Defaults.METASTORE_PORT;
+
+  public ThriftHiveMetastore.Iface makeClient() throws TTransportException {
+    return HiveMetastores.create(host, port);
+  }
 }

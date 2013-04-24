@@ -36,7 +36,6 @@ class Context {
   public final HiveStats hiveStats;
   public Queue<InputSplit> splitsQueue;
 
-  public final TailerCmd opts;
   public final Stats stats;
   public final AtomicLong rowsParsed;
 
@@ -47,21 +46,20 @@ class Context {
   };
 
   Context(HiveApiInputFormat hiveApiInputFormat, HiveConf hiveConf,
-      HiveTableSchema schema, HiveStats hiveStats, TailerCmd opts, Stats stats) {
+      HiveTableSchema schema, HiveStats hiveStats, Stats stats) {
     this.hiveApiInputFormat = hiveApiInputFormat;
     this.hiveConf = hiveConf;
     this.schema = schema;
     this.hiveStats = hiveStats;
-    this.opts = opts;
     this.stats = stats;
     this.rowsParsed = new AtomicLong();
   }
 
-  public boolean hasMoreSplitsToRead() {
-    return !splitsQueue.isEmpty() && !limitReached();
+  public boolean hasMoreSplitsToRead(long limit) {
+    return !splitsQueue.isEmpty() && !limitReached(limit);
   }
 
-  public boolean limitReached() {
-    return rowsParsed.get() >= opts.limit;
+  public boolean limitReached(long limit) {
+    return rowsParsed.get() >= limit;
   }
 }

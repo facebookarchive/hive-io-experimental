@@ -75,9 +75,7 @@ public class ResettableRecordWriterImpl extends RecordWriterImpl {
     super.write(key, value);
     long elapsedTime = System.currentTimeMillis() - startTime;
     if (elapsedTime > writeTimeoutMs) {
-      if (LOG.isInfoEnabled()) {
-        LOG.info("write: Write taking too long ({}s), creating new file to write to", elapsedTime);
-      }
+      LOG.info("write: Write taking too long ({}s), creating new file to write to", elapsedTime);
       baseWriter.close(new ProgressReporter(taskAttemptContext));
       baseWriter = HiveApiOutputFormat.getBaseRecordWriter(taskAttemptContext, baseOutputFormat);
     }

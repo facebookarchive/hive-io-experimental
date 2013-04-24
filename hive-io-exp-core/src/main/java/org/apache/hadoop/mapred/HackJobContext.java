@@ -15,17 +15,20 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.facebook.hiveio.cmdline;
+package org.apache.hadoop.mapred;
 
-import com.facebook.hiveio.conf.AllOptions;
-import com.facebook.hiveio.options.BaseCmd;
-import com.facebook.hiveio.output.OutputConf;
-import io.airlift.command.Command;
+import org.apache.hadoop.mapreduce.JobID;
+import org.apache.hadoop.util.Progressable;
 
-@Command(name = "conf-options", description = "Print Configuration Options")
-public class ConfOptionsCmd extends BaseCmd {
-  @Override public void execute() throws Exception {
-    Class klass = OutputConf.class;
-    AllOptions.main(new String[0]);
+/**
+ * This is a hack to expose mapred.JobContext which has package level constructors
+ */
+public class HackJobContext extends JobContext {
+  public HackJobContext(JobConf conf, org.apache.hadoop.mapreduce.JobID jobId) {
+    super(conf, jobId);
+  }
+
+  public HackJobContext(JobConf conf, JobID jobId, Progressable progress) {
+    super(conf, jobId, progress);
   }
 }

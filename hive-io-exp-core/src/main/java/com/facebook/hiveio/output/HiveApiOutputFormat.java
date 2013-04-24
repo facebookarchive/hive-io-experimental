@@ -21,12 +21,10 @@ package com.facebook.hiveio.output;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
-import org.apache.hadoop.hive.conf.HiveConf;
-import org.apache.hadoop.hive.metastore.HiveMetaStoreClient;
 import org.apache.hadoop.hive.metastore.api.FieldSchema;
-import org.apache.hadoop.hive.metastore.api.MetaException;
 import org.apache.hadoop.hive.metastore.api.StorageDescriptor;
 import org.apache.hadoop.hive.metastore.api.Table;
+import org.apache.hadoop.hive.metastore.api.ThriftHiveMetastore;
 import org.apache.hadoop.hive.serde2.Serializer;
 import org.apache.hadoop.hive.serde2.objectinspector.StructObjectInspector;
 import org.apache.hadoop.io.NullWritable;
@@ -49,7 +47,6 @@ import com.facebook.hiveio.common.HadoopUtils;
 import com.facebook.hiveio.common.HiveUtils;
 import com.facebook.hiveio.common.Inspectors;
 import com.facebook.hiveio.common.ProgressReporter;
-import com.facebook.hiveio.input.HiveApiInputFormat;
 import com.facebook.hiveio.record.HiveWritableRecord;
 import com.facebook.hiveio.schema.HiveTableSchema;
 import com.facebook.hiveio.schema.HiveTableSchemaImpl;
@@ -136,10 +133,9 @@ public class HiveApiOutputFormat
     String dbName = outputDesc.getDbName();
     String tableName = outputDesc.getTableName();
 
-    HiveConf hiveConf = new HiveConf(conf, HiveApiInputFormat.class);
-    HiveMetaStoreClient client = new HiveMetaStoreClient(hiveConf);
+    ThriftHiveMetastore.Iface client = outputDesc.metastoreClient(conf);
 
-    Table table = client.getTable(dbName, tableName);
+    Table table = client.get_table(dbName, tableName);
     sanityCheck(table, outputDesc);
 
     OutputInfo oti = new OutputInfo(table);
@@ -270,12 +266,12 @@ public class HiveApiOutputFormat
    */
   private void checkPartitionDoesntExist(Configuration conf,
     HiveOutputDescription description, OutputInfo oti)
-    throws IOException {
-    HiveConf hiveConf = new HiveConf(conf, HiveApiInputFormat.class);
-    HiveMetaStoreClient client;
+    throws IOException
+  {
+    ThriftHiveMetastore.Iface client;
     try {
-      client = new HiveMetaStoreClient(hiveConf);
-    } catch (MetaException e) {
+      client = description.metastoreClient(conf);
+    } catch (TException e) {
       throw new IOException(e);
     }
 
@@ -303,11 +299,11 @@ public class HiveApiOutputFormat
    * @return true if partition exists
    */
   private boolean partitionExists(
-      HiveMetaStoreClient client, String db, String table,
+      ThriftHiveMetastore.Iface client, String db, String table,
       List<String> partitionValues) {
     List<String> partitionNames;
     try {
-      partitionNames = client.listPartitionNames(db, table,
+      partitionNames = client.get_partition_names_ps(db, table,
           partitionValues, (short) 1);
       // CHECKSTYLE: stop IllegalCatch
     } catch (Exception e) {
@@ -319,7 +315,8 @@ public class HiveApiOutputFormat
 
   @Override
   public RecordWriterImpl getRecordWriter(TaskAttemptContext taskAttemptContext)
-    throws IOException, InterruptedException {
+    throws IOException, InterruptedException
+  {
     HadoopUtils.setWorkOutputDir(taskAttemptContext);
 
     Configuration conf = taskAttemptContext.getConfiguration();
@@ -362,26 +359,31 @@ public class HiveApiOutputFormat
   // CHECKSTYLE: stop LineLengthCheck
   protected static org.apache.hadoop.mapred.RecordWriter<WritableComparable, Writable> getBaseRecordWriter(
     TaskAttemptContext taskAttemptContext,
-    org.apache.hadoop.mapred.OutputFormat baseOutputFormat) throws IOException {
+    org.apache.hadoop.mapred.OutputFormat baseOutputFormat) throws IOException
+  {
     // CHECKSTYLE: resume LineLengthCheck
+    HadoopUtils.setWorkOutputDir(taskAttemptContext);
     JobConf jobConf = new JobConf(taskAttemptContext.getConfiguration());
     int fileId = CREATED_FILES_COUNTER.incrementAndGet();
     String name = FileOutputFormat.getUniqueName(jobConf, "part-" + fileId);
-    if (LOG.isInfoEnabled()) {
-      LOG.info("getBaseRecordWriter: Created new with file {}", name);
-    }
     Reporter reporter = new ProgressReporter(taskAttemptContext);
-    return baseOutputFormat.getRecordWriter(null, jobConf, name, reporter);
+    org.apache.hadoop.mapred.RecordWriter<WritableComparable, Writable> baseWriter =
+        baseOutputFormat.getRecordWriter(null, jobConf, name, reporter);
+    LOG.info("getBaseRecordWriter: Created new {} with file {}", baseWriter, name);
+    return baseWriter;
   }
 
   @Override
-  public OutputCommitter getOutputCommitter(
+  public HiveApiOutputCommitter getOutputCommitter(
     TaskAttemptContext taskAttemptContext)
-    throws IOException, InterruptedException {
+    throws IOException, InterruptedException
+  {
     HadoopUtils.setWorkOutputDir(taskAttemptContext);
     Configuration conf = taskAttemptContext.getConfiguration();
     JobConf jobConf = new JobConf(conf);
     OutputCommitter baseCommitter = jobConf.getOutputCommitter();
+    LOG.info("Getting output committer with base output committer {}",
+        baseCommitter.getClass().getSimpleName());
     return new HiveApiOutputCommitter(baseCommitter, myProfileId);
   }
 }

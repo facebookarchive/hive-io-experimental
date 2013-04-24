@@ -100,7 +100,8 @@ class RecordWriterImpl extends RecordWriter<WritableComparable, HiveWritableReco
    * @throws IOException I/O errors
    */
   private Writable serialize(WritableComparable key, HiveWritableRecord value)
-    throws IOException {
+    throws IOException
+  {
     List<Object> rowData = value.getAllColumns();
     Writable serializedValue;
     observer.beginSerialize(key, value);

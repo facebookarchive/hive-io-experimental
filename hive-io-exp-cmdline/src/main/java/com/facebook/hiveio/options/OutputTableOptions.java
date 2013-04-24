@@ -15,17 +15,21 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.facebook.hiveio.cmdline;
+package com.facebook.hiveio.options;
 
-import com.facebook.hiveio.conf.AllOptions;
-import com.facebook.hiveio.options.BaseCmd;
-import com.facebook.hiveio.output.OutputConf;
-import io.airlift.command.Command;
+import io.airlift.command.Option;
 
-@Command(name = "conf-options", description = "Print Configuration Options")
-public class ConfOptionsCmd extends BaseCmd {
-  @Override public void execute() throws Exception {
-    Class klass = OutputConf.class;
-    AllOptions.main(new String[0]);
+public class OutputTableOptions extends TableOptions {
+  @Option(name = "--partitioned", description = "Write to a table partitioned by ds")
+  public boolean partitioned = false;
+
+  public OutputTableOptions() {
+    table = "hiveio_output_test";
+  }
+
+  public void process() {
+    if (partitioned) {
+      table = "hiveio_output_test_partitioned";
+    }
   }
 }

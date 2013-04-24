@@ -21,17 +21,17 @@ import com.facebook.hiveio.record.HiveReadableRecord;
 
 class DefaultRecordPrinter implements RecordPrinter {
   @Override public void printRecord(HiveReadableRecord record, int numColumns,
-      Context context) {
-    addRecordToStringBuilder(record, numColumns, context);
+      Context context, TailerArgs args) {
+    addRecordToStringBuilder(record, numColumns, context, args);
     context.perThread.get().flushBuffer();
   }
 
   public static void addRecordToStringBuilder(HiveReadableRecord record,
-      int numColumns, Context context) {
+      int numColumns, Context context, TailerArgs args) {
     StringBuilder sb = context.perThread.get().stringBuilder;
     sb.append(String.valueOf(record.get(0)));
     for (int index = 1; index < numColumns; ++index) {
-      sb.append(context.opts.separator);
+      sb.append(args.separator);
       sb.append(String.valueOf(record.get(index)));
     }
   }

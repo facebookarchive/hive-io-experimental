@@ -18,18 +18,20 @@
 package com.facebook.hiveio.cmdline;
 
 import com.facebook.hiveio.benchmark.InputBenchmarkCmd;
+import com.facebook.hiveio.output.OutputCmd;
 import com.facebook.hiveio.tailer.TailerCmd;
 import io.airlift.command.Cli;
 import io.airlift.command.Help;
 
 public class Main {
   public static void main(String[] args) throws Exception {
-    Cli.CliBuilder<Runnable> builder = Cli.<Runnable>builder("hio");
+    Cli.CliBuilder<Runnable> builder = Cli.<Runnable>builder("hiveio");
     builder.withDefaultCommand(Help.class);
     builder.withCommand(Help.class);
     builder.withCommand(InputBenchmarkCmd.class);
     builder.withCommand(TailerCmd.class);
     builder.withCommand(ConfOptionsCmd.class);
+    builder.withCommand(OutputCmd.class);
     Cli<Runnable> cli = builder.build();
     cli.parse(args).run();
   }

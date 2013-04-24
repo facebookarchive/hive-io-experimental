@@ -15,17 +15,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.facebook.hiveio.cmdline;
+package com.facebook.hiveio.options;
 
-import com.facebook.hiveio.conf.AllOptions;
-import com.facebook.hiveio.options.BaseCmd;
-import com.facebook.hiveio.output.OutputConf;
-import io.airlift.command.Command;
+import io.airlift.command.Option;
 
-@Command(name = "conf-options", description = "Print Configuration Options")
-public class ConfOptionsCmd extends BaseCmd {
-  @Override public void execute() throws Exception {
-    Class klass = OutputConf.class;
-    AllOptions.main(new String[0]);
+public class MultiThreadOptions {
+  @Option(name = "--threads", description = "Number of threads to use")
+  public int threads = 1;
+
+  public boolean isMultiThreaded() {
+    return threads > 1;
+  }
+
+  public boolean isSingleThreaded() {
+    return threads == 1;
   }
 }

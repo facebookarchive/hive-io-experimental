@@ -18,6 +18,7 @@
 
 package com.facebook.hiveio.input.parser;
 
+import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.hive.serde2.Deserializer;
 import org.apache.hadoop.hive.serde2.columnar.BytesRefArrayWritable;
 import org.apache.hadoop.hive.serde2.objectinspector.ObjectInspector;
@@ -28,16 +29,31 @@ import org.slf4j.LoggerFactory;
 
 import com.facebook.hiveio.common.HiveTableName;
 import com.facebook.hiveio.common.HiveType;
+import com.facebook.hiveio.conf.ClassConfOption;
 import com.facebook.hiveio.input.parser.array.ArrayParser;
 import com.facebook.hiveio.input.parser.array.ArrayParserData;
 import com.facebook.hiveio.input.parser.array.BytesParser;
+import com.facebook.hiveio.input.parser.hive.DefaultParser;
+import com.google.common.collect.ImmutableSet;
+
+import java.util.Set;
 
 public class Parsers {
   private static final Logger LOG = LoggerFactory.getLogger(Parsers.class);
 
+  public static final ClassConfOption<RecordParser> FORCE_PARSER =
+      ClassConfOption.create("hiveio.input.parser", null, RecordParser.class);
+
+  public static final Set<Class<? extends RecordParser>> CLASSES =
+      ImmutableSet.<Class<? extends RecordParser>>builder()
+        .add(BytesParser.class)
+        .add(ArrayParser.class)
+        .add(DefaultParser.class)
+        .build();
+
   public static RecordParser<Writable> bestParser(Deserializer deserializer,
       int numColumns, int[] columnIndexes, HiveTableName tableName,
-      String[] partitionValues, Writable exampleValue)
+      String[] partitionValues, Writable exampleValue, Configuration conf)
   {
     ArrayParserData data = new ArrayParserData(deserializer, columnIndexes, numColumns,
         partitionValues);
@@ -69,8 +85,35 @@ public class Parsers {
       parser = new ArrayParser(partitionValues, numColumns, data);
     }
 
-    LOG.info("Using {} to parse hive records from table {}",
-        parser.getClass().getSimpleName(), tableName.dotString());
+    Class<? extends RecordParser> forcedParserClass = FORCE_PARSER.get(conf);
+    if (forcedParserClass == null) {
+      LOG.info("Using {} to parse hive records from table {}",
+          parser.getClass().getSimpleName(), tableName.dotString());
+    } else {
+      LOG.info("Using {} chosen by user instead of {} to parse hive records from table {}",
+          forcedParserClass.getSimpleName(), parser.getClass().getSimpleName(),
+          tableName.dotString());
+      parser = createForcedParser(deserializer, numColumns, partitionValues, data, forcedParserClass);
+    }
+
     return parser;
+  }
+
+  private static RecordParser<Writable> createForcedParser(Deserializer deserializer,
+      int numColumns, String[] partitionValues, ArrayParserData data,
+      Class<? extends RecordParser> forcedParserClass)
+  {
+    RecordParser<Writable> forcedParser;
+    if (BytesParser.class.equals(forcedParserClass)) {
+      forcedParser = new BytesParser(partitionValues, numColumns, data);
+    } else if (ArrayParser.class.equals(forcedParserClass)) {
+      forcedParser = new ArrayParser(partitionValues, numColumns, data);
+    } else if (DefaultParser.class.equals(forcedParserClass)) {
+      forcedParser = new DefaultParser(deserializer, partitionValues, numColumns);
+    } else {
+      throw new IllegalArgumentException("Don't know how to create parser " +
+          forcedParserClass.getCanonicalName());
+    }
+    return forcedParser;
   }
 }

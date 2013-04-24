@@ -15,17 +15,22 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.facebook.hiveio.cmdline;
+package com.facebook.hiveio.output;
 
-import com.facebook.hiveio.conf.AllOptions;
-import com.facebook.hiveio.options.BaseCmd;
-import com.facebook.hiveio.output.OutputConf;
-import io.airlift.command.Command;
+import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.hive.conf.HiveConf;
 
-@Command(name = "conf-options", description = "Print Configuration Options")
-public class ConfOptionsCmd extends BaseCmd {
-  @Override public void execute() throws Exception {
-    Class klass = OutputConf.class;
-    AllOptions.main(new String[0]);
+class Context {
+  public Configuration conf;
+  public HiveApiOutputFormat outputFormat;
+
+  public ThreadLocal<PerThread> perThread = new ThreadLocal<PerThread>() {
+    @Override protected PerThread initialValue() {
+      return new PerThread(conf);
+    }
+  };
+
+  public Context() {
+    conf = new HiveConf(OutputCmd.class);
   }
 }

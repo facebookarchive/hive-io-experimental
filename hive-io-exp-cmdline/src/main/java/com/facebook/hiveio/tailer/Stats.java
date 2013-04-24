@@ -88,7 +88,7 @@ class Stats {
     return new ConsoleReporter(Metrics.defaultRegistry(), System.err, MetricPredicate.ALL);
   }
 
-  public void printEndBenchmark(Context context, long timeNanos,
+  public void printEndBenchmark(Context context, TailerArgs args, long timeNanos,
       OutputStream stream) throws IOException {
     PrintWriter writer = new PrintWriter(new BufferedWriter(new OutputStreamWriter(stream)));
     Joiner joiner = Joiner.on(",");
@@ -99,7 +99,7 @@ class Stats {
 
     writer.println(joiner.join(
         rowMeter.count(),
-        context.opts.threads,
+        args.multiThread.threads,
         rawMBMeter.count(),
         seconds,
         rowsPerSec,

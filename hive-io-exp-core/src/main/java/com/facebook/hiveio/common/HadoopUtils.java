@@ -20,7 +20,6 @@ package com.facebook.hiveio.common;
 
 import org.apache.hadoop.conf.Configurable;
 import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.Writable;
 import org.apache.hadoop.mapred.JobConf;
@@ -177,9 +176,10 @@ public class HadoopUtils {
     // implementation since it can't be done automatically because of
     // mapreduce->mapred abstraction
     if (outputPath != null) {
-      FileOutputCommitter foc =
-          new FileOutputCommitter(getOutputPath(conf), context);
-      conf.set("mapred.work.output.dir", foc.getWorkPath().toString());
+      FileOutputCommitter foc = new FileOutputCommitter(getOutputPath(conf), context);
+      String path = foc.getWorkPath().toString();
+      conf.set("mapred.work.output.dir", path);
+      LOG.info("Setting mapred.work.output.dir to {}", path);
     }
   }
 

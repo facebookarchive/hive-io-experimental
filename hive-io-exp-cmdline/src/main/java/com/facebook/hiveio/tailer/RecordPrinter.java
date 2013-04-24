@@ -20,5 +20,6 @@ package com.facebook.hiveio.tailer;
 import com.facebook.hiveio.record.HiveReadableRecord;
 
 interface RecordPrinter {
-  void printRecord(HiveReadableRecord record, int numColumns, Context context);
+  void printRecord(HiveReadableRecord record, int numColumns, Context context,
+      TailerArgs args);
 }

@@ -18,8 +18,8 @@
 package com.facebook.hiveio.benchmark;
 
 import com.facebook.hiveio.options.BaseCmd;
+import com.facebook.hiveio.options.InputTableOptions;
 import com.facebook.hiveio.options.MetastoreOptions;
-import com.facebook.hiveio.options.TableOptions;
 import io.airlift.command.Command;
 import io.airlift.command.Option;
 
@@ -31,7 +31,7 @@ public class InputBenchmarkCmd extends BaseCmd {
   public MetastoreOptions metastoreOpts = new MetastoreOptions();
 
   @Inject
-  public TableOptions tableOpts = new TableOptions();
+  public InputTableOptions tableOpts = new InputTableOptions();
 
   /** Whether to track metrics */
   @Option(name = "--trackMetrics", description = "Track metrics while running")
