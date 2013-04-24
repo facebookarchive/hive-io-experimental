@@ -110,6 +110,8 @@ under the License.
   </properties>
 
   <build>
+    <defaultGoal>install</defaultGoal>
+
     <extensions>
       <extension>
         <groupId>org.apache.maven.scm</groupId>
@@ -479,6 +481,7 @@ under the License.
         <enabled>true</enabled>
       </snapshots>
     </repository>
+    <!-- For Hive -->
     <repository>
       <id>cloudera cdh</id>
       <url>https://repository.cloudera.com/artifactory/cloudera-repos</url>
@@ -488,6 +491,12 @@ under the License.
       <snapshots>
         <enabled>false</enabled>
       </snapshots>
+    </repository>
+    <!-- For Hyperic Sigar. See http://mavenhub.com/mvn/thirdparty-uploads/org.hyperic/sigar/1.6.5.132 -->
+    <repository>
+      <id>thirdparty-uploads</id>
+      <name>JBoss Thirdparty Uploads</name>
+      <url>https://repository.jboss.org/nexus/content/repositories/thirdparty-uploads</url>
     </repository>
   </repositories>
 
@@ -576,6 +585,11 @@ under the License.
         <artifactId>hive-service</artifactId>
         <scope>${dep.hive.scope}</scope>
         <version>${dep.hive.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.hyperic</groupId>
+        <artifactId>sigar</artifactId>
+        <version>1.6.5.132-5</version>
       </dependency>
       <dependency>
         <groupId>org.slf4j</groupId>

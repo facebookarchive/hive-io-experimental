@@ -25,11 +25,4 @@ public class SocksProxyOptions {
 
   @Option(name = "--socks-proxy-port", hidden = true)
   public int port = -1;
-
-  public void process() {
-    if (port != -1) {
-      System.setProperty("socksProxyHost", host);
-      System.setProperty("socksProxyPort", Integer.toString(port));
-    }
-  }
 }

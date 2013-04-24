@@ -26,24 +26,21 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.common.collect.Lists;
-import com.google.common.io.Files;
-import com.google.common.io.Resources;
 
-import java.io.File;
-import java.io.IOException;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
-import java.net.URL;
 import java.util.AbstractMap;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
-public class HadoopNative {
+public class HadoopNative extends NativeCodeHelper {
   private static final Logger LOG = LoggerFactory.getLogger(HadoopNative.class);
 
   private static boolean loaded = false;
   private static Throwable error = null;
+
+  private HadoopNative() {}
 
   public static synchronized void requireHadoopNative() {
     if (loaded) {
@@ -87,24 +84,6 @@ public class HadoopNative {
     modifiersField.setInt(field, field.getModifiers() & ~Modifier.FINAL);
 
     field.set(null, newValue);
-  }
-
-  private static void loadLibrary(String name) throws IOException {
-    URL url = Resources.getResource(HadoopNative.class, getLibraryPath(name));
-    File file = File.createTempFile(name, null);
-    file.deleteOnExit();
-    Files.copy(Resources.newInputStreamSupplier(url), file);
-    System.load(file.getAbsolutePath());
-  }
-
-  private static String getLibraryPath(String name) {
-    return "/nativelib/" + getPlatform() + "/" + System.mapLibraryName(name);
-  }
-
-  private static String getPlatform() {
-    String name = System.getProperty("os.name");
-    String arch = System.getProperty("os.arch");
-    return (name + "-" + arch).replace(' ', '_');
   }
 
   private static class HackListMap<K, V>

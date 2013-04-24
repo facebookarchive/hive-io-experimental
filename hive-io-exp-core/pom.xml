@@ -109,6 +109,10 @@ under the License.
       <artifactId>hive-service</artifactId>
     </dependency>
     <dependency>
+      <groupId>org.hyperic</groupId>
+      <artifactId>sigar</artifactId>
+    </dependency>
+    <dependency>
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-api</artifactId>
     </dependency>

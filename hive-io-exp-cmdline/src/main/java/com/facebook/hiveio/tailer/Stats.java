@@ -20,11 +20,9 @@ package com.facebook.hiveio.tailer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.barney4j.utils.unit.ByteUnit;
 import com.facebook.hiveio.common.HiveStats;
 import com.google.common.base.Joiner;
 import com.yammer.metrics.Metrics;
-import com.yammer.metrics.core.Gauge;
 import com.yammer.metrics.core.Meter;
 import com.yammer.metrics.core.MetricPredicate;
 import com.yammer.metrics.reporting.ConsoleReporter;
@@ -39,7 +37,6 @@ import java.util.concurrent.atomic.AtomicLong;
 
 import static com.barney4j.utils.unit.ByteUnit.BYTE;
 import static com.barney4j.utils.unit.ByteUnit.MB;
-import static java.lang.System.err;
 import static java.util.concurrent.TimeUnit.NANOSECONDS;
 import static java.util.concurrent.TimeUnit.SECONDS;
 
@@ -61,13 +58,7 @@ class Stats {
   private Stats(HiveStats hiveStats) {
     this.hiveStats = hiveStats;
     rowMeter = Metrics.newMeter(Stats.class, "rows", "rows", SECONDS);
-    rawMBMeter = Metrics.newMeter(Stats.class, "raw MB (estimated)", "MBs", SECONDS);
-    Metrics.newGauge(Stats.class, "used MB", new Gauge<Long>() {
-      @Override public Long value() {
-        Runtime runtime = Runtime.getRuntime();
-        return (long) ByteUnit.BYTE.toMB(runtime.totalMemory() - runtime.freeMemory());
-      }
-    });
+    rawMBMeter = Metrics.newMeter(Stats.class, "megabytes (estimated)", "MBs", SECONDS);
   }
 
   public static Stats get(HiveStats hiveStats) {
@@ -97,42 +88,27 @@ class Stats {
     return new ConsoleReporter(Metrics.defaultRegistry(), System.err, MetricPredicate.ALL);
   }
 
-  public void printEnd(long timeNanos) throws IOException {
-    metricsReporter().run();
-
-    double nsPerRow = Math.floor(timeNanos / (double) rowMeter.count());
-    double msecPerRow = NANOSECONDS.toMillis((long) nsPerRow);
-    double rawMBPerNs = hiveStats.getRawSizeInMB() / timeNanos;
-    double rawMBPerSec = SECONDS.toNanos((long) rawMBPerNs);
-    double totalMBPerNs = hiveStats.getTotalSizeInMB() / timeNanos;
-    double totalMBPerSec = BYTE.toMB(SECONDS.toNanos((long) totalMBPerNs));
-
-    err.println("Finished.");
-    err.println("  " + rowMeter.count() + " rows");
-    err.println("  " + NANOSECONDS.toSeconds(timeNanos) + " seconds");
-    err.println("  " + nsPerRow + " ns / row");
-    err.println("  " + msecPerRow + " msec / row");
-    err.println("  " + rawMBPerNs + " raw MB / ns");
-    err.println("  " + rawMBPerSec + " raw MB / second");
-    err.println("  " + totalMBPerNs + " total MB / ns");
-    err.println("  " + totalMBPerSec + " total MB / second");
-  }
-
   public void printEndBenchmark(Context context, long timeNanos,
       OutputStream stream) throws IOException {
     PrintWriter writer = new PrintWriter(new BufferedWriter(new OutputStreamWriter(stream)));
     Joiner joiner = Joiner.on(",");
 
     long seconds = NANOSECONDS.toSeconds(timeNanos);
-    double nsPerRow = Math.floor(timeNanos / (double) rowMeter.count());
-    double msecPerRow = NANOSECONDS.toMillis((long) nsPerRow);
-    double rawMBPerNs = hiveStats.getRawSizeInMB() / timeNanos;
-    double rawMBPerSec = SECONDS.toNanos((long) rawMBPerNs);
-    double totalMBPerNs = hiveStats.getTotalSizeInMB() / timeNanos;
-    double totalMBPerSec = BYTE.toMB(SECONDS.toNanos((long) totalMBPerNs));
+    double rowsPerSec = rowMeter.count() / (double) seconds;
+    double mbPerSec = mbParsed(hiveStats) / (double) seconds;
 
-    writer.println(joiner.join(rowMeter.count(), rawMBMeter.count(),
-        seconds, context.opts.threads, msecPerRow, rawMBPerSec, totalMBPerSec));
+    writer.println(joiner.join(
+        rowMeter.count(),
+        context.opts.threads,
+        rawMBMeter.count(),
+        seconds,
+        rowsPerSec,
+        mbPerSec));
     writer.flush();
+  }
+
+  private double mbParsed(HiveStats hiveStats) {
+    double rowsPct = rowMeter.count() / (double) hiveStats.getNumRows();
+    return hiveStats.getRawSizeInMB() * rowsPct;
   }
 }

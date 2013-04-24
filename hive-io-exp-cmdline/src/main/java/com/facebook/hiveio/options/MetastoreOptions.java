@@ -25,6 +25,6 @@ public class MetastoreOptions {
   public String hiveHost = Defaults.METASTORE_HOST;
 
   /** Hive port */
-  @Option(name = {"-metastore-port"}, description = "Hive Metatstore port")
+  @Option(name = {"--metastore-port"}, description = "Hive Metatstore port")
   public int hivePort = Defaults.METASTORE_PORT;
 }

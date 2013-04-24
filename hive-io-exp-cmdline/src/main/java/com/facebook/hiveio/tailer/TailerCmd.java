@@ -62,12 +62,6 @@ public class TailerCmd extends BaseCmd
   @Option(name = "--request-splits-per-thread", description = "Number of splits per thread")
   public int requestSplitsPerThread = 3;
 
-  @Option(name = "--metrics-update-period-rows", description = "Update metrics every this many records")
-  public int metricsUpdatePeriodRows = 1000;
-
-  @Option(name = "--metrics-print-period-secs", description = "How often to dump metrics to stderr")
-  public int metricsPrintPeriodSecs = 0;
-
   @Option(name = "--append-stats-to",description = "Append final stats to a file")
   public String appendStatsTo;
 

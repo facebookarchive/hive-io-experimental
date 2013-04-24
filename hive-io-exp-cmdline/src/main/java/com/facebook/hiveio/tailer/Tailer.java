@@ -49,22 +49,13 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.util.Collections;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 
 import static com.facebook.hiveio.input.HiveApiInputFormat.DEFAULT_PROFILE_ID;
 
 class Tailer {
   private static final Logger LOG = LoggerFactory.getLogger(Tailer.class);
 
-  public void initMetrics(int metricsPrintPeriodSecs) {
-    if (metricsPrintPeriodSecs > 0) {
-      Stats.metricsReporter().start(metricsPrintPeriodSecs, TimeUnit.SECONDS);
-    }
-  }
-
   public void run(TailerCmd opts) throws Exception {
-    initMetrics(opts.metricsPrintPeriodSecs);
-
     HadoopNative.requireHadoopNative();
 
     HostPort metastoreHostPort = getHostPort(opts);
@@ -116,11 +107,14 @@ class Tailer {
     }
 
     long timeNanos = System.nanoTime() - startNanos;
-    stats.printEnd(timeNanos);
-
     if (context.opts.appendStatsTo != null) {
       OutputStream out = new FileOutputStream(context.opts.appendStatsTo, true);
       stats.printEndBenchmark(context, timeNanos, out);
+    }
+
+    System.err.println("Finished.");
+    if (opts.metricsOpts.stderrEnabled()) {
+      opts.metricsOpts.dumpMetricsToStderr();
     }
   }
 
@@ -179,8 +173,8 @@ class Tailer {
       if (context.rowsParsed.incrementAndGet() > context.opts.limit) {
         break;
       }
-      if (rowsParsed % context.opts.metricsUpdatePeriodRows == 0) {
-        context.stats.addRows(context.opts.metricsUpdatePeriodRows);
+      if (rowsParsed % context.opts.metricsOpts.updateRows == 0) {
+        context.stats.addRows(context.opts.metricsOpts.updateRows);
         rowsParsed = 0;
       }
     }

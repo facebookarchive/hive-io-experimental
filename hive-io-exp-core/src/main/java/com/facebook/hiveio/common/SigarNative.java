@@ -15,31 +15,32 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.facebook.hiveio.options;
+package com.facebook.hiveio.common;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.inject.Inject;
+public class SigarNative extends NativeCodeHelper {
+  private static final Logger LOG = LoggerFactory.getLogger(HadoopNative.class);
 
-public abstract class BaseCmd implements Runnable {
-  private static final Logger LOG = LoggerFactory.getLogger(BaseCmd.class);
+  private static boolean loaded = false;
+  private static Throwable error = null;
 
-  @Inject public SocksProxyOptions socksOpts = new SocksProxyOptions();
-  @Inject public MetricsOptions metricsOpts = new MetricsOptions();
+  private SigarNative() {}
 
-  @Override public void run() {
-    metricsOpts.process();
-    if (socksOpts.port != -1) {
-      System.setProperty("socksProxyHost", socksOpts.host);
-      System.setProperty("socksProxyPort", Integer.toString(socksOpts.port));
+  public static void requireSigarNative() {
+    if (loaded) {
+      return;
+    }
+    if (error != null) {
+      throw new RuntimeException("failed to load Sigar native library", error);
     }
     try {
-      execute();
-    } catch (Exception e) {
-      e.printStackTrace();
+      loadLibrary("sigar");
+      loaded = true;
+    } catch (Throwable t) {
+      error = t;
+      throw new RuntimeException("failed to load Sigar native library", error);
     }
   }
-
-  public abstract void execute() throws Exception;
 }

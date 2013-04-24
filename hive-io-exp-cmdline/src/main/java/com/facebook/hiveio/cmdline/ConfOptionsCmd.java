@@ -22,7 +22,7 @@ import com.facebook.hiveio.options.BaseCmd;
 import io.airlift.command.Command;
 
 @Command(name = "conf-options", description = "Print Configuration Options")
-class ConfOptionsCmd extends BaseCmd {
+public class ConfOptionsCmd extends BaseCmd {
   @Override public void execute() throws Exception {
     AllOptions.main(new String[0]);
   }

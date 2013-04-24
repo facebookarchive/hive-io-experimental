@@ -15,31 +15,27 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.facebook.hiveio.options;
+package com.facebook.hiveio.metrics;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.hyperic.sigar.SigarException;
 
-import javax.inject.Inject;
+import com.yammer.metrics.Metrics;
+import com.yammer.metrics.core.MetricsRegistry;
 
-public abstract class BaseCmd implements Runnable {
-  private static final Logger LOG = LoggerFactory.getLogger(BaseCmd.class);
+public class SigarMetrics {
+  protected SigarMetrics() {}
 
-  @Inject public SocksProxyOptions socksOpts = new SocksProxyOptions();
-  @Inject public MetricsOptions metricsOpts = new MetricsOptions();
-
-  @Override public void run() {
-    metricsOpts.process();
-    if (socksOpts.port != -1) {
-      System.setProperty("socksProxyHost", socksOpts.host);
-      System.setProperty("socksProxyPort", Integer.toString(socksOpts.port));
-    }
-    try {
-      execute();
-    } catch (Exception e) {
-      e.printStackTrace();
-    }
+  public static void registerMetrics() {
+    registerMetrics(Metrics.defaultRegistry());
   }
 
-  public abstract void execute() throws Exception;
+  public static void registerMetrics(MetricsRegistry metrics) {
+    ProcessCpuMetrics.registerMetrics(metrics);
+    ProcessMemoryMetrics.registerMetrics(metrics);
+  }
+
+  public static void registerMetrics(MetricsRegistry metrics, Class<?> owningClass) {
+    ProcessCpuMetrics.registerMetrics(metrics, owningClass);
+    ProcessMemoryMetrics.registerMetrics(metrics, owningClass);
+  }
 }

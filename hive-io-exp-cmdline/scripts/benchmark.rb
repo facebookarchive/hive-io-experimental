@@ -31,13 +31,11 @@ benchmark_file = "bench-out.txt"
 
 header_line = [
   "Rows",
-  "Raw MBs",
-  "Total MBs",
-  "Total Seconds",
   "Threads",
-  "msec / row",
-  "raw MB / sec",
-  "total MB / sec",
+  "MBs",
+  "Total Seconds",
+  "rows / sec",
+  "MB / sec",
 ].join(",")
 
 open(benchmark_file, 'w') do |f|
