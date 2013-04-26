@@ -36,7 +36,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.facebook.hiveio.common.HadoopUtils;
-import com.facebook.hiveio.common.HiveMetastores;
 import com.facebook.hiveio.common.HiveTableName;
 import com.facebook.hiveio.common.HiveUtils;
 import com.facebook.hiveio.common.Writables;
@@ -137,21 +136,22 @@ public class HiveApiInputFormat
     LOG.info("getSplits for profile {}", myProfileId);
 
     HiveConf conf = new HiveConf(jobContext.getConfiguration(), HiveApiInputFormat.class);
+    HiveInputDescription inputDesc = readProfileInputDesc(conf);
 
     ThriftHiveMetastore.Iface client;
     try {
-      client = HiveMetastores.create(conf);
+      client = inputDesc.metastoreClient(conf);
     } catch (TException e) {
       throw new IOException(e);
     }
 
-    return getSplits(conf, client);
+    return getSplits(conf, inputDesc, client);
   }
 
-  public List<InputSplit> getSplits(HiveConf conf, ThriftHiveMetastore.Iface client)
-      throws IOException {
-    HiveInputDescription inputDesc = readProfileInputDesc(conf);
-
+  public List<InputSplit> getSplits(HiveConf conf,
+      HiveInputDescription inputDesc, ThriftHiveMetastore.Iface client)
+      throws IOException
+  {
     Table table;
     try {
       table = client.get_table(inputDesc.getDbName(), inputDesc.getTableName());

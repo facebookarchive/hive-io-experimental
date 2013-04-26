@@ -18,10 +18,14 @@
 
 package com.facebook.hiveio.input;
 
+import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.hive.metastore.api.ThriftHiveMetastore;
 import org.apache.hadoop.io.Writable;
 import org.apache.hadoop.io.WritableUtils;
+import org.apache.thrift.TException;
 
 import com.facebook.hiveio.common.HiveTableName;
+import com.facebook.hiveio.common.MetastoreDesc;
 import com.facebook.hiveio.common.Writables;
 import com.google.common.base.Objects;
 import com.google.common.collect.Lists;
@@ -35,6 +39,8 @@ import java.util.List;
  * Description of hive table to read from.
  */
 public class HiveInputDescription implements Writable {
+  /** Metastore to use. Optional. */
+  private MetastoreDesc metastoreDesc = new MetastoreDesc();
   /** Hive database name */
   private String dbName = "default";
   /** Hive table name */
@@ -192,8 +198,18 @@ public class HiveInputDescription implements Writable {
     return this;
   }
 
+  public MetastoreDesc getMetastoreDesc() {
+    return metastoreDesc;
+  }
+
+  public ThriftHiveMetastore.Iface metastoreClient(Configuration conf)
+      throws TException {
+    return metastoreDesc.makeClient(conf);
+  }
+
   @Override
   public void write(DataOutput out) throws IOException {
+    metastoreDesc.write(out);
     WritableUtils.writeString(out, dbName);
     WritableUtils.writeString(out, tableName);
     Writables.writeStringList(out, columns);
@@ -203,6 +219,7 @@ public class HiveInputDescription implements Writable {
 
   @Override
   public void readFields(DataInput in) throws IOException {
+    metastoreDesc.readFields(in);
     dbName = WritableUtils.readString(in);
     tableName = WritableUtils.readString(in);
     Writables.readStringList(in, columns);

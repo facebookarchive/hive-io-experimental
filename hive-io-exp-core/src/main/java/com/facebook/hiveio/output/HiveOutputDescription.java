@@ -19,14 +19,13 @@
 package com.facebook.hiveio.output;
 
 import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.hive.conf.HiveConf;
 import org.apache.hadoop.hive.metastore.api.ThriftHiveMetastore;
 import org.apache.hadoop.io.Writable;
 import org.apache.hadoop.io.WritableUtils;
 import org.apache.thrift.TException;
 
-import com.facebook.hiveio.common.HiveMetastores;
 import com.facebook.hiveio.common.HiveTableName;
+import com.facebook.hiveio.common.MetastoreDesc;
 import com.facebook.hiveio.common.Writables;
 import com.google.common.base.Objects;
 import com.google.common.collect.Maps;
@@ -40,10 +39,8 @@ import java.util.Map;
  * Description of Hive table to write to
  */
 public class HiveOutputDescription implements Writable {
-  /** Hive Metastore Host. If not set will infer from HiveConf */
-  private String metastoreHost;
-  /** Hive Metastore Port */
-  private int metastorePort = 9083;
+  /** Metastore to use. Optional. */
+  private MetastoreDesc metastoreDesc = new MetastoreDesc();
   /** Hive database */
   private String dbName = "default";
   /** Hive table */
@@ -139,38 +136,18 @@ public class HiveOutputDescription implements Writable {
     return this;
   }
 
-  public String getMetastoreHost() {
-    return metastoreHost;
-  }
-
-  public void setMetastoreHost(String metastoreHost) {
-    this.metastoreHost = metastoreHost;
-  }
-
-  public int getMetastorePort() {
-    return metastorePort;
-  }
-
-  public void setMetastorePort(int metastorePort) {
-    this.metastorePort = metastorePort;
+  public MetastoreDesc getMetastoreDesc() {
+    return metastoreDesc;
   }
 
   public ThriftHiveMetastore.Iface metastoreClient(Configuration conf)
       throws TException {
-    ThriftHiveMetastore.Iface client;
-    if (metastoreHost != null) {
-      client = HiveMetastores.create(metastoreHost, metastorePort);
-    } else {
-      HiveConf hiveConf = new HiveConf(conf, HiveOutputDescription.class);
-      client = HiveMetastores.create(hiveConf);
-    }
-    return client;
+    return metastoreDesc.makeClient(conf);
   }
 
   @Override
   public void write(DataOutput out) throws IOException {
-    WritableUtils.writeString(out, metastoreHost);
-    out.writeInt(metastorePort);
+    metastoreDesc.write(out);
     WritableUtils.writeString(out, dbName);
     WritableUtils.writeString(out, tableName);
     Writables.writeStrStrMap(out, partitionValues);
@@ -178,8 +155,7 @@ public class HiveOutputDescription implements Writable {
 
   @Override
   public void readFields(DataInput in) throws IOException {
-    metastoreHost = WritableUtils.readString(in);
-    metastorePort = in.readInt();
+    metastoreDesc.readFields(in);
     dbName = WritableUtils.readString(in);
     tableName = WritableUtils.readString(in);
     Writables.readStrStrMap(in, partitionValues);

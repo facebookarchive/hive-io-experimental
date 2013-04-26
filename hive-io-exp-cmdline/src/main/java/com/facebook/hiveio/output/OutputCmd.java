@@ -69,8 +69,8 @@ public class OutputCmd extends BaseCmd {
     HiveOutputDescription outputDesc = new HiveOutputDescription();
     outputDesc.setDbName(args.table.database);
     outputDesc.setTableName(args.table.table);
-    outputDesc.setMetastoreHost(args.metastore.host);
-    outputDesc.setMetastorePort(args.metastore.port);
+    outputDesc.getMetastoreDesc().setHost(args.metastore.host);
+    outputDesc.getMetastoreDesc().setPort(args.metastore.port);
     if (args.table.partitioned) {
       outputDesc.putPartitionValue("ds", "2013-04-01");
     }

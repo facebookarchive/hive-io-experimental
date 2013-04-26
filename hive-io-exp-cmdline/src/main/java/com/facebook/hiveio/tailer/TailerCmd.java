@@ -21,6 +21,8 @@ import org.apache.hadoop.hive.conf.HiveConf;
 import org.apache.hadoop.hive.metastore.api.ThriftHiveMetastore;
 import org.apache.hadoop.io.WritableComparable;
 import org.apache.hadoop.mapreduce.InputSplit;
+import org.apache.hadoop.mapreduce.JobContext;
+import org.apache.hadoop.mapreduce.JobID;
 import org.apache.hadoop.mapreduce.RecordReader;
 import org.apache.hadoop.mapreduce.TaskAttemptContext;
 import org.apache.hadoop.mapreduce.TaskAttemptID;
@@ -85,8 +87,8 @@ public class TailerCmd extends BaseCmd
     }
 
     LOG.info("Creating Hive client for Metastore at {}", metastoreHostPort);
-    ThriftHiveMetastore.Iface client = HiveMetastores
-        .create(metastoreHostPort.host, metastoreHostPort.port);
+    ThriftHiveMetastore.Iface client = HiveMetastores.create(
+        metastoreHostPort.host, metastoreHostPort.port);
 
     HiveInputDescription inputDesc = new HiveInputDescription();
     inputDesc.setDbName(args.inputTable.database);
@@ -96,6 +98,8 @@ public class TailerCmd extends BaseCmd
       args.requestNumSplits = args.multiThread.threads * args.requestSplitsPerThread;
     }
     inputDesc.setNumSplits(args.requestNumSplits);
+    inputDesc.getMetastoreDesc().setHost(metastoreHostPort.host);
+    inputDesc.getMetastoreDesc().setPort(metastoreHostPort.port);
 
     HiveStats hiveStats = HiveUtils.statsOf(client, inputDesc);
     LOG.info("{}", hiveStats);
@@ -104,13 +108,13 @@ public class TailerCmd extends BaseCmd
     args.inputTable.process(hiveConf);
 
     LOG.info("Setting up input using {}", inputDesc);
-    HiveApiInputFormat
-        .setProfileInputDesc(hiveConf, inputDesc, DEFAULT_PROFILE_ID);
+    HiveApiInputFormat.setProfileInputDesc(hiveConf, inputDesc,
+        DEFAULT_PROFILE_ID);
 
     HiveApiInputFormat hapi = new HiveApiInputFormat();
     hapi.setMyProfileId(DEFAULT_PROFILE_ID);
 
-    List<InputSplit> splits = hapi.getSplits(hiveConf, client);
+    List<InputSplit> splits = hapi.getSplits(new JobContext(hiveConf, new JobID()));
     LOG.info("Have {} splits to read", splits.size());
 
     HiveTableName hiveTableName = new HiveTableName(args.inputTable.database, args.inputTable.table);

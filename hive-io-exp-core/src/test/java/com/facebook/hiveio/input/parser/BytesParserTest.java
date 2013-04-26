@@ -15,10 +15,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.facebook.hiveio.input.parser.array;
+package com.facebook.hiveio.input.parser;
 
 import org.testng.annotations.Test;
 
+import com.facebook.hiveio.input.parser.array.BytesParser;
 import com.google.common.base.Charsets;
 
 import static com.facebook.hiveio.input.parser.array.BytesParser.parseDouble;

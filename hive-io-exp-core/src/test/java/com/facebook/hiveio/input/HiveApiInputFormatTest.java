@@ -17,10 +17,7 @@
  */
 package com.facebook.hiveio.input;
 
-import org.apache.commons.io.FileUtils;
 import org.apache.hadoop.hive.conf.HiveConf;
-import org.apache.hadoop.hive.service.HiveInterface;
-import org.apache.hadoop.hive.service.HiveServer;
 import org.apache.hadoop.io.WritableComparable;
 import org.apache.hadoop.mapreduce.InputSplit;
 import org.apache.hadoop.mapreduce.RecordReader;
@@ -29,13 +26,10 @@ import org.apache.hadoop.mapreduce.TaskAttemptID;
 import org.testng.annotations.BeforeSuite;
 import org.testng.annotations.Test;
 
-import com.facebook.hiveio.common.HadoopNative;
+import com.facebook.hiveio.common.HiveMetastores;
 import com.facebook.hiveio.record.HiveReadableRecord;
-import com.google.common.base.Charsets;
-import com.google.common.base.Joiner;
-import com.google.common.io.Files;
+import com.facebook.hiveio.testing.LocalHiveServer;
 
-import java.io.File;
 import java.io.IOException;
 import java.util.List;
 
@@ -44,26 +38,12 @@ import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertTrue;
 
 public class HiveApiInputFormatTest {
-  private final File ROOT_DIR = new File("/tmp/hive-io-test");
-
-  private HiveConf hiveConf;
-  private HiveInterface client;
-
-  private File metastoreDir() {
-    return new File(ROOT_DIR, "metastore_db");
-  }
+  private LocalHiveServer hiveServer = new LocalHiveServer("hiveio-test");
 
   @BeforeSuite
   public void beforeSuite() throws Exception {
-    HadoopNative.requireHadoopNative();
-    ROOT_DIR.mkdirs();
-    FileUtils.deleteDirectory(ROOT_DIR);
-    hiveConf = new HiveConf(HiveApiInputFormatTest.class);
-    hiveConf.setVar(HiveConf.ConfVars.METASTOREWAREHOUSE,
-        metastoreDir().getAbsolutePath());
-    hiveConf.setVar(HiveConf.ConfVars.METASTORECONNECTURLKEY,
-        "jdbc:derby:;databaseName=" + metastoreDir().toString() + ";create=true");
-    client = new HiveServer.HiveServerHandler(hiveConf);
+    hiveServer.init();
+    HiveMetastores.setTestClient(hiveServer.getClient());
   }
 
   @Test
@@ -73,7 +53,10 @@ public class HiveApiInputFormatTest {
     run1(tableName);
   }
 
-  private void run1(String tableName) throws IOException, InterruptedException {
+  private void run1(String tableName) throws IOException, InterruptedException
+  {
+    HiveConf hiveConf = hiveServer.getHiveConf();
+
     HiveInputDescription hid = new HiveInputDescription();
     hid.setTableName(tableName);
     HiveApiInputFormat.setProfileInputDesc(hiveConf, hid,
@@ -81,7 +64,7 @@ public class HiveApiInputFormatTest {
 
     HiveApiInputFormat haif = new HiveApiInputFormat();
 
-    List<InputSplit> splits = haif.getSplits(hiveConf, client);
+    List<InputSplit> splits = haif.getSplits(hiveConf, hid, hiveServer.getClient());
 
     TaskAttemptContext taskContext = new TaskAttemptContext(hiveConf, new TaskAttemptID());
     InputSplit split = splits.get(0);
@@ -90,8 +73,8 @@ public class HiveApiInputFormatTest {
     recordReader.initialize(split, taskContext);
 
     assertTrue(recordReader.nextKeyValue());
+
     HiveReadableRecord record = recordReader.getCurrentValue();
-    System.out.println(record);
     assertEquals(Long.class, record.get(0).getClass());
     assertEquals(Double.class, record.get(1).getClass());
     assertEquals(1, record.getLong(0));
@@ -107,22 +90,13 @@ public class HiveApiInputFormatTest {
 
   private void initData(String tableName)
       throws IOException, org.apache.thrift.TException {
-    System.out.println("ROOT DIR: " + ROOT_DIR);
-    Joiner joiner = Joiner.on("\n");
     String rows[] = {
       "1\t1.1",
       "2\t2.2",
-      "",
     };
-    File dataFile = new File(ROOT_DIR, "foo");
-    Files.write(joiner.join(rows), dataFile, Charsets.UTF_8);
-    client.execute("" +
-        "CREATE TABLE " + tableName +
+    hiveServer.createTable("CREATE TABLE " + tableName +
         " (i1 INT, d1 DOUBLE) " +
         " ROW FORMAT DELIMITED FIELDS TERMINATED BY '\t'");
-    client.execute("LOAD DATA LOCAL INPATH '" + dataFile.getAbsolutePath() +
-        "' INTO TABLE " + tableName);
-
-    System.out.println("FINISHED LOADING DATA");
+    hiveServer.loadData(tableName, rows);
   }
 }

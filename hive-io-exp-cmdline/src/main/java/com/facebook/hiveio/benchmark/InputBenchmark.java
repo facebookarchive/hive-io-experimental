@@ -19,16 +19,16 @@
 package com.facebook.hiveio.benchmark;
 
 import org.apache.hadoop.hive.conf.HiveConf;
-import org.apache.hadoop.hive.metastore.api.ThriftHiveMetastore;
 import org.apache.hadoop.io.WritableComparable;
 import org.apache.hadoop.mapreduce.InputSplit;
+import org.apache.hadoop.mapreduce.JobContext;
+import org.apache.hadoop.mapreduce.JobID;
 import org.apache.hadoop.mapreduce.RecordReader;
 import org.apache.hadoop.mapreduce.TaskAttemptContext;
 import org.apache.hadoop.mapreduce.TaskAttemptID;
 import org.slf4j.LoggerFactory;
 
 import com.facebook.hiveio.common.HadoopNative;
-import com.facebook.hiveio.common.HiveMetastores;
 import com.facebook.hiveio.input.HiveApiInputFormat;
 import com.facebook.hiveio.input.HiveInputDescription;
 import com.facebook.hiveio.record.HiveReadableRecord;
@@ -40,6 +40,7 @@ import com.yammer.metrics.reporting.ConsoleReporter;
 import java.io.IOException;
 import java.util.List;
 
+import static com.facebook.hiveio.input.HiveApiInputFormat.DEFAULT_PROFILE_ID;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 
 /**
@@ -61,19 +62,20 @@ class InputBenchmark {
     input.setDbName(args.tableOpts.database);
     input.setTableName(args.tableOpts.table);
     input.setPartitionFilter(args.tableOpts.partitionFilter);
+    input.getMetastoreDesc().setHost(args.metastoreOpts.host);
+    input.getMetastoreDesc().setPort(args.metastoreOpts.port);
 
     HiveConf hiveConf = new HiveConf(InputBenchmark.class);
-    ThriftHiveMetastore.Iface client = HiveMetastores.create(args.metastoreOpts.host, args.metastoreOpts.port);
 
     System.err.println("Initialize profile with input data");
-    HiveApiInputFormat.setProfileInputDesc(hiveConf, input, HiveApiInputFormat.DEFAULT_PROFILE_ID);
+    HiveApiInputFormat.setProfileInputDesc(hiveConf, input, DEFAULT_PROFILE_ID);
 
     HiveApiInputFormat defaultInputFormat = new HiveApiInputFormat();
     if (args.trackMetrics) {
       defaultInputFormat.setObserver(new MetricsObserver("default", args.recordPrintPeriod));
     }
 
-    List<InputSplit> splits = defaultInputFormat.getSplits(hiveConf, client);
+    List<InputSplit> splits = defaultInputFormat.getSplits(new JobContext(hiveConf, new JobID()));
     System.err.println("getSplits returned " + splits.size() + " splits");
 
     long numRows = 0;

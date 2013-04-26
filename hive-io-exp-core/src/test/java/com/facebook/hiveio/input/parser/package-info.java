@@ -18,4 +18,4 @@
 /**
  * Parser using raw primitives.
  */
-package com.facebook.hiveio.input.parser.array;
+package com.facebook.hiveio.input.parser;

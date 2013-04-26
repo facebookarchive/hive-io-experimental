@@ -27,12 +27,10 @@ under the License.
   </parent>
 
   <name>${project.artifactId}</name>
-  <artifactId>hive-io-exp-cmdline</artifactId>
+  <artifactId>hive-io-exp-testing</artifactId>
   <packaging>jar</packaging>
 
   <properties>
-    <jar.main.class>com.facebook.hiveio.cmdline.Main</jar.main.class>
-
     <root.dir>..</root.dir>
   </properties>
 
@@ -41,10 +39,6 @@ under the License.
       <plugin>
         <groupId>com.github.koraktor</groupId>
         <artifactId>mavanagaiata</artifactId>
-      </plugin>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-assembly-plugin</artifactId>
       </plugin>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
@@ -92,36 +86,17 @@ under the License.
       <artifactId>hive-io-exp-core</artifactId>
     </dependency>
     <dependency>
-      <groupId>com.facebook.hadoop</groupId>
-      <artifactId>hadoop-core</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>com.fasterxml.jackson.core</groupId>
-      <artifactId>jackson-annotations</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>com.fasterxml.jackson.core</groupId>
-      <artifactId>jackson-core</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>com.fasterxml.jackson.core</groupId>
-      <artifactId>jackson-databind</artifactId>
+      <groupId>org.apache.hive</groupId>
+      <artifactId>hive-builtins</artifactId>
     </dependency>
     <dependency>
       <groupId>org.apache.hive</groupId>
-      <artifactId>hive-exec</artifactId>
+      <artifactId>hive-service</artifactId>
     </dependency>
     <dependency>
-      <groupId>org.apache.hive</groupId>
-      <artifactId>hive-metastore</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>io.airlift</groupId>
-      <artifactId>airline</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.slf4j</groupId>
-      <artifactId>slf4j-log4j12</artifactId>
+      <groupId>com.facebook.hiveio</groupId>
+      <artifactId>hive-io-exp-core</artifactId>
+      <type>test-jar</type>
     </dependency>
   </dependencies>
 </project>

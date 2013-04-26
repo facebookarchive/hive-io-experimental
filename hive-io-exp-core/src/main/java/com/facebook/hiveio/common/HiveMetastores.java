@@ -31,6 +31,8 @@ import org.apache.thrift.transport.TTransportException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.annotations.VisibleForTesting;
+
 import java.lang.reflect.Field;
 import java.net.URI;
 import java.util.List;
@@ -47,25 +49,24 @@ public class HiveMetastores {
   /** Logger */
   private static final Logger LOG = LoggerFactory.getLogger(HiveMetastores.class);
 
+  /**
+   * This is mainly for testing, it should not be used normally. It allows us to
+   * have a global metastore connection that overrides everything else.
+   */
+  private static ThriftHiveMetastore.Iface testClient;
+
+  @VisibleForTesting
+  public static ThriftHiveMetastore.Iface getTestClient() {
+    return testClient;
+  }
+
+  @VisibleForTesting
+  public static void setTestClient(ThriftHiveMetastore.Iface testClient) {
+    HiveMetastores.testClient = testClient;
+  }
+
   /** Don't construct */
   private HiveMetastores() { }
-
-  /**
-   * Create client from host and port with timeout
-   * @param host Host to connect to
-   * @param port Port to connect on
-   * @param timeoutMillis Socket timeout
-   * @return Hive Thrift Metastore client
-   * @throws TTransportException Connection errors
-   */
-  public static ThriftHiveMetastore.Iface create(String host, int port,
-    int timeoutMillis) throws TTransportException
-  {
-    TTransport transport = new TSocket(host, port, timeoutMillis);
-    transport.open();
-    TProtocol protocol = new TBinaryProtocol(transport);
-    return new ThriftHiveMetastore.Client(protocol);
-  }
 
   /**
    * Create client from host and port with default timeout
@@ -75,7 +76,11 @@ public class HiveMetastores {
    * @throws TTransportException network problems
    */
   public static ThriftHiveMetastore.Iface create(String host, int port)
-    throws TTransportException {
+    throws TTransportException
+  {
+    if (testClient != null) {
+      return testClient;
+    }
     return create(host, port, DEFAULT_TIMEOUT_MS);
   }
 
@@ -91,12 +96,36 @@ public class HiveMetastores {
    * @throws TException network problems
    */
   public static ThriftHiveMetastore.Iface create(HiveConf hiveConf)
-    throws TException {
+    throws TException
+  {
+    if (testClient != null) {
+      return testClient;
+    }
     ThriftHiveMetastore.Iface client = createFromURIs(hiveConf);
     if (client == null) {
       client = createfromReflection(hiveConf);
     }
     return client;
+  }
+
+  /**
+   * Create client from host and port with timeout
+   * @param host Host to connect to
+   * @param port Port to connect on
+   * @param timeoutMillis Socket timeout
+   * @return Hive Thrift Metastore client
+   * @throws TTransportException Connection errors
+   */
+  private static ThriftHiveMetastore.Iface create(String host, int port,
+    int timeoutMillis) throws TTransportException
+  {
+    if (testClient != null) {
+      return testClient;
+    }
+    TTransport transport = new TSocket(host, port, timeoutMillis);
+    transport.open();
+    TProtocol protocol = new TBinaryProtocol(transport);
+    return new ThriftHiveMetastore.Client(protocol);
   }
 
   /**
