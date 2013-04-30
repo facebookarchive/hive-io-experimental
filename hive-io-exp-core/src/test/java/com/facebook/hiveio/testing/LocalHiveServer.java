@@ -68,6 +68,22 @@ public class LocalHiveServer {
   public void loadData(String tableName, String[] data)
       throws IOException, TException
   {
+    File dataFile = writeDataToFile(tableName, data);
+    client.execute("LOAD DATA LOCAL INPATH '" + dataFile.getAbsolutePath() +
+        "' OVERWRITE INTO TABLE " + tableName);
+  }
+
+  public void loadData(String tableName, String partitionStr, String[] data)
+      throws IOException, TException
+  {
+    File dataFile = writeDataToFile(tableName, data);
+    client.execute("LOAD DATA LOCAL INPATH '" + dataFile.getAbsolutePath() +
+        "' OVERWRITE INTO TABLE " + tableName +
+        " PARTITION (" + partitionStr + ")");
+  }
+
+  private File writeDataToFile(String tableName, String[] data)
+      throws IOException {
     File dataFile = new File(rootDir(), tableName);
     Writer writer = Files.newWriter(dataFile, Charsets.UTF_8);
     for (String line : data) {
@@ -75,8 +91,7 @@ public class LocalHiveServer {
       writer.write("\n");
     }
     writer.close();
-    client.execute("LOAD DATA LOCAL INPATH '" + dataFile.getAbsolutePath() +
-        "' INTO TABLE " + tableName);
+    return dataFile;
   }
 
   public File rootDir() {
