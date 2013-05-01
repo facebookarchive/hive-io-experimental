@@ -47,7 +47,7 @@ public class OutputTest {
     HiveMetastores.setTestClient(hiveServer.getClient());
   }
 
-//  @Test
+  @Test
   public void testOutput() throws Exception
   {
     String tableName = "test1";

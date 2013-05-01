@@ -138,24 +138,24 @@ public class HiveApiOutputFormat
     Table table = client.get_table(dbName, tableName);
     sanityCheck(table, outputDesc);
 
-    OutputInfo oti = new OutputInfo(table);
+    OutputInfo outputInfo = new OutputInfo(table);
 
     String partitionPiece;
-    if (oti.hasPartitionInfo()) {
-      partitionPiece = HiveUtils.computePartitionPath(oti.getPartitionInfo(),
+    if (outputInfo.hasPartitionInfo()) {
+      partitionPiece = HiveUtils.computePartitionPath(outputInfo.getPartitionInfo(),
           outputDesc.getPartitionValues());
     } else {
       partitionPiece = "_temp";
     }
-    String partitionPath = oti.getTableRoot() + Path.SEPARATOR + partitionPiece;
+    String partitionPath = outputInfo.getTableRoot() + Path.SEPARATOR + partitionPiece;
 
-    oti.setPartitionPath(partitionPath);
+    outputInfo.setPartitionPath(partitionPath);
     HadoopUtils.setOutputDir(conf, partitionPath);
 
-    if (oti.hasPartitionInfo()) {
-      oti.setFinalOutputPath(oti.getPartitionPath());
+    if (outputInfo.hasPartitionInfo()) {
+      outputInfo.setFinalOutputPath(outputInfo.getPartitionPath());
     } else {
-      oti.setFinalOutputPath(oti.getTableRoot());
+      outputInfo.setFinalOutputPath(table.getSd().getLocation());
     }
 
     HiveTableSchema tableSchema = HiveTableSchemaImpl.fromTable(table);
@@ -163,7 +163,7 @@ public class HiveApiOutputFormat
 
     OutputConf outputConf = new OutputConf(conf, profileId);
     outputConf.writeOutputDescription(outputDesc);
-    outputConf.writeOutputTableInfo(oti);
+    outputConf.writeOutputTableInfo(outputInfo);
 
     LOG.info("initProfile '{}' using {}", profileId, outputDesc);
   }

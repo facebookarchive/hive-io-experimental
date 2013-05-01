@@ -111,10 +111,10 @@ public class FileSystems {
           throw new IllegalArgumentException("Could not remove existing file " +
               destFilePath);
         }
-        if (!fs.rename(file, destFilePath)) {
-          throw new IllegalArgumentException("Could not move " + file + " to " +
-              destFilePath);
-        }
+      }
+      if (!fs.rename(file, destFilePath)) {
+        throw new IllegalArgumentException("Could not move " + file + " to " +
+            destFilePath);
       }
     } else if (fs.getFileStatus(file).isDir()) {
       FileStatus[] statuses = fs.listStatus(file);
