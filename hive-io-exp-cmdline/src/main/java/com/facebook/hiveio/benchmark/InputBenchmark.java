@@ -29,6 +29,7 @@ import org.apache.hadoop.mapreduce.TaskAttemptID;
 import org.slf4j.LoggerFactory;
 
 import com.facebook.hiveio.common.HadoopNative;
+import com.facebook.hiveio.common.HiveUtils;
 import com.facebook.hiveio.input.HiveApiInputFormat;
 import com.facebook.hiveio.input.HiveInputDescription;
 import com.facebook.hiveio.record.HiveReadableRecord;
@@ -65,7 +66,7 @@ class InputBenchmark {
     input.getMetastoreDesc().setHost(args.metastoreOpts.host);
     input.getMetastoreDesc().setPort(args.metastoreOpts.port);
 
-    HiveConf hiveConf = new HiveConf(InputBenchmark.class);
+    HiveConf hiveConf = HiveUtils.newHiveConf(InputBenchmark.class);
 
     System.err.println("Initialize profile with input data");
     HiveApiInputFormat.setProfileInputDesc(hiveConf, input, DEFAULT_PROFILE_ID);

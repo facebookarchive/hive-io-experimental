@@ -18,7 +18,6 @@
 package com.facebook.hiveio.output;
 
 import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.hive.conf.HiveConf;
 import org.apache.hadoop.mapred.HackJobContext;
 import org.apache.hadoop.mapred.HackTaskAttemptContext;
 import org.apache.hadoop.mapred.JobConf;
@@ -27,12 +26,14 @@ import org.apache.hadoop.mapred.TaskAttemptContext;
 import org.apache.hadoop.mapred.TaskAttemptID;
 import org.apache.hadoop.mapreduce.JobID;
 
+import com.facebook.hiveio.common.HiveUtils;
+
 class PerThread {
   public final Configuration conf;
   public final TaskAttemptID taskID;
 
   public PerThread(Configuration conf) {
-    this.conf = new HiveConf(conf, OutputCmd.class);
+    this.conf = HiveUtils.newHiveConf(conf, OutputCmd.class);
     this.taskID = new TaskAttemptID("hiveio_output", 42, true,
         (int) Thread.currentThread().getId(), 0);
   }

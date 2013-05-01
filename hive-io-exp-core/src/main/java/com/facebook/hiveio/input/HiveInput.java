@@ -29,6 +29,7 @@ import org.apache.hadoop.mapreduce.TaskAttemptID;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.facebook.hiveio.common.HiveUtils;
 import com.facebook.hiveio.common.RecordReaderWrapper;
 import com.facebook.hiveio.record.HiveReadableRecord;
 import com.google.common.collect.AbstractIterator;
@@ -45,7 +46,8 @@ public class HiveInput {
   {
     String profileID = Long.toString(System.currentTimeMillis());
 
-    final Configuration conf = new HiveConf(HiveInput.class);
+    final HiveConf conf = HiveUtils.newHiveConf(HiveInput.class);
+
     HiveApiInputFormat.setProfileInputDesc(conf, inputDesc, profileID);
 
     final HiveApiInputFormat inputFormat = new HiveApiInputFormat();

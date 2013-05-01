@@ -18,7 +18,8 @@
 package com.facebook.hiveio.output;
 
 import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.hive.conf.HiveConf;
+
+import com.facebook.hiveio.common.HiveUtils;
 
 class Context {
   public Configuration conf;
@@ -31,6 +32,6 @@ class Context {
   };
 
   public Context() {
-    conf = new HiveConf(OutputCmd.class);
+    conf = HiveUtils.newHiveConf(OutputCmd.class);
   }
 }

@@ -23,6 +23,7 @@ import org.apache.hadoop.hive.service.HiveServer;
 import org.apache.thrift.TException;
 
 import com.facebook.hiveio.common.HadoopNative;
+import com.facebook.hiveio.common.HiveUtils;
 import com.google.common.base.Charsets;
 import com.google.common.io.Files;
 
@@ -44,7 +45,7 @@ public class LocalHiveServer {
 
   public void init() throws IOException, TException
   {
-    hiveConf = new HiveConf();
+    hiveConf = HiveUtils.newHiveConf();
     File baseDir = randomDir();
 
     File metastore = new File(baseDir, "metastore");

@@ -20,6 +20,7 @@ package com.facebook.hiveio.common;
 
 import org.apache.hadoop.conf.Configurable;
 import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.Writable;
 import org.apache.hadoop.mapred.JobConf;
@@ -169,7 +170,8 @@ public class HadoopUtils {
    * @throws IOException I/O errors
    */
   public static void setWorkOutputDir(TaskAttemptContext context)
-    throws IOException {
+    throws IOException
+  {
     Configuration conf = context.getConfiguration();
     String outputPath = getOutputDir(conf);
     // we need to do this to get the task path and set it for mapred
@@ -177,9 +179,11 @@ public class HadoopUtils {
     // mapreduce->mapred abstraction
     if (outputPath != null) {
       FileOutputCommitter foc = new FileOutputCommitter(getOutputPath(conf), context);
-      String path = foc.getWorkPath().toString();
-      conf.set("mapred.work.output.dir", path);
-      LOG.info("Setting mapred.work.output.dir to {}", path);
+      Path path = foc.getWorkPath();
+      FileSystem fs = path.getFileSystem(conf);
+      fs.mkdirs(path);
+      conf.set("mapred.work.output.dir", path.toString());
+      LOG.info("Setting mapred.work.output.dir to {}", path.toString());
     }
   }
 

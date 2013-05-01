@@ -135,7 +135,7 @@ public class HiveApiInputFormat
   {
     LOG.info("getSplits for profile {}", myProfileId);
 
-    HiveConf conf = new HiveConf(jobContext.getConfiguration(), HiveApiInputFormat.class);
+    HiveConf conf = HiveUtils.newHiveConf(jobContext.getConfiguration(), HiveApiInputFormat.class);
     HiveInputDescription inputDesc = readProfileInputDesc(conf);
 
     ThriftHiveMetastore.Iface client;

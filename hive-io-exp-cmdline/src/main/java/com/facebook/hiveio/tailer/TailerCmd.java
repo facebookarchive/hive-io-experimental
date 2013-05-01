@@ -104,7 +104,7 @@ public class TailerCmd extends BaseCmd
     HiveStats hiveStats = HiveUtils.statsOf(client, inputDesc);
     LOG.info("{}", hiveStats);
 
-    HiveConf hiveConf = new HiveConf(TailerCmd.class);
+    HiveConf hiveConf = HiveUtils.newHiveConf(TailerCmd.class);
     args.inputTable.process(hiveConf);
 
     LOG.info("Setting up input using {}", inputDesc);

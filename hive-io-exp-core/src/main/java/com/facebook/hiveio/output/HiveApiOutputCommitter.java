@@ -95,7 +95,8 @@ class HiveApiOutputCommitter extends OutputCommitter {
    * @param conf Configuration
    * @throws IOException I/O errors
    */
-  private static void writeSuccessFile(Configuration conf) throws IOException {
+  private static void writeSuccessFile(Configuration conf) throws IOException
+  {
     if (!HadoopUtils.needSuccessMarker(conf)) {
       return;
     }
@@ -164,14 +165,15 @@ class HiveApiOutputCommitter extends OutputCommitter {
    * Table has no partitions, just copy data
    *
    * @param conf Configuration
-   * @param oti OutputInfo
+   * @param outputInfo OutputInfo
    * @throws IOException I/O errors
    */
-  private void noPartitionsCopyData(Configuration conf, OutputInfo oti)
-    throws IOException {
-    Preconditions.checkArgument(!oti.hasPartitionInfo());
-    Path tablePath = new Path(oti.getTableRoot());
-    Path writePath = new Path(oti.getPartitionPath());
+  private void noPartitionsCopyData(Configuration conf, OutputInfo outputInfo)
+    throws IOException
+  {
+    Preconditions.checkArgument(!outputInfo.hasPartitionInfo());
+    Path tablePath = new Path(outputInfo.getTableRoot());
+    Path writePath = new Path(outputInfo.getPartitionPath());
     FileSystem tableFs = tablePath.getFileSystem(conf);
     FileSystem writePathFs = writePath.getFileSystem(conf);
     if (!tableFs.getUri().equals(writePathFs.getUri())) {
@@ -180,7 +182,7 @@ class HiveApiOutputCommitter extends OutputCommitter {
       throw new IllegalStateException("Table's root path fs " + tableFs.getUri() +
           " is not on same as its partition path fs " + writePathFs.getUri());
     }
-    LOG.info("No partitions, just copying data from {} to {}", writePath, tablePath);
+    LOG.info("No partitions, copying data from {} to {}", writePath, tablePath);
     FileSystems.move(tableFs, writePath, writePath, tablePath);
     tableFs.delete(writePath, true);
   }

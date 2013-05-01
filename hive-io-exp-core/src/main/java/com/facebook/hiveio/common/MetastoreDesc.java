@@ -58,7 +58,7 @@ public class MetastoreDesc implements Writable {
     if (host != null) {
       client = HiveMetastores.create(host, port);
     } else {
-      HiveConf hiveConf = new HiveConf(conf, HiveOutputDescription.class);
+      HiveConf hiveConf = HiveUtils.newHiveConf(conf, HiveOutputDescription.class);
       client = HiveMetastores.create(hiveConf);
     }
     return client;
