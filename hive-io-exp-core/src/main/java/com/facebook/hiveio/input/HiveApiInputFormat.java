@@ -133,8 +133,6 @@ public class HiveApiInputFormat
   public List<InputSplit> getSplits(JobContext jobContext)
     throws IOException, InterruptedException
   {
-    LOG.info("getSplits for profile {}", myProfileId);
-
     HiveConf conf = HiveUtils.newHiveConf(jobContext.getConfiguration(), HiveApiInputFormat.class);
     HiveInputDescription inputDesc = readProfileInputDesc(conf);
 

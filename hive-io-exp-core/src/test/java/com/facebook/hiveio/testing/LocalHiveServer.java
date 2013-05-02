@@ -17,6 +17,7 @@
  */
 package com.facebook.hiveio.testing;
 
+import org.apache.commons.io.FileUtils;
 import org.apache.hadoop.hive.conf.HiveConf;
 import org.apache.hadoop.hive.service.HiveInterface;
 import org.apache.hadoop.hive.service.HiveServer;
@@ -35,6 +36,7 @@ public class LocalHiveServer {
   public static final File TMP_DIR = new File(System.getProperty("java.io.tmpdir"));
 
   private final String name;
+  private File baseDir;
   private HiveConf hiveConf;
   private HiveServer.HiveServerHandler client;
 
@@ -45,8 +47,12 @@ public class LocalHiveServer {
 
   public void init() throws IOException, TException
   {
+    if (baseDir != null && baseDir.isDirectory()) {
+      FileUtils.deleteDirectory(baseDir);
+    }
+
     hiveConf = HiveUtils.newHiveConf();
-    File baseDir = randomDir();
+    baseDir = randomDir();
 
     File metastore = new File(baseDir, "metastore");
     hiveConf.setVar(HiveConf.ConfVars.METASTOREDIRECTORY, metastore.getAbsolutePath());
