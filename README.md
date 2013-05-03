@@ -42,7 +42,7 @@ API information is available here:
 # 1. Simple API #
 If you just want to quickly read or write a Hive table from a Java process, these are for you.
 
-The input API is simple:
+The input API is simply:
 
     public class HiveInput {
       public static Iterable<HiveReadableRecord> readTable(HiveInputDescription inputDesc);
