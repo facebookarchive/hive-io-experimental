@@ -39,6 +39,25 @@ is generated with each release.<br/>
 API information is available here: 
 [JavaDocs](http://facebook.github.io/hive-io-experimental/apidocs/index.html).
 
+# 1. Simple API #
+If you just want to quickly read or write a Hive table from a Java process, these are for you.
+
+The input API is simple:
+
+    public class HiveInput {
+      public static Iterable<HiveReadableRecord> readTable(HiveInputDescription inputDesc);
+    }
+
+And the output API is:
+
+    public class HiveOutput {
+      public static void writeTable(
+            HiveOutputDescription outputDesc,
+            Iterable<HiveWritableRecord> records)
+    }
+
+For example usages of these take a look at the cmdline apps and the tests in the code.
+
 # 2. Hadoop Compatible API #
 
 ## Design ##
