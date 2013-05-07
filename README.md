@@ -25,7 +25,7 @@ To use this library in your project with maven add this to you pom.xml:
     <dependency>
         <groupId>com.facebook.hiveio</groupId>
         <artifactId>hive-io-exp-core</artifactId>
-        <version>0.9</version>
+        <version>0.10</version>
     </dependency>
 
 You can also browse the
@@ -115,7 +115,7 @@ The code is located
 [here](hive-io-exp-cmdline/src/main/java/com/facebook/hiveio/tailer/).<br/>
 To use it first build the code or download the jar from
 [Maven Central](http://goo.gl/ng9XA).
-Then on your machine run `java -jar hive-io-exp-cmdline-0.9-jar-with-dependencies.jar help tail`.
+Then on your machine run `java -jar hive-io-exp-cmdline-0.10-jar-with-dependencies.jar help tail`.
 
 # 4. Examples #
 
