@@ -25,6 +25,8 @@ import org.apache.hadoop.io.WritableUtils;
 import org.apache.thrift.TException;
 
 import com.facebook.hiveio.output.HiveOutputDescription;
+import com.google.common.base.CharMatcher;
+import com.google.common.base.Objects;
 
 import java.io.DataInput;
 import java.io.DataOutput;
@@ -55,13 +57,43 @@ public class MetastoreDesc implements Writable {
   public ThriftHiveMetastore.Iface makeClient(Configuration conf)
       throws TException {
     ThriftHiveMetastore.Iface client;
-    if (host != null) {
+    if (hasHost()) {
       client = HiveMetastores.create(host, port);
     } else {
       HiveConf hiveConf = HiveUtils.newHiveConf(conf, HiveOutputDescription.class);
       client = HiveMetastores.create(hiveConf);
     }
     return client;
+  }
+
+  public boolean hasHost() {
+    return host != null && !CharMatcher.WHITESPACE.matchesAllOf(host);
+  }
+
+  @Override
+  public boolean equals(Object obj) {
+    if (this == obj) {
+      return true;
+    }
+    if (obj instanceof MetastoreDesc) {
+      MetastoreDesc other = (MetastoreDesc) obj;
+      return Objects.equal(host, other.host) &&
+          port == other.port;
+    }
+    return false;
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hashCode(host, port);
+  }
+
+  @Override
+  public String toString() {
+    return Objects.toStringHelper(this)
+        .add("host", host)
+        .add("port", port)
+        .toString();
   }
 
   @Override
