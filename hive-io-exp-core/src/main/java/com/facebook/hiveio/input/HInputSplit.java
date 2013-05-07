@@ -198,6 +198,7 @@ class HInputSplit extends InputSplit
   public void readFields(DataInput in) throws IOException {
     baseSplit = Writables.readUnknownWritable(in);
     baseInputFormat = Writables.readNewInstance(in);
+    HadoopUtils.configureInputFormat(baseInputFormat, conf);
     tableSchema.readFields(in);
     inputSplitData.readFields(in);
     columnIds = Writables.readIntArray(in);

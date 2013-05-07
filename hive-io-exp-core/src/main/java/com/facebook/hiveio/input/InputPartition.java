@@ -25,13 +25,12 @@ import org.apache.hadoop.hive.metastore.api.Table;
 import org.apache.hadoop.io.Writable;
 import org.apache.hadoop.io.WritableUtils;
 import org.apache.hadoop.mapred.InputFormat;
-import org.apache.hadoop.mapred.JobConf;
-import org.apache.hadoop.mapred.TextInputFormat;
 import org.apache.hadoop.util.ReflectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.facebook.hiveio.common.Classes;
+import com.facebook.hiveio.common.HadoopUtils;
 import com.facebook.hiveio.common.Writables;
 import com.google.common.base.Preconditions;
 
@@ -115,11 +114,7 @@ class InputPartition implements Writable {
    */
   public InputFormat makeInputFormat(Configuration conf) {
     InputFormat inputFormat = ReflectionUtils.newInstance(inputFormatClass, conf);
-    // TextInputFormat is JobConfigurable not Configurable, so we need to explicitly
-    // call this here to make sure it gets configured with the compression codecs.
-    if (inputFormat instanceof TextInputFormat) {
-      ((TextInputFormat) inputFormat).configure(new JobConf(conf));
-    }
+    HadoopUtils.configureInputFormat(inputFormat, conf);
     return inputFormat;
   }
 

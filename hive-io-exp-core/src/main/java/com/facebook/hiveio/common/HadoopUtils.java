@@ -23,8 +23,10 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.Writable;
+import org.apache.hadoop.mapred.InputFormat;
 import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapred.JobConfigurable;
+import org.apache.hadoop.mapred.TextInputFormat;
 import org.apache.hadoop.mapreduce.TaskAttemptContext;
 import org.apache.hadoop.mapreduce.lib.output.FileOutputCommitter;
 import org.slf4j.Logger;
@@ -61,9 +63,25 @@ public class HadoopUtils {
    * @param object Object to check
    * @param conf JobConf to set
    */
-  public static void setConfIfPossible(Object object, JobConf jobConf) {
+  public static void setJobConfIfPossible(Object object, JobConf jobConf) {
     if (object instanceof JobConfigurable) {
       ((JobConfigurable) object).configure(jobConf);
+    }
+  }
+
+  /**
+   * Hack to configure InputFormats before they get used.
+   * @param inputFormat InputFormat to configure
+   * @param conf Configuration to use
+   */
+  public static void configureInputFormat(InputFormat inputFormat, Configuration conf)
+  {
+    JobConf jobConf = new JobConf(conf);
+    setJobConfIfPossible(inputFormat, jobConf);
+    // TextInputFormat is not always JobConfigurable, so we need to explicitly
+    // call this here to make sure it gets configured with the compression codecs.
+    if (inputFormat instanceof TextInputFormat) {
+      ((TextInputFormat) inputFormat).configure(jobConf);
     }
   }
 
