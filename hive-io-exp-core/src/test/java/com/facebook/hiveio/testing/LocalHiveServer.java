@@ -23,7 +23,6 @@ import org.apache.hadoop.hive.service.HiveInterface;
 import org.apache.hadoop.hive.service.HiveServer;
 import org.apache.thrift.TException;
 
-import com.facebook.hiveio.common.HadoopNative;
 import com.facebook.hiveio.common.HiveUtils;
 import com.google.common.base.Charsets;
 import com.google.common.io.Files;
@@ -41,7 +40,6 @@ public class LocalHiveServer {
   private HiveServer.HiveServerHandler client;
 
   public LocalHiveServer(String name) {
-    HadoopNative.requireHadoopNative();
     this.name = name;
   }
 
