@@ -323,6 +323,7 @@ under the License.
             <goals>deploy</goals>
             <localCheckout>true</localCheckout>
             <pushChanges>false</pushChanges>
+            <tagNameFormat>@{project.version}</tagNameFormat>
           </configuration>
         </plugin>
         <plugin>
