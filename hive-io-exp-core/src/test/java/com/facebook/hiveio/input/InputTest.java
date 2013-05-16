@@ -102,4 +102,27 @@ public class InputTest {
 
     assertFalse(records.hasNext());
   }
+  @Test
+  public void testInputWithPartitions2() throws Exception {
+	  String tableName = "test1";
+	  String partition = "ds='foo', ds2='bar'";
+
+	  String rows[] = {
+			  "1\t1.1",
+			  "2\t2.2",
+	  };
+	  hiveServer.createTable("CREATE TABLE " + tableName +
+			  " (i1 INT, d1 DOUBLE) " +
+			  " PARTITIONED BY (ds STRING, ds2 STRING) " +
+			  " ROW FORMAT DELIMITED FIELDS TERMINATED BY '\t'");
+	  hiveServer.loadData(tableName, partition, rows);
+
+	  HiveInputDescription inputDesc = new HiveInputDescription();
+	  inputDesc.setDbName("default");
+	  inputDesc.setTableName(tableName);
+	  inputDesc.setPartitionFilter(partition);
+
+	  verifyData(inputDesc);
+  }
+
 }
