@@ -48,7 +48,7 @@ public class HiveInputDescription implements Writable {
   /** Columns to read in table */
   private List<String> columns = Lists.newArrayList();
   /** Filter for which partitions to read from  */
-  private String partitionFilter = "";
+  private List<String> partitionFilter = Lists.newArrayList();
   /** Number of splits per matched partition desired */
   private int numSplits;
 
@@ -154,7 +154,7 @@ public class HiveInputDescription implements Writable {
    *
    * @return partition filter
    */
-  public String getPartitionFilter() {
+  public List<String> getPartitionFilter() {
     return partitionFilter;
   }
 
@@ -165,7 +165,7 @@ public class HiveInputDescription implements Writable {
    * @return this
    */
   public HiveInputDescription setPartitionFilter(String partitionFilter) {
-    this.partitionFilter = partitionFilter;
+    this.partitionFilter.add(partitionFilter);
     return this;
   }
 
@@ -213,7 +213,7 @@ public class HiveInputDescription implements Writable {
     WritableUtils.writeString(out, dbName);
     WritableUtils.writeString(out, tableName);
     Writables.writeStringList(out, columns);
-    WritableUtils.writeString(out, partitionFilter);
+    Writables.writeStringList(out, partitionFilter);
     out.writeInt(numSplits);
   }
 
@@ -223,7 +223,7 @@ public class HiveInputDescription implements Writable {
     dbName = WritableUtils.readString(in);
     tableName = WritableUtils.readString(in);
     Writables.readStringList(in, columns);
-    partitionFilter = WritableUtils.readString(in);
+    partitionFilter = Lists.asList("", WritableUtils.readStringArray(in));
     numSplits = in.readInt();
   }
 

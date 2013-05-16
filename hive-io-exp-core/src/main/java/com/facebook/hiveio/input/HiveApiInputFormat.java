@@ -223,10 +223,9 @@ public class HiveApiInputFormat
       partitions.add(InputPartition.newFromHiveTable(table));
     } else {
       // table with partitions, find matches to user filter.
-      List<Partition> hivePartitions;
+      List<Partition> hivePartitions = Lists.newArrayList();
       try {
-        hivePartitions = client.get_partitions_by_filter(inputDesc.getDbName(),
-            inputDesc.getTableName(), inputDesc.getPartitionFilter(), (short) -1);
+          hivePartitions.addAll(HiveUtils.getPartitionsByFilter(client, inputDesc));
       } catch (Exception e) {
         throw new IOException(e);
       }
