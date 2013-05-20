@@ -33,6 +33,7 @@ import com.google.common.collect.Lists;
 import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -165,6 +166,10 @@ public class HiveInputDescription implements Writable {
    * @return this
    */
   public HiveInputDescription setPartitionFilter(String partitionFilter) {
+    if (partitionFilter.contains(",")) {
+      this.partitionFilter.addAll(Arrays.asList(partitionFilter.split(",")));
+      return this;
+    }
     this.partitionFilter.add(partitionFilter);
     return this;
   }
