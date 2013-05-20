@@ -84,9 +84,7 @@ public class HiveUtils {
   public static HiveStats statsOf(ThriftHiveMetastore.Iface client,
       HiveInputDescription inputDesc) throws TException
   {
-    List<Partition> partitions = client.get_partitions_by_filter(
-        inputDesc.getDbName(), inputDesc.getTableName(),
-        inputDesc.getPartitionFilter(), (short) -1);
+    List<Partition> partitions = getPartitionsByFilter(client, inputDesc);
 
     HiveStats hiveStats = new HiveStats();
 
@@ -98,6 +96,27 @@ public class HiveUtils {
     }
 
     return hiveStats;
+  }
+
+  public static List<Partition> getPartitionsByFilter(ThriftHiveMetastore.Iface client, HiveInputDescription inputDesc) throws TException {
+    if (inputDesc.hasPartitionFilter()) {
+      final List<Partition> partitionList = Lists.newArrayList();
+      for (String partition : inputDesc.getPartitionFilter()) {
+        List<Partition> partitionInfo = client.get_partitions_by_filter(
+                             inputDesc.getDbName(), inputDesc.getTableName(),
+                             partition, (short) -1);
+        for (Partition partitionFilter : partitionInfo) {
+          if (!partitionList.contains(partitionFilter)) {
+            partitionList.add(partitionFilter);
+          }
+        }
+
+      }
+      return partitionList;
+    }
+    return client.get_partitions_by_filter(
+            inputDesc.getDbName(), inputDesc.getTableName(),
+            "", (short) -1);
   }
 
   /**

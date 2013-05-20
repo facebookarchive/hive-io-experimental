@@ -33,6 +33,7 @@ import com.google.common.collect.Lists;
 import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -48,7 +49,7 @@ public class HiveInputDescription implements Writable {
   /** Columns to read in table */
   private List<String> columns = Lists.newArrayList();
   /** Filter for which partitions to read from  */
-  private String partitionFilter = "";
+  private List<String> partitionFilter = Lists.newArrayList();
   /** Number of splits per matched partition desired */
   private int numSplits;
 
@@ -154,7 +155,7 @@ public class HiveInputDescription implements Writable {
    *
    * @return partition filter
    */
-  public String getPartitionFilter() {
+  public List<String> getPartitionFilter() {
     return partitionFilter;
   }
 
@@ -165,7 +166,22 @@ public class HiveInputDescription implements Writable {
    * @return this
    */
   public HiveInputDescription setPartitionFilter(String partitionFilter) {
-    this.partitionFilter = partitionFilter;
+    if (partitionFilter.contains(",")) {
+      this.partitionFilter.addAll(Arrays.asList(partitionFilter.split(",")));
+      return this;
+    }
+    this.partitionFilter.add(partitionFilter);
+    return this;
+  }
+
+  /**
+   * Add partition filter
+   *
+   * @param partitionFilter HQL partition filter
+   * @return this
+   */
+  public HiveInputDescription addPartitionFilter(String partitionFilter) {
+    this.partitionFilter.add(partitionFilter);
     return this;
   }
 
@@ -213,7 +229,7 @@ public class HiveInputDescription implements Writable {
     WritableUtils.writeString(out, dbName);
     WritableUtils.writeString(out, tableName);
     Writables.writeStringList(out, columns);
-    WritableUtils.writeString(out, partitionFilter);
+    Writables.writeStringList(out, partitionFilter);
     out.writeInt(numSplits);
   }
 
@@ -223,7 +239,7 @@ public class HiveInputDescription implements Writable {
     dbName = WritableUtils.readString(in);
     tableName = WritableUtils.readString(in);
     Writables.readStringList(in, columns);
-    partitionFilter = WritableUtils.readString(in);
+    partitionFilter = Lists.asList("", WritableUtils.readStringArray(in));
     numSplits = in.readInt();
   }
 
