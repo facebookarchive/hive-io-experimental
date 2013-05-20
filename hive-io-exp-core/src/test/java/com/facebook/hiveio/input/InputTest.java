@@ -105,7 +105,8 @@ public class InputTest {
   @Test
   public void testInputWithPartitions2() throws Exception {
 	  String tableName = "test1";
-	  String partition = "ds='foo', ds2='bar'";
+    String partition = "ds='foo', ds2='bar'";
+    String partition2 = "ds='foo', ds2='bar2'";
 
 	  String rows[] = {
 			  "1\t1.1",
@@ -116,13 +117,39 @@ public class InputTest {
 			  " PARTITIONED BY (ds STRING, ds2 STRING) " +
 			  " ROW FORMAT DELIMITED FIELDS TERMINATED BY '\t'");
 	  hiveServer.loadData(tableName, partition, rows);
+    hiveServer.loadData(tableName, partition2, rows);
 
 	  HiveInputDescription inputDesc = new HiveInputDescription();
 	  inputDesc.setDbName("default");
 	  inputDesc.setTableName(tableName);
-	  inputDesc.setPartitionFilter(partition);
+	  inputDesc.addPartitionFilter(partition.split(",")[0]);
+    inputDesc.addPartitionFilter(partition.split(",")[1]);
+    inputDesc.addPartitionFilter(partition2.split(",")[0]);
+    inputDesc.addPartitionFilter(partition2.split(",")[1]);
 
-	  verifyData(inputDesc);
+    Iterator<HiveReadableRecord> records = HiveInput.readTable(inputDesc).iterator();
+    assertTrue(records.hasNext());
+
+    HiveReadableRecord record = records.next();
+    assertEquals(Long.class, record.get(0).getClass());
+    assertEquals(Double.class, record.get(1).getClass());
+    assertEquals(1, record.getLong(0));
+    assertEquals(1.1, record.getDouble(1));
+
+    assertTrue(records.hasNext());
+    record = records.next();
+    assertEquals(2, record.getLong(0));
+    assertEquals(2.2, record.getDouble(1));
+
+    assertTrue(records.hasNext());
+    record = records.next();
+    assertEquals(1, record.getLong(0));
+    assertEquals(1.1, record.getDouble(1));
+
+    assertTrue(records.hasNext());
+    record = records.next();
+    assertEquals(2, record.getLong(0));
+    assertEquals(2.2, record.getDouble(1));
   }
 
 }

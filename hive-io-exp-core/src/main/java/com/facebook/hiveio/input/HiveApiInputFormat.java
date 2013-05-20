@@ -225,7 +225,12 @@ public class HiveApiInputFormat
       // table with partitions, find matches to user filter.
       List<Partition> hivePartitions = Lists.newArrayList();
       try {
-          hivePartitions.addAll(HiveUtils.getPartitionsByFilter(client, inputDesc));
+          List<Partition> filters = HiveUtils.getPartitionsByFilter(client, inputDesc);
+          for (Partition partition : filters) {
+            if (!hivePartitions.contains(partition)) {
+              hivePartitions.add(partition);
+            }
+          }
       } catch (Exception e) {
         throw new IOException(e);
       }

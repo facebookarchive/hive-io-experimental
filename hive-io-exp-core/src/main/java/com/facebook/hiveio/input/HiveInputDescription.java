@@ -170,6 +170,17 @@ public class HiveInputDescription implements Writable {
   }
 
   /**
+   * Add partition filter
+   *
+   * @param partitionFilter HQL partition filter
+   * @return this
+   */
+  public HiveInputDescription addPartitionFilter(String partitionFilter) {
+    this.partitionFilter.add(partitionFilter);
+    return this;
+  }
+
+  /**
    * Do we have a partition filter
    *
    * @return true if we have a partition filter
