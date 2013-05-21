@@ -18,6 +18,7 @@
 
 package com.facebook.hiveio.schema;
 
+import com.google.common.collect.Lists;
 import org.apache.hadoop.hive.metastore.api.Table;
 import org.apache.hadoop.io.WritableUtils;
 
@@ -47,6 +48,8 @@ public class HiveTableSchemaImpl implements HiveTableSchema {
   /** Positions of columns in the row */
   private final Map<String, Integer> columnPositions;
 
+  private final List<String> columnNames;
+
   /** Number of columns. Not serialized */
   private int numColumns;
 
@@ -57,6 +60,7 @@ public class HiveTableSchemaImpl implements HiveTableSchema {
     tableName = new HiveTableName("_unknown_", "_unknown_");
     partitionPositions = Maps.newHashMap();
     columnPositions = Maps.newHashMap();
+    columnNames = Lists.newArrayList();
   }
 
   /**
@@ -72,7 +76,9 @@ public class HiveTableSchemaImpl implements HiveTableSchema {
     this.partitionPositions = partitionPositions;
     this.columnPositions = columnPositions;
     numColumns = computeNumColumns(columnPositions);
+    this.columnNames = Lists.newArrayList(columnPositions.keySet());
   }
+
   /**
    * Create from a Hive table
    *
@@ -154,5 +160,10 @@ public class HiveTableSchemaImpl implements HiveTableSchema {
         .add("partitionKeys", partitionPositions)
         .add("columnPositions", columnPositions)
         .toString();
+  }
+
+  @Override
+  public List<String> getColumnNames() {
+    return columnNames;
   }
 }
