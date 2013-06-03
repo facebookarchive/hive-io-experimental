@@ -77,7 +77,6 @@ public class HiveTableSchemaImpl implements HiveTableSchema {
     this.partitionPositions = partitionPositions;
     this.columnPositions = columnPositions;
     numColumns = computeNumColumns(columnPositions);
-    this.columnNames = Lists.newArrayList(columnPositions.keySet());
   }
 
   /**
