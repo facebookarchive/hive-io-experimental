@@ -22,6 +22,7 @@ import org.apache.hadoop.io.Writable;
 
 import com.facebook.hiveio.common.HiveTableName;
 
+import java.util.Collection;
 import java.util.List;
 
 /**
@@ -55,5 +56,5 @@ public interface HiveTableSchema extends Writable {
    *
    * @return
    */
-  List<String> getColumnNames();
+  Collection<String> getColumnNames();
 }

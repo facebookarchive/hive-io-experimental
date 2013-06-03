@@ -32,6 +32,7 @@ import com.facebook.hiveio.common.HiveUtils;
 import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
@@ -163,7 +164,7 @@ public class HiveTableSchemaImpl implements HiveTableSchema {
   }
 
   @Override
-  public List<String> getColumnNames() {
-    return columnNames;
+  public Collection<String> getColumnNames() {
+    return columnPositions.keySet();
   }
 }
