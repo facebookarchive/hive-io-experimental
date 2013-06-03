@@ -49,8 +49,6 @@ public class HiveTableSchemaImpl implements HiveTableSchema {
   /** Positions of columns in the row */
   private final Map<String, Integer> columnPositions;
 
-  private final List<String> columnNames;
-
   /** Number of columns. Not serialized */
   private int numColumns;
 
@@ -61,7 +59,6 @@ public class HiveTableSchemaImpl implements HiveTableSchema {
     tableName = new HiveTableName("_unknown_", "_unknown_");
     partitionPositions = Maps.newHashMap();
     columnPositions = Maps.newHashMap();
-    columnNames = Lists.newArrayList();
   }
 
   /**
