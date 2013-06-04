@@ -160,7 +160,7 @@ public class HiveTableSchemaImpl implements HiveTableSchema {
   }
 
   @Override
-  public Collection<String> getColumnNames() {
-    return columnPositions.keySet();
+  public List<String> getColumnNames() {
+    return Lists.newArrayList(columnPositions.keySet());
   }
 }

@@ -56,5 +56,5 @@ public interface HiveTableSchema extends Writable {
    *
    * @return
    */
-  Collection<String> getColumnNames();
+  List<String> getColumnNames();
 }
