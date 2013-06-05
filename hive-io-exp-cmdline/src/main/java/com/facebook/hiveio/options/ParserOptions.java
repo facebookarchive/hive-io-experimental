@@ -15,23 +15,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.facebook.hiveio.tailer;
+package com.facebook.hiveio.options;
 
-import com.facebook.hiveio.options.Defaults;
-import com.fasterxml.jackson.annotation.JsonProperty;
+import com.facebook.hiveio.rows.IdIdSimRow;
+import io.airlift.command.Option;
 
-class HostPort {
-  @JsonProperty public String host;
-  @JsonProperty public int port = Defaults.METASTORE_PORT;
+public class ParserOptions {
+  @Option(name = {"--parse-only", "--dont-print"}, description = "Don't print, just measure performance")
+  public boolean parseOnly = false;
 
-  public HostPort() {}
+  @Option(name = "--bean-parser", description = "Use bean parser")
+  public boolean beanParser = false;
 
-  public HostPort(String host, int port) {
-    this.host = host;
-    this.port = port;
-  }
-
-  @Override public String toString() {
-    return host + ":" + port;
-  }
+  @Option(name = "--row-class", description = "class which represents a row")
+  public String rowClassName = IdIdSimRow.class.getName();
 }

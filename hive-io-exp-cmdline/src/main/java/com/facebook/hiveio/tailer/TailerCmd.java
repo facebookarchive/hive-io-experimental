@@ -37,22 +37,19 @@ import com.facebook.hiveio.common.HiveUtils;
 import com.facebook.hiveio.input.HiveApiInputFormat;
 import com.facebook.hiveio.input.HiveInputDescription;
 import com.facebook.hiveio.options.BaseCmd;
+import com.facebook.hiveio.common.HostPort;
 import com.facebook.hiveio.record.HiveReadableRecord;
 import com.facebook.hiveio.schema.HiveTableSchema;
 import com.facebook.hiveio.schema.HiveTableSchemas;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Queues;
 import com.google.common.util.concurrent.Uninterruptibles;
 import io.airlift.command.Command;
-import io.airlift.command.Help;
 
 import javax.inject.Inject;
-import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
-import java.util.Collections;
 import java.util.List;
 
 import static com.facebook.hiveio.input.HiveApiInputFormat.DEFAULT_PROFILE_ID;
@@ -60,28 +57,42 @@ import static com.facebook.hiveio.input.HiveApiInputFormat.DEFAULT_PROFILE_ID;
 @Command(name = "tail", description = "Dump a Hive table")
 public class TailerCmd extends BaseCmd
 {
-  @Inject TailerArgs args = new TailerArgs();
+  private static final Logger LOG = LoggerFactory.getLogger(TailerCmd.class);
 
-  public RecordPrinter recordPrinter;
+  @Inject private TailerArgs args = new TailerArgs();
 
-  public void chooseRecordPrinter() {
+  private RecordPrinter recordPrinter;
+  private RowParser rowParser;
+
+  public void chooseRecordPrinter()
+  {
     if (args.recordBufferFlush > 1) {
-      recordPrinter = new BufferedRecordPrinter();
+      recordPrinter = new RecordPrinter.Buffered();
     } else {
-      recordPrinter = new DefaultRecordPrinter();
+      recordPrinter = new RecordPrinter.Default();
     }
   }
 
-  private static final Logger LOG = LoggerFactory.getLogger(TailerCmd.class);
+  public void chooseRowParser(HiveTableSchema schema)
+      throws ClassNotFoundException, InstantiationException, IllegalAccessException
+  {
+    if (args.parser.beanParser) {
+      Class<?> klass = Class.forName(args.parser.rowClassName);
+      rowParser = new RowParser.Bean(schema, klass);
+    } else {
+      rowParser = new RowParser.Default();
+    }
+  }
 
   @Override
   public void execute() throws Exception
   {
-    chooseRecordPrinter();
-
     HadoopNative.requireHadoopNative();
 
-    HostPort metastoreHostPort = getHostPort();
+    args.process();
+    chooseRecordPrinter();
+
+    HostPort metastoreHostPort = getMetastoreHostPort();
     if (metastoreHostPort == null) {
       return;
     }
@@ -90,16 +101,7 @@ public class TailerCmd extends BaseCmd
     ThriftHiveMetastore.Iface client = HiveMetastores.create(
         metastoreHostPort.host, metastoreHostPort.port);
 
-    HiveInputDescription inputDesc = new HiveInputDescription();
-    inputDesc.setDbName(args.inputTable.database);
-    inputDesc.setTableName(args.inputTable.table);
-    inputDesc.setPartitionFilter(args.inputTable.partitionFilter);
-    if (args.requestNumSplits == 0) {
-      args.requestNumSplits = args.multiThread.threads * args.requestSplitsPerThread;
-    }
-    inputDesc.setNumSplits(args.requestNumSplits);
-    inputDesc.getMetastoreDesc().setHost(metastoreHostPort.host);
-    inputDesc.getMetastoreDesc().setPort(metastoreHostPort.port);
+    HiveInputDescription inputDesc = initInput(metastoreHostPort);
 
     HiveStats hiveStats = HiveUtils.statsOf(client, inputDesc);
     LOG.info("{}", hiveStats);
@@ -119,6 +121,7 @@ public class TailerCmd extends BaseCmd
 
     HiveTableName hiveTableName = new HiveTableName(args.inputTable.database, args.inputTable.table);
     HiveTableSchema schema = HiveTableSchemas.lookup(client, hiveTableName);
+    chooseRowParser(schema);
 
     Stats stats = Stats.get(hiveStats);
     Context context = new Context(hapi, hiveConf, schema, hiveStats, stats);
@@ -139,9 +142,21 @@ public class TailerCmd extends BaseCmd
     }
 
     System.err.println("Finished.");
-    if (metricsOpts.stderrEnabled()) {
-      metricsOpts.dumpMetricsToStderr();
+    if (args.metricsOpts.stderrEnabled()) {
+      args.metricsOpts.dumpMetricsToStderr();
     }
+  }
+
+  private HiveInputDescription initInput(HostPort metastoreHostPort) {
+    HiveInputDescription inputDesc = new HiveInputDescription();
+    inputDesc.setDbName(args.inputTable.database);
+    inputDesc.setTableName(args.inputTable.table);
+    inputDesc.setPartitionFilter(args.inputTable.partitionFilter);
+    args.splits.compute(args.multiThread.threads);
+    inputDesc.setNumSplits(args.splits.requestNumSplits);
+    inputDesc.getMetastoreDesc().setHost(metastoreHostPort.host);
+    inputDesc.getMetastoreDesc().setPort(metastoreHostPort.port);
+    return inputDesc;
   }
 
   private void multiThreaded(final Context context, int numThreads)
@@ -189,8 +204,8 @@ public class TailerCmd extends BaseCmd
     int rowsParsed = 0;
     while (recordReader.nextKeyValue() && !context.limitReached(args.limit)) {
       HiveReadableRecord record = recordReader.getCurrentValue();
-      if (args.parseOnly) {
-        parseRecord(record, context.schema.numColumns());
+      if (args.parser.parseOnly) {
+        rowParser.parse(record);
       } else {
         recordPrinter.printRecord(record, context.schema.numColumns(), context, args);
       }
@@ -198,42 +213,21 @@ public class TailerCmd extends BaseCmd
       if (context.rowsParsed.incrementAndGet() >= args.limit) {
         break;
       }
-      if (rowsParsed % metricsOpts.updateRows == 0) {
-        context.stats.addRows(metricsOpts.updateRows);
+      if (rowsParsed % args.metricsOpts.updateRows == 0) {
+        context.stats.addRows(args.metricsOpts.updateRows);
         rowsParsed = 0;
       }
     }
     context.stats.addRows(rowsParsed);
   }
 
-  private static void parseRecord(HiveReadableRecord record, int numColumns) {
-    for (int index = 0; index < numColumns; ++index) {
-      record.get(index);
+  private HostPort getMetastoreHostPort() throws IOException {
+    HostPort metastoreInfo;
+    if (args.namespace.hasPath()) {
+      metastoreInfo = args.namespace.readMetastoreInfo();
+    } else {
+      metastoreInfo = new HostPort(args.metastore.host, args.metastore.port);
     }
-  }
-
-  private HostPort getHostPort() throws IOException {
-    if (args.clustersFile == null) {
-      return new HostPort(args.metastore.host, args.metastore.port);
-    }
-    return clusterFromConfig();
-  }
-
-  private HostPort clusterFromConfig() throws IOException {
-    if (args.clustersFile == null) {
-      LOG.error("Cluster file not given");
-      new Help().run();
-      return null;
-    }
-    ObjectMapper objectMapper = new ObjectMapper();
-    File file = new File(args.clustersFile);
-    ClusterData clustersData = objectMapper.readValue(file, ClusterData.class);
-    List<HostPort> hostAndPorts = clustersData.data.get(args.cluster);
-    if (hostAndPorts == null) {
-      LOG.error("Cluster {} not found in data file {}", args.cluster, args.clustersFile);
-      return null;
-    }
-    Collections.shuffle(hostAndPorts);
-    return hostAndPorts.get(0);
+    return metastoreInfo;
   }
 }

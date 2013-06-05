@@ -22,4 +22,35 @@ import com.facebook.hiveio.record.HiveReadableRecord;
 interface RecordPrinter {
   void printRecord(HiveReadableRecord record, int numColumns, Context context,
       TailerArgs args);
+
+  static class Default implements RecordPrinter {
+    @Override public void printRecord(HiveReadableRecord record, int numColumns,
+        Context context, TailerArgs args) {
+      addRecordToStringBuilder(record, numColumns, context, args);
+      context.perThread.get().flushBuffer();
+    }
+
+    public static void addRecordToStringBuilder(HiveReadableRecord record,
+        int numColumns, Context context, TailerArgs args) {
+      StringBuilder sb = context.perThread.get().stringBuilder;
+      sb.append(String.valueOf(record.get(0)));
+      for (int index = 1; index < numColumns; ++index) {
+        sb.append(args.separator);
+        sb.append(String.valueOf(record.get(index)));
+      }
+    }
+  }
+
+  static class Buffered implements RecordPrinter {
+    @Override public void printRecord(HiveReadableRecord record, int numColumns,
+        Context context, TailerArgs args) {
+      Default.addRecordToStringBuilder(record, numColumns, context, args);
+
+      ThreadContext perThread = context.perThread.get();
+      ++perThread.recordsInBuffer;
+      if (perThread.recordsInBuffer >= args.recordBufferFlush) {
+        perThread.flushBuffer();
+      }
+    }
+  }
 }

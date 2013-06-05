@@ -51,8 +51,6 @@ class InputBenchmark {
   /** Logger */
   private static final org.slf4j.Logger LOG = LoggerFactory.getLogger(InputBenchmark.class);
 
-  public InputBenchmark() { }
-
   public void run(InputBenchmarkCmd args) throws Exception {
     HadoopNative.requireHadoopNative();
 

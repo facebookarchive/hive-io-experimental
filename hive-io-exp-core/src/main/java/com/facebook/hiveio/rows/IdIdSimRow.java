@@ -15,24 +15,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.facebook.hiveio.tailer;
+package com.facebook.hiveio.rows;
 
-import com.facebook.hiveio.record.HiveReadableRecord;
-
-class DefaultRecordPrinter implements RecordPrinter {
-  @Override public void printRecord(HiveReadableRecord record, int numColumns,
-      Context context, TailerArgs args) {
-    addRecordToStringBuilder(record, numColumns, context, args);
-    context.perThread.get().flushBuffer();
-  }
-
-  public static void addRecordToStringBuilder(HiveReadableRecord record,
-      int numColumns, Context context, TailerArgs args) {
-    StringBuilder sb = context.perThread.get().stringBuilder;
-    sb.append(String.valueOf(record.get(0)));
-    for (int index = 1; index < numColumns; ++index) {
-      sb.append(args.separator);
-      sb.append(String.valueOf(record.get(index)));
-    }
-  }
+public class IdIdSimRow {
+  public long id1;
+  public long id2;
+  public double sim;
 }

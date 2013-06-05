@@ -30,17 +30,13 @@ public class InputTableOptions extends TableOptions {
   @Option(name = "--parser", description = "Force Input parser to use")
   public String parser;
 
-  public InputTableOptions() {
-    table = "inference_sims";
-  }
-
   public void process(Configuration conf) {
     processParser(conf);
   }
 
   private void processParser(Configuration conf) {
     if (parser != null) {
-      Class<?> klass = null;
+      Class<?> klass;
       try {
         klass = Class.forName(parser);
       } catch (ClassNotFoundException e) {

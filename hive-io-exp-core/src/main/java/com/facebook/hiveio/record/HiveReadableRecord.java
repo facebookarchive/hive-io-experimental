@@ -23,6 +23,20 @@ package com.facebook.hiveio.record;
  */
 public interface HiveReadableRecord {
   /**
+   * Get count of number of columns
+   *
+   * @return number of columns in record
+   */
+  int numColumns();
+
+  /**
+   * Get count of partition values
+   *
+   * @return number of partition values
+   */
+  int numPartitionValues();
+
+  /**
    * Get column at given index.
    *
    * Regular data columns from the tables should always be placed first, and then

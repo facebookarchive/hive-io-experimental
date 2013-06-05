@@ -54,11 +54,13 @@ class ArrayRecord implements HiveReadableRecord {
     }
   }
 
-  public int getNumColumns() {
+  @Override
+  public int numColumns() {
     return numColumns;
   }
 
-  public int getNumPartitionValues() {
+  @Override
+  public int numPartitionValues() {
     return booleans.length - numColumns;
   }
 

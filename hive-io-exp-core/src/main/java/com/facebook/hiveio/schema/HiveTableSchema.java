@@ -48,4 +48,10 @@ public interface HiveTableSchema extends Writable {
    * @return Number of columns in table
    */
   int numColumns();
+
+  /**
+   * Get number of partition keys for this table
+   * @return number of partition keys
+   */
+  int numPartitionKeys();
 }

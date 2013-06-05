@@ -106,8 +106,14 @@ public class DefaultRecord implements HiveRecord {
     rowData[index] = value;
   }
 
-  public int getNumColumns() {
+  @Override
+  public int numColumns() {
     return rowData.length;
+  }
+
+  @Override
+  public int numPartitionValues() {
+    return partitionValues.length;
   }
 
   /**
@@ -143,7 +149,7 @@ public class DefaultRecord implements HiveRecord {
   @Override
   public String toString() {
     return Objects.toStringHelper(this)
-        .add("numColumns", getNumColumns())
+        .add("numColumns", numColumns())
         .add("rowData", rowDataToString())
         .add("partitionData", partitionValues)
         .toString();

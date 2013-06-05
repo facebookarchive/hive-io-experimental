@@ -82,6 +82,14 @@ under the License.
   <dependencies>
     <!-- Compile dependencies -->
     <dependency>
+      <groupId>com.esotericsoftware.reflectasm</groupId>
+      <artifactId>reflectasm</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>it.unimi.dsi</groupId>
+      <artifactId>fastutil</artifactId>
+    </dependency>
+    <dependency>
       <groupId>com.google.guava</groupId>
       <artifactId>guava</artifactId>
     </dependency>

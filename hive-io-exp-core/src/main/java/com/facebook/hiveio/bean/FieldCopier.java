@@ -15,14 +15,33 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.facebook.hiveio.tailer;
+package com.facebook.hiveio.bean;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.google.common.collect.Maps;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import java.util.List;
-import java.util.Map;
+import com.facebook.hiveio.record.HiveReadableRecord;
+import com.google.common.base.Objects;
 
-class ClusterData {
-  @JsonProperty public Map<String, List<HostPort>> data = Maps.newHashMap();
+public abstract class FieldCopier {
+  private static final Logger LOG = LoggerFactory.getLogger(FieldCopier.class);
+
+  private int fromHiveIndex;
+
+  protected int getFromHiveIndex() {
+    return fromHiveIndex;
+  }
+
+  void setFromHiveIndex(int fromHiveIndex) {
+    this.fromHiveIndex = fromHiveIndex;
+  }
+
+  @Override public String toString() {
+    return Objects.toStringHelper(this)
+        .add("fromHiveIndex", fromHiveIndex)
+        .add("copierClass", getClass())
+        .toString();
+  }
+
+  protected abstract void setValue(HiveReadableRecord fromRecord, Object toObject);
 }

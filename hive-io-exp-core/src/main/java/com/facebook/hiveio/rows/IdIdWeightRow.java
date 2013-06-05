@@ -15,29 +15,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.facebook.hiveio.options;
+package com.facebook.hiveio.rows;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import javax.inject.Inject;
-
-public abstract class BaseCmd implements Runnable {
-  private static final Logger LOG = LoggerFactory.getLogger(BaseCmd.class);
-
-  @Inject public SocksProxyOptions socksOpts = new SocksProxyOptions();
-
-  @Override public void run() {
-    if (socksOpts.port != -1) {
-      System.setProperty("socksProxyHost", socksOpts.host);
-      System.setProperty("socksProxyPort", Integer.toString(socksOpts.port));
-    }
-    try {
-      execute();
-    } catch (Exception e) {
-      e.printStackTrace();
-    }
-  }
-
-  public abstract void execute() throws Exception;
+public class IdIdWeightRow {
+  public long id1;
+  public long id2;
+  public double weight;
 }

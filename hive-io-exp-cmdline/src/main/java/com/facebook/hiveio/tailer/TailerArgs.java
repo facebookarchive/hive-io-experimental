@@ -20,26 +20,23 @@ package com.facebook.hiveio.tailer;
 import com.facebook.hiveio.options.Defaults;
 import com.facebook.hiveio.options.InputTableOptions;
 import com.facebook.hiveio.options.MetastoreOptions;
+import com.facebook.hiveio.options.MetricsOptions;
 import com.facebook.hiveio.options.MultiThreadOptions;
+import com.facebook.hiveio.options.NamespaceOptions;
+import com.facebook.hiveio.options.ParserOptions;
+import com.facebook.hiveio.options.SplitOptions;
 import io.airlift.command.Option;
 
 import javax.inject.Inject;
 
 public class TailerArgs {
-  @Option(name = "--clustersFile", description = "File of Hive metastore clusters")
-  public String clustersFile;
-
-  @Option(name = "--cluster", description = "Cluster to use")
-  public String cluster = "silver";
-
+  @Inject public NamespaceOptions namespace = new NamespaceOptions();
   @Inject public MetastoreOptions metastore = new MetastoreOptions();
-
   @Inject public InputTableOptions inputTable = new InputTableOptions();
-
   @Inject public MultiThreadOptions multiThread = new MultiThreadOptions();
-
-  @Option(name = {"--parse-only", "--dont-print"}, description = "Don't print, just measure performance")
-  public boolean parseOnly = false;
+  @Inject public ParserOptions parser = new ParserOptions();
+  @Inject public SplitOptions splits = new SplitOptions();
+  @Inject public MetricsOptions metricsOpts = new MetricsOptions();
 
   @Option(name = {"-l", "--limit"}, description = "Limit on number of rows to process")
   public long limit = Long.MAX_VALUE;
@@ -50,12 +47,10 @@ public class TailerArgs {
   @Option(name = "--record-buffer-flush", description = "How many records to buffer before printing")
   public int recordBufferFlush = 1;
 
-  @Option(name = "--request-num_splits", description = "Number of splits to request")
-  public int requestNumSplits = 0;
-
-  @Option(name = "--request-splits-per-thread", description = "Number of splits per thread")
-  public int requestSplitsPerThread = 3;
-
-  @Option(name = "--append-stats-to",description = "Append final stats to a file")
+  @Option(name = "--append-stats-to", description = "Append final stats to a file")
   public String appendStatsTo;
+
+  public void process() {
+    metricsOpts.process();
+  }
 }

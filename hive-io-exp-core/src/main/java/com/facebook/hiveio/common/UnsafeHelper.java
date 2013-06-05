@@ -15,29 +15,20 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.facebook.hiveio.options;
+package com.facebook.hiveio.common;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import sun.misc.Unsafe;
 
-import javax.inject.Inject;
+import java.lang.reflect.Field;
 
-public abstract class BaseCmd implements Runnable {
-  private static final Logger LOG = LoggerFactory.getLogger(BaseCmd.class);
-
-  @Inject public SocksProxyOptions socksOpts = new SocksProxyOptions();
-
-  @Override public void run() {
-    if (socksOpts.port != -1) {
-      System.setProperty("socksProxyHost", socksOpts.host);
-      System.setProperty("socksProxyPort", Integer.toString(socksOpts.port));
-    }
+public class UnsafeHelper {
+  public static Unsafe getUnsafe() {
     try {
-      execute();
+      Field f = Unsafe.class.getDeclaredField("theUnsafe");
+      f.setAccessible(true);
+      return (Unsafe)f.get(null);
     } catch (Exception e) {
-      e.printStackTrace();
+      throw new IllegalStateException("Could not get theUnsafe object");
     }
   }
-
-  public abstract void execute() throws Exception;
 }

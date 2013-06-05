@@ -17,27 +17,18 @@
  */
 package com.facebook.hiveio.options;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import io.airlift.command.Option;
 
-import javax.inject.Inject;
+public class SplitOptions {
+  @Option(name = "--request-num-splits", description = "Number of splits to request")
+  public int requestNumSplits = 0;
 
-public abstract class BaseCmd implements Runnable {
-  private static final Logger LOG = LoggerFactory.getLogger(BaseCmd.class);
+  @Option(name = "--request-splits-per-thread", description = "Number of splits per thread")
+  public int requestSplitsPerThread = 3;
 
-  @Inject public SocksProxyOptions socksOpts = new SocksProxyOptions();
-
-  @Override public void run() {
-    if (socksOpts.port != -1) {
-      System.setProperty("socksProxyHost", socksOpts.host);
-      System.setProperty("socksProxyPort", Integer.toString(socksOpts.port));
-    }
-    try {
-      execute();
-    } catch (Exception e) {
-      e.printStackTrace();
+  public void compute(int threads) {
+    if (requestNumSplits == 0) {
+      requestNumSplits = threads * requestSplitsPerThread;
     }
   }
-
-  public abstract void execute() throws Exception;
 }

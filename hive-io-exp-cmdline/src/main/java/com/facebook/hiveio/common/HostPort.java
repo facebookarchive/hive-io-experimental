@@ -15,19 +15,23 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.facebook.hiveio.tailer;
+package com.facebook.hiveio.common;
 
-import com.facebook.hiveio.record.HiveReadableRecord;
+import com.facebook.hiveio.options.Defaults;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
-class BufferedRecordPrinter implements RecordPrinter {
-  @Override public void printRecord(HiveReadableRecord record, int numColumns,
-      Context context, TailerArgs args) {
-    DefaultRecordPrinter.addRecordToStringBuilder(record, numColumns, context, args);
+public class HostPort {
+  @JsonProperty public String host;
+  @JsonProperty public int port = Defaults.METASTORE_PORT;
 
-    ThreadContext perThread = context.perThread.get();
-    ++perThread.recordsInBuffer;
-    if (perThread.recordsInBuffer >= args.recordBufferFlush) {
-      perThread.flushBuffer();
-    }
+  public HostPort() {}
+
+  public HostPort(String host, int port) {
+    this.host = host;
+    this.port = port;
+  }
+
+  @Override public String toString() {
+    return host + ":" + port;
   }
 }

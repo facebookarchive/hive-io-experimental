@@ -49,6 +49,7 @@ public class HiveTableSchemaImpl implements HiveTableSchema {
 
   /** Number of columns. Not serialized */
   private int numColumns;
+  private int numPartitionKeys;
 
   /**
    * Constructor
@@ -71,7 +72,8 @@ public class HiveTableSchemaImpl implements HiveTableSchema {
     this.tableName = tableName;
     this.partitionPositions = partitionPositions;
     this.columnPositions = columnPositions;
-    numColumns = computeNumColumns(columnPositions);
+    numColumns = sizeFromIndexes(columnPositions);
+    numPartitionKeys = sizeFromIndexes(partitionPositions);
   }
   /**
    * Create from a Hive table
@@ -103,7 +105,10 @@ public class HiveTableSchemaImpl implements HiveTableSchema {
    * @param columnPositions column positions to compute on
    * @return number of columns
    */
-  private static int computeNumColumns(Map<String, Integer> columnPositions) {
+  private static int sizeFromIndexes(Map<String, Integer> columnPositions) {
+    if (columnPositions.isEmpty()) {
+      return 0;
+    }
     return Ordering.natural().max(columnPositions.values()) + 1;
   }
 
@@ -115,6 +120,11 @@ public class HiveTableSchemaImpl implements HiveTableSchema {
   @Override
   public int numColumns() {
     return numColumns;
+  }
+
+  @Override
+  public int numPartitionKeys() {
+    return numPartitionKeys;
   }
 
   @Override
@@ -142,7 +152,7 @@ public class HiveTableSchemaImpl implements HiveTableSchema {
   public void readFields(DataInput in) throws IOException {
     Writables.readStrIntMap(in, partitionPositions);
     Writables.readStrIntMap(in, columnPositions);
-    numColumns = computeNumColumns(columnPositions);
+    numColumns = sizeFromIndexes(columnPositions);
     String dbName = WritableUtils.readString(in);
     String tblName = WritableUtils.readString(in);
     tableName = new HiveTableName(dbName, tblName);

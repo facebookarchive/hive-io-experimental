@@ -29,11 +29,18 @@ import org.apache.hadoop.mapreduce.TaskAttemptID;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.facebook.hiveio.bean.RowToBean;
+import com.facebook.hiveio.bean.UnsafeRowToBean;
 import com.facebook.hiveio.common.HiveUtils;
 import com.facebook.hiveio.common.RecordReaderWrapper;
 import com.facebook.hiveio.record.HiveReadableRecord;
+import com.facebook.hiveio.schema.HiveTableSchema;
+import com.facebook.hiveio.schema.HiveTableSchemas;
+import com.google.common.base.Function;
 import com.google.common.collect.AbstractIterator;
+import com.google.common.collect.Iterables;
 
+import javax.annotation.Nullable;
 import java.io.IOException;
 import java.util.Iterator;
 import java.util.List;
@@ -61,6 +68,28 @@ public class HiveInput {
         return new RecordIterator(inputFormat, conf, splits.iterator());
       }
     };
+  }
+
+  public static <X> RowToBean<X> rowToBean(HiveInputDescription inputDesc, Class<X> rowClass) {
+    HiveConf conf = HiveUtils.newHiveConf(HiveInput.class);
+    HiveTableSchema schema = HiveTableSchemas.lookup(conf, inputDesc.hiveTableName());;
+    RowToBean<X> rowToBean = new UnsafeRowToBean<X>(rowClass, schema);
+    return rowToBean;
+  }
+
+  public static <X> Iterable<X> readTable(HiveInputDescription inputDesc, Class<X> rowClass)
+      throws IllegalAccessException, InstantiationException, IOException,
+      InterruptedException
+  {
+    final X row = rowClass.newInstance();
+    final RowToBean<X> rowMapper = rowToBean(inputDesc, rowClass);
+    Function<HiveReadableRecord, X> function = new Function<HiveReadableRecord, X>() {
+      @Nullable @Override public X apply(@Nullable HiveReadableRecord input) {
+        rowMapper.writeRow(input, row);
+        return row;
+      }
+    };
+    return Iterables.transform(readTable(inputDesc), function);
   }
 
   private static class RecordIterator extends AbstractIterator<HiveReadableRecord> {
