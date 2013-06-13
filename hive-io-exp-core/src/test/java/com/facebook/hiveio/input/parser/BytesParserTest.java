@@ -135,7 +135,7 @@ public class BytesParserTest {
     String padding = "9999";
     String padded = padding + string + padding;
     assertEquals(parseLong(padded.getBytes(Charsets.US_ASCII), padding.length(),
-        string.length()), Long.parseLong(string));
+        string.length()), expectedValue);
   }
 
   private void assertParseDouble(String string) {
