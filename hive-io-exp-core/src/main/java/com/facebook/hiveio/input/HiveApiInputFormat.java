@@ -19,7 +19,6 @@
 package com.facebook.hiveio.input;
 
 import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.hive.conf.HiveConf;
 import org.apache.hadoop.hive.metastore.api.Partition;
 import org.apache.hadoop.hive.metastore.api.Table;
 import org.apache.hadoop.hive.metastore.api.ThriftHiveMetastore;
@@ -123,7 +122,7 @@ public class HiveApiInputFormat
     conf.set(profileConfKey(profileId), Writables.writeToEncodedStr(inputDesc));
   }
 
-  private HiveInputDescription readProfileInputDesc(HiveConf conf) {
+  private HiveInputDescription readProfileInputDesc(Configuration conf) {
     HiveInputDescription inputDesc = new HiveInputDescription();
     Writables.readFieldsFromEncodedStr(conf.get(profileConfKey(myProfileId)), inputDesc);
     return inputDesc;
@@ -133,7 +132,7 @@ public class HiveApiInputFormat
   public List<InputSplit> getSplits(JobContext jobContext)
     throws IOException, InterruptedException
   {
-    HiveConf conf = HiveUtils.newHiveConf(jobContext.getConfiguration(), HiveApiInputFormat.class);
+    Configuration conf = jobContext.getConfiguration();
     HiveInputDescription inputDesc = readProfileInputDesc(conf);
 
     ThriftHiveMetastore.Iface client;
@@ -146,7 +145,7 @@ public class HiveApiInputFormat
     return getSplits(conf, inputDesc, client);
   }
 
-  public List<InputSplit> getSplits(HiveConf conf,
+  public List<InputSplit> getSplits(Configuration conf,
       HiveInputDescription inputDesc, ThriftHiveMetastore.Iface client)
       throws IOException
   {
@@ -167,7 +166,7 @@ public class HiveApiInputFormat
     return splits;
   }
 
-  private List<InputSplit> computeSplits(HiveConf conf, HiveInputDescription inputDesc,
+  private List<InputSplit> computeSplits(Configuration conf, HiveInputDescription inputDesc,
     HiveTableSchema tableSchema, List<InputPartition> partitions) throws IOException
   {
     int partitionNum = 0;
