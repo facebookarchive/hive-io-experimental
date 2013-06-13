@@ -67,20 +67,20 @@ public class BytesParserTest {
 
   @Test
   public void testLong() throws Exception {
-    assertParseLong("1");
-    assertParseLong("12");
-    assertParseLong("123");
-    assertParseLong("-1");
-    assertParseLong("-12");
-    assertParseLong("-123");
-    assertParseLong("+1");
-    assertParseLong("+12");
-    assertParseLong("+123");
-    assertParseLong("0");
-    assertParseLong("-0");
-    assertParseLong("+0");
-    assertParseLong(Long.toString(Long.MAX_VALUE));
-    assertParseLong(Long.toString(Long.MIN_VALUE));
+    assertParseLong("1", 1);
+    assertParseLong("12", 12);
+    assertParseLong("123", 123);
+    assertParseLong("-1", -1);
+    assertParseLong("-12", -12);
+    assertParseLong("-123", -123);
+    assertParseLong("+1", 1);
+    assertParseLong("+12", 12);
+    assertParseLong("+123", 123);
+    assertParseLong("0", 0);
+    assertParseLong("-0", 0);
+    assertParseLong("+0", 0);
+    assertParseLong(Long.toString(Long.MAX_VALUE), Long.MAX_VALUE);
+    assertParseLong(Long.toString(Long.MIN_VALUE), Long.MIN_VALUE);
   }
 
   @Test
@@ -127,15 +127,15 @@ public class BytesParserTest {
     assertParseDouble(Double.toString(-Double.MIN_VALUE));
   }
 
-  private void assertParseLong(String string) {
+  private void assertParseLong(String string, long expectedValue) {
     assertEquals(parseLong(string.getBytes(Charsets.US_ASCII), 0, string.length()),
-        Long.parseLong(string));
+        expectedValue);
 
     // verify we can parse using a non-zero offset
     String padding = "9999";
     String padded = padding + string + padding;
     assertEquals(parseLong(padded.getBytes(Charsets.US_ASCII), padding.length(),
-        string.length()), Long.parseLong(string));
+        string.length()), expectedValue);
   }
 
   private void assertParseDouble(String string) {
