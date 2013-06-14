@@ -21,8 +21,13 @@ import com.esotericsoftware.reflectasm.FieldAccess;
 import com.facebook.hiveio.record.HiveReadableRecord;
 import com.google.common.base.Objects;
 
+/**
+ * {@link FieldCopier} using reflectasm
+ */
 public abstract class ReflectasmFieldCopier extends FieldCopier {
+  /** Offset in target object of our field */
   private int toObjectIndex;
+  /** Access to internals of objects */
   private FieldAccess fieldAccess;
 
   @Override public String toString() {
@@ -49,6 +54,11 @@ public abstract class ReflectasmFieldCopier extends FieldCopier {
     this.fieldAccess = fieldAccess;
   }
 
+  /**
+   * Get copier for type
+   * @param type the type
+   * @return ReflectasmFieldCopier
+   */
   public static ReflectasmFieldCopier fromType(Class<?> type) {
     ReflectasmFieldCopier fieldCopier;
     if (type.equals(boolean.class)) {
@@ -71,6 +81,7 @@ public abstract class ReflectasmFieldCopier extends FieldCopier {
     return fieldCopier;
   }
 
+  /** Boolean FieldCopier */
   private static class BooleanFC extends ReflectasmFieldCopier {
     @Override
     public void setValue(HiveReadableRecord fromRecord, Object toObject) {
@@ -79,6 +90,7 @@ public abstract class ReflectasmFieldCopier extends FieldCopier {
     }
   }
 
+  /** Byte FieldCopier */
   private static class ByteFC extends ReflectasmFieldCopier {
     @Override
     public void setValue(HiveReadableRecord fromRecord, Object toObject) {
@@ -87,6 +99,7 @@ public abstract class ReflectasmFieldCopier extends FieldCopier {
     }
   }
 
+  /** Short FieldCopier */
   private static class ShortFC extends ReflectasmFieldCopier {
     @Override
     public void setValue(HiveReadableRecord fromRecord, Object toObject) {
@@ -95,6 +108,7 @@ public abstract class ReflectasmFieldCopier extends FieldCopier {
     }
   }
 
+  /** Integer FieldCopier */
   private static class IntFC extends ReflectasmFieldCopier {
     @Override
     public void setValue(HiveReadableRecord fromRecord, Object toObject) {
@@ -103,6 +117,7 @@ public abstract class ReflectasmFieldCopier extends FieldCopier {
     }
   }
 
+  /** Long FieldCopier */
   private static class LongFC extends ReflectasmFieldCopier {
     @Override
     public void setValue(HiveReadableRecord fromRecord, Object toObject) {
@@ -111,6 +126,7 @@ public abstract class ReflectasmFieldCopier extends FieldCopier {
     }
   }
 
+  /** Float FieldCopier */
   private static class FloatFC extends ReflectasmFieldCopier {
     @Override
     public void setValue(HiveReadableRecord fromRecord, Object toObject) {
@@ -119,6 +135,7 @@ public abstract class ReflectasmFieldCopier extends FieldCopier {
     }
   }
 
+  /** Double FieldCopier */
   private static class DoubleFC extends ReflectasmFieldCopier {
     @Override
     public void setValue(HiveReadableRecord fromRecord, Object toObject) {
@@ -127,6 +144,7 @@ public abstract class ReflectasmFieldCopier extends FieldCopier {
     }
   }
 
+  /** Object FieldCopier */
   private static class ObjectFC extends ReflectasmFieldCopier {
     @Override
     protected void setValue(HiveReadableRecord fromRecord, Object toObject) {

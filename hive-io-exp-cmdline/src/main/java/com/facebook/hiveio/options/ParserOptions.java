@@ -20,13 +20,22 @@ package com.facebook.hiveio.options;
 import com.facebook.hiveio.rows.IdIdSimRow;
 import io.airlift.command.Option;
 
+/**
+ * Options for parser
+ */
 public class ParserOptions {
-  @Option(name = {"--parse-only", "--dont-print"}, description = "Don't print, just measure performance")
+  // CHECKSTYLE: stop VisibilityModifier
+  /** Parse only, don't print */
+  @Option(name = { "--parse-only", "--dont-print" },
+      description = "Don't print, just measure performance")
   public boolean parseOnly = false;
 
+  /** Name of Java bean parser */
   @Option(name = "--bean-parser", description = "Use bean parser")
   public boolean beanParser = false;
 
+  /** Name of row class */
   @Option(name = "--row-class", description = "class which represents a row")
   public String rowClassName = IdIdSimRow.class.getName();
+  // CHECKSTYLE: stop VisibilityModifier
 }

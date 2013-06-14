@@ -24,10 +24,23 @@ import org.apache.hadoop.util.Progressable;
  * This is a hack to expose mapred.JobContext which has package level constructors
  */
 public class HackJobContext extends JobContext {
+  /**
+   * Constructor
+   *
+   * @param conf JobConf
+   * @param jobId JobID
+   */
   public HackJobContext(JobConf conf, org.apache.hadoop.mapreduce.JobID jobId) {
     super(conf, jobId);
   }
 
+  /**
+   * Constructor
+   *
+   * @param conf Configuration
+   * @param jobId JobID
+   * @param progress Progressable
+   */
   public HackJobContext(JobConf conf, JobID jobId, Progressable progress) {
     super(conf, jobId, progress);
   }

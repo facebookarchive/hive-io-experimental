@@ -202,8 +202,14 @@ public class HiveInputDescription implements Writable {
     return metastoreDesc;
   }
 
-  public ThriftHiveMetastore.Iface metastoreClient(Configuration conf)
-      throws TException {
+  /**
+   * Make metastore client
+   *
+   * @param conf Configuration
+   * @return Thrift Metastore client
+   * @throws TException
+   */
+  public ThriftHiveMetastore.Iface metastoreClient(Configuration conf) throws TException {
     return metastoreDesc.makeClient(conf);
   }
 

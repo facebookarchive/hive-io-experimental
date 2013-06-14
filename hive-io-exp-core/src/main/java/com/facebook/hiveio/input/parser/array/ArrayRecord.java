@@ -24,19 +24,37 @@ import com.google.common.base.Objects;
 
 import java.util.Arrays;
 
+/**
+ * Record backed by arrays
+ */
 class ArrayRecord implements HiveReadableRecord {
+  /** Number of columns */
   private final int numColumns;
 
   // Note that partition data and column data are stored together, with column
   // data coming before partition values.
+  /** Hive types */
   private final HiveType[] hiveTypes;
+  /** booleans */
   private final boolean[] booleans;
+  /** longs */
   private final long[] longs;
+  /** doubles */
   private final double[] doubles;
+  /** strings */
   private final String[] strings;
+  /** objects */
   private final Object[] objects;
+  /** nulls */
   private final boolean[] nulls;
 
+  /**
+   * Constructor
+   *
+   * @param numColumns number of columns
+   * @param partitionValues partition data
+   * @param hiveTypes hive types
+   */
   public ArrayRecord(int numColumns, String[] partitionValues, HiveType[] hiveTypes) {
     this.numColumns = numColumns;
     this.hiveTypes = hiveTypes;
@@ -68,38 +86,87 @@ class ArrayRecord implements HiveReadableRecord {
     return booleans.length;
   }
 
+  /** Reset data */
   public void reset() {
     Arrays.fill(nulls, false);
   }
 
+  /**
+   * Get HiveType for column
+   *
+   * @param index column index
+   * @return HiveType
+   */
   public HiveType getHiveType(int index) {
     return hiveTypes[index];
   }
 
+  /**
+   * Get Hive NativeType for column
+   *
+   * @param index column index
+   * @return NativeType
+   */
   public NativeType getNativeType(int index) {
     return hiveTypes[index].getNativeType();
   }
 
+  /**
+   * Set boolean value for column
+   *
+   * @param index column index
+   * @param value data
+   */
   public void setBoolean(int index, boolean value) {
     booleans[index] = value;
   }
 
+  /**
+   * Set long value for column
+   *
+   * @param index column index
+   * @param value data
+   */
   public void setLong(int index, long value) {
     longs[index] = value;
   }
 
+  /**
+   * Set double value for column
+   *
+   * @param index column index
+   * @param value data
+   */
   public void setDouble(int index, double value) {
     doubles[index] = value;
   }
 
+  /**
+   * Set String value for column
+   *
+   * @param index column index
+   * @param value data
+   */
   public void setString(int index, String value) {
     strings[index] = value;
   }
 
+  /**
+   * Set Object value for column
+   *
+   * @param index column index
+   * @param value data
+   */
   public void setObject(int index, Object value) {
     objects[index] = value;
   }
 
+  /**
+   * Set null to column
+   *
+   * @param index column index
+   * @param value data
+   */
   public void setNull(int index, boolean value) {
     nulls[index] = value;
   }
@@ -116,8 +183,15 @@ class ArrayRecord implements HiveReadableRecord {
     }
   }
 
+  /**
+   * Get primitive column value
+   *
+   * @param index column index
+   * @return Object
+   */
   private Object getPrimitive(int index) {
-    switch (hiveTypes[index].getNativeType()) {
+    NativeType nativeType = hiveTypes[index].getNativeType();
+    switch (nativeType) {
       case BOOLEAN:
         return booleans[index];
       case LONG:
@@ -126,8 +200,9 @@ class ArrayRecord implements HiveReadableRecord {
         return doubles[index];
       case STRING:
         return strings[index];
+      default:
+        throw new IllegalArgumentException("Don't know how to handle native type " + nativeType);
     }
-    return null;
   }
 
   @Override
@@ -159,6 +234,12 @@ class ArrayRecord implements HiveReadableRecord {
     return nulls[index];
   }
 
+  /**
+   * Verify column's type is what we expect
+   *
+   * @param index column index
+   * @param expectedType expected type
+   */
   private void verifyType(int index, NativeType expectedType) {
     if (hiveTypes[index].getNativeType() != expectedType) {
       throw new IllegalStateException(

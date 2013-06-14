@@ -26,17 +26,40 @@ import com.yammer.metrics.core.MetricsRegistry;
 
 import java.util.List;
 
+/**
+ * Metrics for network related things
+ */
 public class NetworkMetrics {
+  /** Don't construct */
+  private NetworkMetrics() { }
+
+  /**
+   * Register metrics tracked here
+   *
+   * @throws SigarException
+   */
   public static void registerMetrics() throws SigarException {
     registerMetrics(Metrics.defaultRegistry());
   }
 
-  public static void registerMetrics(MetricsRegistry metrics) throws SigarException{
+  /**
+   * Register metrics tracked here
+   *
+   * @param metrics MetricsRegistry
+   * @throws SigarException
+   */
+  public static void registerMetrics(MetricsRegistry metrics) throws SigarException {
     registerMetrics(metrics, NetworkMetrics.class);
   }
 
+  /**
+   * Register metrics tracked here
+   *
+   * @param interfaceNames Names of network interfaces
+   * @throws SigarException
+   */
   public static void registerMetrics(List<String> interfaceNames)
-      throws SigarException
+    throws SigarException
   {
     if (interfaceNames.isEmpty()) {
       registerMetrics(Metrics.defaultRegistry(), NetworkMetrics.class);
@@ -48,8 +71,15 @@ public class NetworkMetrics {
     }
   }
 
+  /**
+   * Register metrics tracked here
+   *
+   * @param metrics MetricsRegistry
+   * @param owningClass class that should own metrics
+   * @throws SigarException
+   */
   public static void registerMetrics(MetricsRegistry metrics, Class<?> owningClass)
-      throws SigarException
+    throws SigarException
   {
     final Sigar sigar = new Sigar();
     String[] interfaceNames = sigar.getNetInterfaceList();
@@ -58,8 +88,17 @@ public class NetworkMetrics {
     }
   }
 
+  /**
+   * Register metrics tracked here
+   *
+   * @param metrics MetricsRegistry
+   * @param owningClass class that should own metrics
+   * @param interfaceName network interface names
+   * @param sigar Hyperic Sigar object
+   * @throws SigarException
+   */
   public static void registerMetrics(MetricsRegistry metrics, Class<?> owningClass,
-      final String interfaceName, final Sigar sigar) throws SigarException
+    final String interfaceName, final Sigar sigar) throws SigarException
   {
     NetInterfaceStat netInterfaceStat = sigar.getNetInterfaceStat(interfaceName);
     final long initialRxBytes = netInterfaceStat.getRxBytes();
@@ -67,25 +106,31 @@ public class NetworkMetrics {
     final long initialTxBytes = netInterfaceStat.getTxBytes();
     final long initialTxPackets = netInterfaceStat.getTxPackets();
 
-    metrics.newGauge(owningClass, "network-" + interfaceName + "-receive-bytes", new SigarLongGauge() {
+    // CHECKSTYLE: stop IndentationCheck
+    metrics.newGauge(owningClass, "network-" + interfaceName + "-receive-bytes",
+        new SigarLongGauge() {
       @Override public long computeValue() throws SigarException {
         return sigar.getNetInterfaceStat(interfaceName).getRxBytes() - initialRxBytes;
       }
     });
-    metrics.newGauge(owningClass, "network-" + interfaceName + "-receive-packets", new SigarLongGauge() {
+    metrics.newGauge(owningClass, "network-" + interfaceName + "-receive-packets",
+        new SigarLongGauge() {
       @Override public long computeValue() throws SigarException {
         return sigar.getNetInterfaceStat(interfaceName).getRxPackets() - initialRxPackets;
       }
     });
-    metrics.newGauge(owningClass, "network-" + interfaceName + "-send-bytes", new SigarLongGauge() {
+    metrics.newGauge(owningClass, "network-" + interfaceName + "-send-bytes",
+        new SigarLongGauge() {
       @Override public long computeValue() throws SigarException {
         return sigar.getNetInterfaceStat(interfaceName).getTxBytes() - initialTxBytes;
       }
     });
-    metrics.newGauge(owningClass, "network-" + interfaceName + "-send-packets", new SigarLongGauge() {
+    metrics.newGauge(owningClass, "network-" + interfaceName + "-send-packets",
+        new SigarLongGauge() {
       @Override public long computeValue() throws SigarException {
         return sigar.getNetInterfaceStat(interfaceName).getTxPackets() - initialTxPackets;
       }
     });
+    // CHECKSTYLE: resume IndentationCheck
   }
 }

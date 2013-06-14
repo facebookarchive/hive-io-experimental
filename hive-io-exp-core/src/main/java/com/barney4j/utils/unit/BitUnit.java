@@ -1,3 +1,4 @@
+// CHECKSTYLE: stop all
 package com.barney4j.utils.unit;
 
 
@@ -298,6 +299,6 @@ public enum BitUnit {
   public final double toPB(double d, int wordSize) {
     return ByteUnit.PB.convert(d, this, wordSize);
   }
-
-
 }
+
+// CHECKSTYLE: resume all

@@ -22,8 +22,13 @@ import com.facebook.hiveio.record.HiveReadableRecord;
 import com.google.common.base.Objects;
 import sun.misc.Unsafe;
 
+/**
+ * {@link FieldCopier} using {@link Unsafe}
+ */
 public abstract class UnsafeFieldCopier extends FieldCopier {
+  /** The Unsafe object */
   private static final Unsafe UNSAFE = UnsafeHelper.getUnsafe();
+  /** Offset in object */
   private long toObjectOffset;
 
   protected long getToObjectOffset() {
@@ -42,6 +47,11 @@ public abstract class UnsafeFieldCopier extends FieldCopier {
         .toString();
   }
 
+  /**
+   * Get field copier from type
+   * @param type the type
+   * @return UnsafeFieldCopier
+   */
   public static UnsafeFieldCopier fromType(Class<?> type) {
     UnsafeFieldCopier fieldCopier;
     if (type.equals(boolean.class)) {
@@ -64,6 +74,7 @@ public abstract class UnsafeFieldCopier extends FieldCopier {
     return fieldCopier;
   }
 
+  /** Boolean FieldCopier */
   private static class BooleanFC extends UnsafeFieldCopier {
     @Override
     public void setValue(HiveReadableRecord fromRecord, Object toObject) {
@@ -72,6 +83,7 @@ public abstract class UnsafeFieldCopier extends FieldCopier {
     }
   }
 
+  /** Byte FieldCopier */
   private static class ByteFC extends UnsafeFieldCopier {
     @Override
     public void setValue(HiveReadableRecord fromRecord, Object toObject) {
@@ -80,6 +92,7 @@ public abstract class UnsafeFieldCopier extends FieldCopier {
     }
   }
 
+  /** Short FieldCopier */
   private static class ShortFC extends UnsafeFieldCopier {
     @Override
     public void setValue(HiveReadableRecord fromRecord, Object toObject) {
@@ -88,6 +101,7 @@ public abstract class UnsafeFieldCopier extends FieldCopier {
     }
   }
 
+  /** Integer FieldCopier */
   private static class IntFC extends UnsafeFieldCopier {
     @Override
     public void setValue(HiveReadableRecord fromRecord, Object toObject) {
@@ -96,6 +110,7 @@ public abstract class UnsafeFieldCopier extends FieldCopier {
     }
   }
 
+  /** Long FieldCopier */
   private static class LongFC extends UnsafeFieldCopier {
     @Override
     public void setValue(HiveReadableRecord fromRecord, Object toObject) {
@@ -104,6 +119,7 @@ public abstract class UnsafeFieldCopier extends FieldCopier {
     }
   }
 
+  /** Float FieldCopier */
   private static class FloatFC extends UnsafeFieldCopier {
     @Override
     public void setValue(HiveReadableRecord fromRecord, Object toObject) {
@@ -112,6 +128,7 @@ public abstract class UnsafeFieldCopier extends FieldCopier {
     }
   }
 
+  /** Double FieldCopier */
   private static class DoubleFC extends UnsafeFieldCopier {
     @Override
     public void setValue(HiveReadableRecord fromRecord, Object toObject) {
@@ -120,6 +137,7 @@ public abstract class UnsafeFieldCopier extends FieldCopier {
     }
   }
 
+  /** Object FieldCopier */
   private static class ObjectFC extends UnsafeFieldCopier {
     @Override
     protected void setValue(HiveReadableRecord fromRecord, Object toObject) {

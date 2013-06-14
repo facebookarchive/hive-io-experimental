@@ -38,12 +38,15 @@ import com.google.common.collect.ImmutableSet;
 
 import java.util.Set;
 
+/**
+ * Helpers for parsers
+ */
 public class Parsers {
-  private static final Logger LOG = LoggerFactory.getLogger(Parsers.class);
-
+  /** Force a particular parser to be used */
   public static final ClassConfOption<RecordParser> FORCE_PARSER =
       ClassConfOption.create("hiveio.input.parser", null, RecordParser.class);
 
+  /** Known parsers */
   public static final Set<Class<? extends RecordParser>> CLASSES =
       ImmutableSet.<Class<? extends RecordParser>>builder()
         .add(BytesParser.class)
@@ -51,6 +54,24 @@ public class Parsers {
         .add(DefaultParser.class)
         .build();
 
+  /** Logger */
+  private static final Logger LOG = LoggerFactory.getLogger(Parsers.class);
+
+  /** Don't construct */
+  private Parsers() { }
+
+  /**
+   * Choose the best parser available
+   *
+   * @param deserializer Hive Deserializer
+   * @param numColumns number of columns
+   * @param columnIndexes column IDs
+   * @param tableName Hive table name
+   * @param partitionValues partition data
+   * @param exampleValue example Writable
+   * @param conf Configuration
+   * @return RecordParser
+   */
   public static RecordParser<Writable> bestParser(Deserializer deserializer,
       int numColumns, int[] columnIndexes, HiveTableName tableName,
       String[] partitionValues, Writable exampleValue, Configuration conf)
@@ -93,12 +114,23 @@ public class Parsers {
       LOG.info("Using {} chosen by user instead of {} to parse hive records from table {}",
           forcedParserClass.getSimpleName(), parser.getClass().getSimpleName(),
           tableName.dotString());
-      parser = createForcedParser(deserializer, numColumns, partitionValues, data, forcedParserClass);
+      parser = createForcedParser(deserializer, numColumns, partitionValues,
+          data, forcedParserClass);
     }
 
     return parser;
   }
 
+  /**
+   * Create a parser forced by user
+   *
+   * @param deserializer Hive Deserializer
+   * @param numColumns number of columns
+   * @param partitionValues partition data
+   * @param data array parser data
+   * @param forcedParserClass class of record parser
+   * @return RecordParser
+   */
   private static RecordParser<Writable> createForcedParser(Deserializer deserializer,
       int numColumns, String[] partitionValues, ArrayParserData data,
       Class<? extends RecordParser> forcedParserClass)

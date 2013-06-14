@@ -32,18 +32,30 @@ import static java.lang.Long.parseLong;
  * Information about a table or partition. See "DESC FORMATTED table"
  */
 public class HiveStats {
+  /** Logger */
   private static final Logger LOG = LoggerFactory.getLogger(HiveStats.class);
 
+  /** total size */
   private long totalSize;
+  /** raw size */
   private long rawSize;
+  /** number of rows in table */
   private long numRows;
 
+  /** Constructor */
   public HiveStats() {
     totalSize = 0;
     rawSize = 0;
     numRows = 0;
   }
 
+  /**
+   * Constructor
+   *
+   * @param numRows number of rows
+   * @param rawSize raw size
+   * @param totalSize total size
+   */
   public HiveStats(long numRows, long rawSize, long totalSize) {
     this.numRows = numRows;
     this.rawSize = rawSize;
@@ -70,12 +82,23 @@ public class HiveStats {
     return ByteUnit.BYTE.toMB(totalSize);
   }
 
+  /**
+   * Add another HiveStats
+   *
+   * @param other HiveStats to add
+   */
   public void add(HiveStats other) {
     totalSize += other.totalSize;
     rawSize += other.rawSize;
     numRows += other.numRows;
   }
 
+  /**
+   * Parse HiveStats from table parameters retrieved from thrift.
+   *
+   * @param params thrift table params
+   * @return HiveStats
+   */
   public static HiveStats fromParams(Map<String, String> params) {
     LOG.info("Table params: {}", params);
     long totalSize = parseLong(params.get(StatsSetupConst.TOTAL_SIZE));

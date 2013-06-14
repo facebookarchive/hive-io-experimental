@@ -23,15 +23,26 @@ import org.apache.thrift.transport.TTransportException;
 import com.facebook.hiveio.common.HiveMetastores;
 import io.airlift.command.Option;
 
+/**
+ * Options for Metastore
+ */
 public class MetastoreOptions {
+  // CHECKSTYLE: stop VisibilityModifier
   /** Hive host */
-  @Option(name = {"--metastore-host"}, description = "Hive Metastore Host")
+  @Option(name = { "--metastore-host" }, description = "Hive Metastore Host")
   public String host = Defaults.METASTORE_HOST;
 
   /** Hive port */
-  @Option(name = {"--metastore-port"}, description = "Hive Metatstore Port")
+  @Option(name = { "--metastore-port" }, description = "Hive Metatstore Port")
   public int port = Defaults.METASTORE_PORT;
+  // CHECKSTYLE: resume VisibilityModifier
 
+  /**
+   * Create Metastore Thrift client
+   *
+   * @return thrift metastore client
+   * @throws TTransportException
+   */
   public ThriftHiveMetastore.Iface makeClient() throws TTransportException {
     return HiveMetastores.create(host, port);
   }

@@ -17,8 +17,16 @@
  */
 package com.facebook.hiveio.rows;
 
+/**
+ * Two IDs and their similarity
+ */
 public class IdIdSimRow {
+  // CHECKSTYLE: stop VisibilityModifier
+  /** Source ID */
   public long id1;
+  /** Target ID */
   public long id2;
+  /** Similarity */
   public double sim;
+  // CHECKSTYLE: resume VisibilityModifier
 }

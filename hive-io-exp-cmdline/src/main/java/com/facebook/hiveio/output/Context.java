@@ -21,16 +21,25 @@ import org.apache.hadoop.conf.Configuration;
 
 import com.facebook.hiveio.common.HiveUtils;
 
+/**
+ * Context for output command
+ */
 class Context {
+  // CHECKSTYLE: stop VisibilityModifier
+  /** Hadoop configuration */
   public Configuration conf;
+  /** OutputFormat */
   public HiveApiOutputFormat outputFormat;
 
+  /** Thread safe context */
   public ThreadLocal<PerThread> perThread = new ThreadLocal<PerThread>() {
     @Override protected PerThread initialValue() {
       return new PerThread(conf);
     }
   };
+  // CHECKSTYLE: resume VisibilityModifier
 
+  /** Constructor */
   public Context() {
     conf = HiveUtils.newHiveConf(OutputCmd.class);
   }

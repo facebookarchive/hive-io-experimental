@@ -47,26 +47,27 @@ public class HiveMetastores {
   public static final int DEFAULT_TIMEOUT_MS = (int) SECONDS.toMillis(20);
 
   /** Logger */
-  private static final Logger LOG = LoggerFactory.getLogger(HiveMetastores.class);
+  private static final Logger LOG = LoggerFactory.getLogger(
+      HiveMetastores.class);
 
   /**
    * This is mainly for testing, it should not be used normally. It allows us to
    * have a global metastore connection that overrides everything else.
    */
-  private static ThriftHiveMetastore.Iface testClient;
+  private static ThriftHiveMetastore.Iface TEST_CLIENT;
+
+  /** Don't construct */
+  private HiveMetastores() { }
 
   @VisibleForTesting
   public static ThriftHiveMetastore.Iface getTestClient() {
-    return testClient;
+    return TEST_CLIENT;
   }
 
   @VisibleForTesting
   public static void setTestClient(ThriftHiveMetastore.Iface testClient) {
-    HiveMetastores.testClient = testClient;
+    HiveMetastores.TEST_CLIENT = testClient;
   }
-
-  /** Don't construct */
-  private HiveMetastores() { }
 
   /**
    * Create client from host and port with default timeout
@@ -78,8 +79,8 @@ public class HiveMetastores {
   public static ThriftHiveMetastore.Iface create(String host, int port)
     throws TTransportException
   {
-    if (testClient != null) {
-      return testClient;
+    if (TEST_CLIENT != null) {
+      return TEST_CLIENT;
     }
     return create(host, port, DEFAULT_TIMEOUT_MS);
   }
@@ -98,8 +99,8 @@ public class HiveMetastores {
   public static ThriftHiveMetastore.Iface create(HiveConf hiveConf)
     throws TException
   {
-    if (testClient != null) {
-      return testClient;
+    if (TEST_CLIENT != null) {
+      return TEST_CLIENT;
     }
     ThriftHiveMetastore.Iface client = createFromURIs(hiveConf);
     if (client == null) {
@@ -119,8 +120,8 @@ public class HiveMetastores {
   private static ThriftHiveMetastore.Iface create(String host, int port,
     int timeoutMillis) throws TTransportException
   {
-    if (testClient != null) {
-      return testClient;
+    if (TEST_CLIENT != null) {
+      return TEST_CLIENT;
     }
     TTransport transport = new TSocket(host, port, timeoutMillis);
     transport.open();
@@ -170,7 +171,8 @@ public class HiveMetastores {
    * @return Thrift Hive client, or null if could not make one out of URIs
    */
   private static ThriftHiveMetastore.Iface createFromURIs(HiveConf hiveConf) {
-    List<URI> uris = HiveUtils.getURIs(hiveConf, HiveConf.ConfVars.METASTOREURIS);
+    List<URI> uris = HiveUtils.getURIs(hiveConf,
+        HiveConf.ConfVars.METASTOREURIS);
     if (uris.isEmpty()) {
       LOG.warn("No Hive Metastore URIs to connect to");
       return null;

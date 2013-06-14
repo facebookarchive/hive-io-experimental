@@ -28,6 +28,7 @@ import com.facebook.hiveio.record.HiveWritableRecord;
 public interface HiveApiOutputObserver {
   /**
    * Begin serializing key/value
+   *
    * @param key Key
    * @param value Value
    */
@@ -35,6 +36,7 @@ public interface HiveApiOutputObserver {
 
   /**
    * Failed to serialize key/value
+   *
    * @param key Key
    * @param value Value
    */
@@ -42,6 +44,7 @@ public interface HiveApiOutputObserver {
 
   /**
    * Finished serializing key/value
+   *
    * @param key Key
    * @param value Value
    */
@@ -49,6 +52,7 @@ public interface HiveApiOutputObserver {
 
   /**
    * Begin writing key/value
+   *
    * @param key Key
    * @param value Value
    */
@@ -56,6 +60,7 @@ public interface HiveApiOutputObserver {
 
   /**
    * Finished writing key/value
+   *
    * @param key Key
    * @param value Value
    */

@@ -34,6 +34,7 @@ import java.util.concurrent.TimeUnit;
  * Observer that tracks metrics
  */
 class MetricsObserver extends HiveApiInputObserver.Empty {
+  /** How often to print */
   private final int printPeriod;
   /** Timer to read rows */
   private final Timer readTimer;
@@ -49,7 +50,8 @@ class MetricsObserver extends HiveApiInputObserver.Empty {
   /**
    * Constructor
    *
-   * @param metricsRegistry MetricsRegistry
+   * @param name String name
+   * @param printPeriod how often to print
    */
   public MetricsObserver(String name, int printPeriod) {
     TimeUnit durationUnit = TimeUnit.MICROSECONDS;

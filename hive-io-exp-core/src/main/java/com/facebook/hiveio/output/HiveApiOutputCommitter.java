@@ -44,6 +44,7 @@ import java.util.List;
  * OutputCommitter for Hive output
  */
 class HiveApiOutputCommitter extends OutputCommitter {
+  /** Logger */
   private static final Logger LOG = LoggerFactory.getLogger(HiveApiOutputCommitter.class);
 
   /** Profile ID to use */

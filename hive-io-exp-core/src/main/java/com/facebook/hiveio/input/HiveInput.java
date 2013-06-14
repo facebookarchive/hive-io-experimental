@@ -45,11 +45,26 @@ import java.io.IOException;
 import java.util.Iterator;
 import java.util.List;
 
+/**
+ * Simple API for reading from Hive
+ */
 public class HiveInput {
+  /** Logger */
   private static final Logger LOG = LoggerFactory.getLogger(HiveInput.class);
 
+  /** Don't construct */
+  private HiveInput() { }
+
+  /**
+   * Read a Hive table
+   *
+   * @param inputDesc Hive table description
+   * @return iterable of Hive records
+   * @throws IOException
+   * @throws InterruptedException
+   */
   public static Iterable<HiveReadableRecord> readTable(HiveInputDescription inputDesc)
-      throws IOException, InterruptedException
+    throws IOException, InterruptedException
   {
     String profileID = Long.toString(System.currentTimeMillis());
 
@@ -70,16 +85,35 @@ public class HiveInput {
     };
   }
 
+  /**
+   * Create a row-to-java-bean transformer
+   *
+   * @param inputDesc Hive input description
+   * @param rowClass Class of Java bean
+   * @param <X> type of Java bean
+   * @return RowToBean
+   */
   public static <X> RowToBean<X> rowToBean(HiveInputDescription inputDesc, Class<X> rowClass) {
     HiveConf conf = HiveUtils.newHiveConf(HiveInput.class);
-    HiveTableSchema schema = HiveTableSchemas.lookup(conf, inputDesc.hiveTableName());;
+    HiveTableSchema schema = HiveTableSchemas.lookup(conf, inputDesc.hiveTableName());
     RowToBean<X> rowToBean = new UnsafeRowToBean<X>(rowClass, schema);
     return rowToBean;
   }
 
+  /**
+   * Read table into iterable of user Java bean objects
+   *
+   * @param inputDesc Hive input description
+   * @param rowClass Class of Java bean
+   * @param <X> type of Java bean
+   * @return Iterable over user objects
+   * @throws IllegalAccessException
+   * @throws InstantiationException
+   * @throws IOException
+   * @throws InterruptedException
+   */
   public static <X> Iterable<X> readTable(HiveInputDescription inputDesc, Class<X> rowClass)
-      throws IllegalAccessException, InstantiationException, IOException,
-      InterruptedException
+    throws IllegalAccessException, InstantiationException, IOException, InterruptedException
   {
     final X row = rowClass.newInstance();
     final RowToBean<X> rowMapper = rowToBean(inputDesc, rowClass);
@@ -92,14 +126,29 @@ public class HiveInput {
     return Iterables.transform(readTable(inputDesc), function);
   }
 
+  /**
+   * Iterator over records
+   */
   private static class RecordIterator extends AbstractIterator<HiveReadableRecord> {
+    /** input format */
     private final HiveApiInputFormat inputFormat;
+    /** input splits */
     private final Iterator<InputSplit> splits;
+    /** context */
     private final TaskAttemptContext taskContext;
+    /** record reader */
     private RecordReaderWrapper<HiveReadableRecord> recordReader;
 
+    /**
+     * Constructor
+     *
+     * @param inputFormat Hive table InputFormat
+     * @param conf Configuration
+     * @param splits input splits
+     */
     public RecordIterator(HiveApiInputFormat inputFormat, Configuration conf,
-        Iterator<InputSplit> splits) {
+      Iterator<InputSplit> splits)
+    {
       this.inputFormat = inputFormat;
       this.splits = splits;
       this.taskContext = new TaskAttemptContext(conf, new TaskAttemptID());
@@ -114,7 +163,9 @@ public class HiveInput {
           try {
             reader = inputFormat.createRecordReader(split, taskContext);
             reader.initialize(split, taskContext);
+            // CHECKSTYLE: stop IllegalCatch
           } catch (Exception e) {
+            // CHECKSTYLE: stop IllegalCatch
             LOG.info("Couldn't create reader from split {}", split, e);
           }
         }

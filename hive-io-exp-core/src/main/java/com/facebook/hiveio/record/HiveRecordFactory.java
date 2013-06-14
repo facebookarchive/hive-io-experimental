@@ -19,9 +19,19 @@ package com.facebook.hiveio.record;
 
 import com.facebook.hiveio.input.parser.hive.DefaultRecord;
 
+/**
+ * Factory for creating {@link HiveWritableRecord}
+ */
 public class HiveRecordFactory {
-  private HiveRecordFactory() {}
+  /** Don't construct */
+  private HiveRecordFactory() { }
 
+  /**
+   * Create a new {@link HiveWritableRecord} for writing
+   *
+   * @param numColumns int number of columns
+   * @return new record
+   */
   public static HiveWritableRecord newWritableRecord(int numColumns) {
     return new DefaultRecord(numColumns, new String[0]);
   }

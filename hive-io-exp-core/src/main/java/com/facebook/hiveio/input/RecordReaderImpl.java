@@ -50,18 +50,16 @@ public class RecordReaderImpl extends RecordReader<WritableComparable, HiveReada
   /** Observer for operations here */
   private HiveApiInputObserver observer;
 
-  // CHECKSTYLE: stop LineLength
   /**
    * Constructor
    *
    * @param baseRecordReader Base record reader
-   * @param deserializer Deserializer
-   * @param partitionValues partition info
-   * @param numColumns total number of columns
-   * @param reuseRecord whether to reuse HiveRecord objects
+   * @param parser RecordParser
    */
-  public RecordReaderImpl(org.apache.hadoop.mapred.RecordReader<WritableComparable, Writable> baseRecordReader, RecordParser parser) {
-    // CHECKSTYLE: resume LineLength
+  public RecordReaderImpl(
+      org.apache.hadoop.mapred.RecordReader<WritableComparable, Writable> baseRecordReader,
+      RecordParser parser)
+  {
     this.baseRecordReader = baseRecordReader;
     this.key = baseRecordReader.createKey();
     this.value = baseRecordReader.createValue();

@@ -21,14 +21,25 @@ import org.hyperic.sigar.SigarException;
 
 import com.yammer.metrics.core.Gauge;
 
+/**
+ * Wrapper for Guages producing double values from Sigar
+ */
 public abstract class SigarDoubleGauge extends Gauge<Double> {
   @Override public Double value() {
     double value = -1.0;
     try {
       value = computeValue();
-    } catch (SigarException e) {}
+      // CHECKSTYLE: stop EmptyBlock
+    } catch (SigarException e) { }
+    // CHECKSTYLE: resume EmptyBlock
     return value;
   }
 
+  /**
+   * Compute new value
+   *
+   * @return double value
+   * @throws SigarException
+   */
   public abstract double computeValue() throws SigarException;
 }

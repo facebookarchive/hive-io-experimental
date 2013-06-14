@@ -86,6 +86,10 @@ under the License.
       <artifactId>reflectasm</artifactId>
     </dependency>
     <dependency>
+      <groupId>io.airlift</groupId>
+      <artifactId>units</artifactId>
+    </dependency>
+    <dependency>
       <groupId>it.unimi.dsi</groupId>
       <artifactId>fastutil</artifactId>
     </dependency>

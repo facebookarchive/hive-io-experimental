@@ -28,28 +28,60 @@ import org.apache.hadoop.mapreduce.JobID;
 
 import com.facebook.hiveio.common.HiveUtils;
 
+/**
+ * Per-Thread context for thread-safety.
+ */
 class PerThread {
+  // CHECKSTYLE: stop VisibilityModifier
+  /** Configuration */
   public final Configuration conf;
+  /** task id */
   public final TaskAttemptID taskID;
+  // CHECKSTYLE: resume VisibilityModifier
 
+  /**
+   * Constructor
+   *
+   * @param conf Configuration
+   */
   public PerThread(Configuration conf) {
     this.conf = HiveUtils.newHiveConf(conf, OutputCmd.class);
     this.taskID = new TaskAttemptID("hiveio_output", 42, true,
         (int) Thread.currentThread().getId(), 0);
   }
 
+  /**
+   * Get task context
+   *
+   * @return task context
+   */
   public TaskAttemptContext taskContext() {
     return new HackTaskAttemptContext(new JobConf(conf), taskID);
   }
 
+  /**
+   * Get JobID
+   *
+   * @return JobID
+   */
   public JobID jobID() {
     return taskID.getJobID();
   }
 
+  /**
+   * Get JobConf
+   *
+   * @return JobConf
+   */
   public JobConf jobConf() {
     return new JobConf(conf);
   }
 
+  /**
+   * Get JobContext
+   *
+   * @return JobContext
+   */
   public JobContext jobContext() {
     return new HackJobContext(jobConf(), jobID());
   }

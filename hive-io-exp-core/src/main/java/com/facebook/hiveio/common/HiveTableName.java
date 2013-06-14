@@ -19,10 +19,21 @@ package com.facebook.hiveio.common;
 
 import com.google.common.base.Objects;
 
+/**
+ * Name of a table in Hive
+ */
 public class HiveTableName {
+  /** Database where table is located */
   private final String databaseName;
+  /** Name of the table */
   private final String tableName;
 
+  /**
+   * Constructor
+   *
+   * @param databaseName database
+   * @param tableName table
+   */
   public HiveTableName(String databaseName, String tableName) {
     this.databaseName = databaseName;
     this.tableName = tableName;
@@ -36,6 +47,11 @@ public class HiveTableName {
     return tableName;
   }
 
+  /**
+   * Convert to string in dot format
+   *
+   * @return database.name
+   */
   public String dotString() {
     return databaseName + "." + tableName;
   }

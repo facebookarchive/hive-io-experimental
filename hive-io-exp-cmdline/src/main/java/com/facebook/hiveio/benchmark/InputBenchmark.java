@@ -51,6 +51,12 @@ class InputBenchmark {
   /** Logger */
   private static final org.slf4j.Logger LOG = LoggerFactory.getLogger(InputBenchmark.class);
 
+  /**
+   * Run benchmark
+   *
+   * @param args parsed args
+   * @throws Exception
+   */
   public void run(InputBenchmarkCmd args) throws Exception {
     HadoopNative.requireHadoopNative();
 
@@ -102,6 +108,7 @@ class InputBenchmark {
    * Read all records from a RecordReader
    *
    * @param reader RecordReader
+   * @return number of rows
    * @throws IOException I/O errors
    * @throws InterruptedException thread errors
    */
@@ -113,15 +120,15 @@ class InputBenchmark {
       HiveReadableRecord record = reader.getCurrentValue();
       parseLongLongDouble(record);
       ++num;
-//      if (num % 1000000 == 0) {
-//        System.out.println("Parsed " + num + " rows");
-//      }
     }
     return num;
   }
 
-  private static int rowsPrinted = 0;
-
+  /**
+   * Parse a long-long-double record
+   *
+   * @param record to parse
+   */
   private static void parseLongLongDouble(HiveReadableRecord record) {
     record.getLong(0);
     record.getLong(1);

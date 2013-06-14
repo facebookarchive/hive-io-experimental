@@ -20,12 +20,26 @@ package com.facebook.hiveio.common;
 import com.facebook.hiveio.options.Defaults;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+/**
+ * A host-port pair
+ */
 public class HostPort {
+  // CHECKSTYLE: stop VisibilityModifier
+  /** host */
   @JsonProperty public String host;
+  /** port */
   @JsonProperty public int port = Defaults.METASTORE_PORT;
+  // CHECKSTYLE: resume VisibilityModifier
 
-  public HostPort() {}
+  /** Empty constructor */
+  public HostPort() { }
 
+  /**
+   * Constructor
+   *
+   * @param host the host
+   * @param port the port
+   */
   public HostPort(String host, int port) {
     this.host = host;
     this.port = port;

@@ -19,16 +19,25 @@ package com.facebook.hiveio.tailer;
 
 import javax.annotation.concurrent.NotThreadSafe;
 
+/**
+ * Per-thread context for thread safety
+ */
 @NotThreadSafe
 class ThreadContext {
+  // CHECKSTYLE: stop VisibilityModifier
+  /** How many records are in the buffer */
   public int recordsInBuffer;
+  /** The string builder buffer */
   public final StringBuilder stringBuilder;
+  // CHECKSTYLE: resume VisibilityModifier
 
+  /** Constructor */
   public ThreadContext() {
     recordsInBuffer = 0;
     stringBuilder = new StringBuilder(1000);
   }
 
+  /** Flush the buffer */
   public void flushBuffer() {
     System.out.println(stringBuilder.toString());
     stringBuilder.setLength(0);

@@ -17,6 +17,7 @@
  */
 package com.facebook.hiveio.options;
 
+import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.facebook.hiveio.common.HostPort;
@@ -32,19 +33,38 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * Options for Hive namespaces
+ */
 public class NamespaceOptions {
-  private static final org.slf4j.Logger LOG = LoggerFactory.getLogger(NamespaceOptions.class);
+  /** Logger */
+  private static final Logger LOG = LoggerFactory.getLogger(NamespaceOptions.class);
 
+  // CHECKSTYLE: stop VisibilityModifier
+  /** Path to file with namespaces */
   @Option(name = "--namespaces-file", description = "File of Hive metastore clusters")
   public String path;
 
+  /** Namespace to use */
   @Option(name = "--namespace", description = "Cluster to use")
   public String name = "silver";
+  // CHECKSTYLE: resume VisibilityModifier
 
+  /**
+   * Check if file path is present
+   *
+   * @return true if path present
+   */
   public boolean hasPath() {
     return path != null;
   }
 
+  /**
+   * Read metastore information from file path
+   *
+   * @return HostPort of metastore
+   * @throws IOException
+   */
   public HostPort readMetastoreInfo() throws IOException {
     if (path == null) {
       LOG.error("Cluster file not given");
@@ -63,7 +83,13 @@ public class NamespaceOptions {
     return hostAndPorts.get(0);
   }
 
+  /**
+   * Holder for namespace information
+   */
   private static class NamespaceData {
+    // CHECKSTYLE: stop VisibilityModifier
+    /** Raw data */
     @JsonProperty public Map<String, List<HostPort>> data = Maps.newHashMap();
+    // CHECKSTYLE: resume VisibilityModifier
   }
 }

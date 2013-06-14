@@ -29,27 +29,45 @@ import io.airlift.command.Option;
 
 import javax.inject.Inject;
 
+/**
+ * Arguments for tailer command
+ */
 public class TailerArgs {
+  // CHECKSTYLE: stop VisibilityModifier
+  /** namespace */
   @Inject public NamespaceOptions namespace = new NamespaceOptions();
+  /** metastore */
   @Inject public MetastoreOptions metastore = new MetastoreOptions();
+  /** input table */
   @Inject public InputTableOptions inputTable = new InputTableOptions();
+  /** multi threaded */
   @Inject public MultiThreadOptions multiThread = new MultiThreadOptions();
+  /** parser */
   @Inject public ParserOptions parser = new ParserOptions();
+  /** input splits */
   @Inject public SplitOptions splits = new SplitOptions();
+  /** metrics */
   @Inject public MetricsOptions metricsOpts = new MetricsOptions();
 
-  @Option(name = {"-l", "--limit"}, description = "Limit on number of rows to process")
+  /** limit */
+  @Option(name = { "-l", "--limit" }, description = "Limit on number of rows to process")
   public long limit = Long.MAX_VALUE;
 
+  /** separator */
   @Option(name = "--separator", description = "Separator between columns")
   public String separator = Defaults.SEPARATOR;
 
-  @Option(name = "--record-buffer-flush", description = "How many records to buffer before printing")
+  /** buffre flush period */
+  @Option(name = "--record-buffer-flush",
+      description = "How many records to buffer before printing")
   public int recordBufferFlush = 1;
 
+  /** where to append stats */
   @Option(name = "--append-stats-to", description = "Append final stats to a file")
   public String appendStatsTo;
+  // CHECKSTYLE: resume VisibilityModifier
 
+  /** Process options */
   public void process() {
     metricsOpts.process();
   }

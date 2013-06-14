@@ -25,13 +25,17 @@ import io.airlift.command.Option;
 
 import javax.inject.Inject;
 
+/**
+ * Input benchmark
+ */
 @Command(name = "input-benchmark", description = "Benchmark for Input")
 public class InputBenchmarkCmd extends BaseCmd {
-  @Inject
-  public MetastoreOptions metastoreOpts = new MetastoreOptions();
+  // CHECKSTYLE: stop VisibilityModifier
+  /** metastore options */
+  @Inject public MetastoreOptions metastoreOpts = new MetastoreOptions();
 
-  @Inject
-  public InputTableOptions tableOpts = new InputTableOptions();
+  /** table options */
+  @Inject public InputTableOptions tableOpts = new InputTableOptions();
 
   /** Whether to track metrics */
   @Option(name = "--trackMetrics", description = "Track metrics while running")
@@ -44,6 +48,7 @@ public class InputBenchmarkCmd extends BaseCmd {
   /** Every how many records in a split to print */
   @Option(name = "--recordPrintPeriod")
   public int recordPrintPeriod = 1000000;
+  // CHECKSTYLE: resume VisibilityModifier
 
   @Override public void execute() throws Exception {
     new InputBenchmark().run(this);

@@ -19,10 +19,17 @@ package com.facebook.hiveio.options;
 
 import io.airlift.command.Option;
 
+/**
+ * Options for table
+ */
 public class TableOptions {
+  // CHECKSTYLE: stop VisibilityModifier
+  /** Database name */
   @Option(name = "--database", description = "Database to use")
   public String database = Defaults.DATABASE;
 
-  @Option(name = {"-t", "--table"}, description = "Table to read from")
+  /** Table name */
+  @Option(name = { "-t", "--table" }, description = "Table to read from")
   public String table;
+  // CHECKSTYLE: resume VisibilityModifier
 }

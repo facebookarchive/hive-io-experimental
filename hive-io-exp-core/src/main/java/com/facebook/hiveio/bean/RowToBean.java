@@ -19,6 +19,16 @@ package com.facebook.hiveio.bean;
 
 import com.facebook.hiveio.record.HiveReadableRecord;
 
+/**
+ * Interface for converting rows to Java bean objects
+ *
+ * @param <X> type of bean class
+ */
 public interface RowToBean<X> {
+  /**
+   * Write row to object
+   * @param record Hive row
+   * @param result Object to write to
+   */
   void writeRow(HiveReadableRecord record, X result);
 }

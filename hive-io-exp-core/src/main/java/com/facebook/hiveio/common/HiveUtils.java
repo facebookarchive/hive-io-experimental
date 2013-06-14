@@ -64,23 +64,55 @@ public class HiveUtils {
   /** Don't construct, allow inheritance */
   protected HiveUtils() { }
 
+  /**
+   * Create a new HiveConf
+   *
+   * @return HiveConf
+   */
   public static HiveConf newHiveConf() {
     return alterHiveConf(new HiveConf());
   }
 
+  /**
+   * Create a new HiveConf with a class
+   *
+   * @param klass Class to use
+   * @return HiveConf
+   */
   public static HiveConf newHiveConf(Class<?> klass) {
     return alterHiveConf(new HiveConf(klass));
   }
 
+  /**
+   * Create a new HiveConf with a Configuration and a Class
+   *
+   * @param conf Configuration
+   * @param klass Class
+   * @return HiveConf
+   */
   public static HiveConf newHiveConf(Configuration conf, Class<?> klass) {
     return alterHiveConf(new HiveConf(conf, klass));
   }
 
+  /**
+   * Alter the HiveConf before its returned to user
+   *
+   * @param hiveConf HiveConf
+   * @return altered HiveConf
+   */
   public static HiveConf alterHiveConf(HiveConf hiveConf) {
 //    hiveConf.setVar(HiveConf.ConfVars.METASTORE_AUTO_START_MECHANISM_MODE, "None");
     return hiveConf;
   }
 
+  /**
+   * Get the statistics of a table
+   *
+   * @param client Metastore client
+   * @param inputDesc description of Hive input table
+   * @return HiveStats
+   * @throws TException
+   */
   public static HiveStats statsOf(ThriftHiveMetastore.Iface client,
       HiveInputDescription inputDesc) throws TException
   {

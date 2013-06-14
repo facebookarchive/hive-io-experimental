@@ -65,11 +65,11 @@ import java.util.concurrent.atomic.AtomicInteger;
  */
 public class HiveApiOutputFormat
     extends OutputFormat<WritableComparable, HiveWritableRecord> {
-  /** Logger */
-  private static final Logger LOG = LoggerFactory.getLogger(HiveApiOutputFormat.class);
-
   /** Default profile if none given */
   public static final String DEFAULT_PROFILE_ID = "output-profile";
+
+  /** Logger */
+  private static final Logger LOG = LoggerFactory.getLogger(HiveApiOutputFormat.class);
 
   /** Counter for the files created, so we would be able to get unique name for new files */
   private static final AtomicInteger CREATED_FILES_COUNTER = new AtomicInteger(0);

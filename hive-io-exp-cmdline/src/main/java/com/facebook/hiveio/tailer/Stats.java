@@ -21,6 +21,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.facebook.hiveio.common.HiveStats;
+import com.google.common.base.Charsets;
 import com.google.common.base.Joiner;
 import com.yammer.metrics.Metrics;
 import com.yammer.metrics.core.Meter;
@@ -40,32 +41,54 @@ import static com.barney4j.utils.unit.ByteUnit.MB;
 import static java.util.concurrent.TimeUnit.NANOSECONDS;
 import static java.util.concurrent.TimeUnit.SECONDS;
 
+/**
+ * Statistics tracked for hivetail
+ */
 @ThreadSafe
 class Stats {
+  /** flush period */
   public static final long MEGABYTES_FLUSH = 10;
 
+  /** Logger */
   private static final Logger LOG = LoggerFactory.getLogger(Stats.class);
 
+  /** hive stats */
   private final HiveStats hiveStats;
 
-  public Meter rowMeter;
+  /** rows */
+  private Meter rowMeter;
 
-  public Meter rawMBMeter;
-  public AtomicLong bytesTillFlush = new AtomicLong();
+  /** MBs */
+  private Meter rawMBMeter;
+  /** bytes left till next flush */
+  private AtomicLong bytesTillFlush = new AtomicLong();
 
-  public static Stats instance;
-
+  /**
+   * Constructor
+   *
+   * @param hiveStats hive stats
+   */
   private Stats(HiveStats hiveStats) {
     this.hiveStats = hiveStats;
     rowMeter = Metrics.newMeter(Stats.class, "rows", "rows", SECONDS);
     rawMBMeter = Metrics.newMeter(Stats.class, "megabytes (estimated)", "MBs", SECONDS);
   }
 
-  public static Stats get(HiveStats hiveStats) {
-    instance = new Stats(hiveStats);
-    return instance;
+  /**
+   * Create and get instance
+   *
+   * @param hiveStats hive stats
+   * @return Stats
+   */
+  public static Stats create(HiveStats hiveStats) {
+    return new Stats(hiveStats);
   }
 
+  /**
+   * Add rows to stats
+   *
+   * @param numRows number of rows
+   */
   public void addRows(long numRows) {
     rowMeter.mark(numRows);
     double rowsFraction = numRows / (double) hiveStats.getNumRows();
@@ -74,6 +97,11 @@ class Stats {
     addBytes(bytes);
   }
 
+  /**
+   * Add bytes to stats
+   *
+   * @param bytes number of bytes
+   */
   private void addBytes(long bytes) {
     long bytesSoFar = bytesTillFlush.addAndGet(bytes);
     while (bytesSoFar > MB.toBytes(MEGABYTES_FLUSH)) {
@@ -84,13 +112,28 @@ class Stats {
     }
   }
 
+  /**
+   * Get metrics reporter
+   *
+   * @return ConsoleReporter
+   */
   public static ConsoleReporter metricsReporter() {
     return new ConsoleReporter(Metrics.defaultRegistry(), System.err, MetricPredicate.ALL);
   }
 
+  /**
+   * Print end results
+   *
+   * @param context Context
+   * @param args TailerArgs
+   * @param timeNanos nanoseconds
+   * @param stream OutputStream
+   * @throws IOException
+   */
   public void printEndBenchmark(Context context, TailerArgs args, long timeNanos,
       OutputStream stream) throws IOException {
-    PrintWriter writer = new PrintWriter(new BufferedWriter(new OutputStreamWriter(stream)));
+    PrintWriter writer = new PrintWriter(new BufferedWriter(
+        new OutputStreamWriter(stream, Charsets.UTF_8)));
     Joiner joiner = Joiner.on(",");
 
     long seconds = NANOSECONDS.toSeconds(timeNanos);
@@ -107,6 +150,12 @@ class Stats {
     writer.flush();
   }
 
+  /**
+   * Compute how many MBs we've parsed
+   *
+   * @param hiveStats HiveStats
+   * @return megabytes parsed
+   */
   private double mbParsed(HiveStats hiveStats) {
     double rowsPct = rowMeter.count() / (double) hiveStats.getNumRows();
     return hiveStats.getRawSizeInMB() * rowsPct;

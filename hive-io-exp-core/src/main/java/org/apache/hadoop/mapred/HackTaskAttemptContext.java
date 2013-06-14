@@ -23,10 +23,23 @@ import org.apache.hadoop.util.Progressable;
  * This is a hack to expose mapred.TaskAttemptContext which has package level constructors
  */
 public class HackTaskAttemptContext extends TaskAttemptContext {
+  /**
+   * Constructor
+   *
+   * @param conf JobConf
+   * @param taskid TaskAttemptID
+   */
   public HackTaskAttemptContext(JobConf conf, TaskAttemptID taskid) {
     super(conf, taskid);
   }
 
+  /**
+   * Constructor
+   *
+   * @param conf JobConf
+   * @param taskid TaskAttemptID
+   * @param progress Progressable
+   */
   public HackTaskAttemptContext(JobConf conf, TaskAttemptID taskid,
       Progressable progress) {
     super(conf, taskid, progress);

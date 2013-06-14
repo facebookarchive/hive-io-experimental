@@ -61,7 +61,7 @@ public class HadoopUtils {
   /**
    * Set JobConf if object is JobConfigurable
    * @param object Object to check
-   * @param conf JobConf to set
+   * @param jobConf JobConf to set
    */
   public static void setJobConfIfPossible(Object object, JobConf jobConf) {
     if (object instanceof JobConfigurable) {
@@ -74,12 +74,14 @@ public class HadoopUtils {
    * @param inputFormat InputFormat to configure
    * @param conf Configuration to use
    */
-  public static void configureInputFormat(InputFormat inputFormat, Configuration conf)
+  public static void configureInputFormat(InputFormat inputFormat,
+      Configuration conf)
   {
     JobConf jobConf = new JobConf(conf);
     setJobConfIfPossible(inputFormat, jobConf);
     // TextInputFormat is not always JobConfigurable, so we need to explicitly
-    // call this here to make sure it gets configured with the compression codecs.
+    // call this here to make sure it gets configured with the
+    // compression codecs.
     if (inputFormat instanceof TextInputFormat) {
       ((TextInputFormat) inputFormat).configure(jobConf);
     }
@@ -196,7 +198,8 @@ public class HadoopUtils {
     // implementation since it can't be done automatically because of
     // mapreduce->mapred abstraction
     if (outputPath != null) {
-      FileOutputCommitter foc = new FileOutputCommitter(getOutputPath(conf), context);
+      FileOutputCommitter foc =
+          new FileOutputCommitter(getOutputPath(conf), context);
       Path path = foc.getWorkPath();
       FileSystem fs = path.getFileSystem(conf);
       fs.mkdirs(path);

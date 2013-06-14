@@ -30,20 +30,25 @@ import com.google.common.collect.Lists;
 import java.io.IOException;
 import java.util.List;
 
+/**
+ * InputFormat
+ */
 public class SampleInputFormat extends InputFormat<NullWritable, MapWritable> {
   @Override public RecordReader<NullWritable, MapWritable> createRecordReader(
-      InputSplit split, TaskAttemptContext context)
-      throws IOException, InterruptedException {
+    InputSplit split, TaskAttemptContext context)
+    throws IOException, InterruptedException
+  {
     SampleInputSplit hSplit = (SampleInputSplit) split;
     if (hSplit.getNum() == 0) {
-      return new SplitReader(HiveTools.mapperData1);
+      return new SplitReader(HiveTools.getMapperData1());
     } else {
-      return new SplitReader(HiveTools.mapperData2);
+      return new SplitReader(HiveTools.getMapperData2());
     }
   }
 
   @Override public List<InputSplit> getSplits(JobContext context)
-      throws IOException, InterruptedException {
+    throws IOException, InterruptedException
+  {
     return Lists.<InputSplit>newArrayList(
         new SampleInputSplit(0),
         new SampleInputSplit(1));

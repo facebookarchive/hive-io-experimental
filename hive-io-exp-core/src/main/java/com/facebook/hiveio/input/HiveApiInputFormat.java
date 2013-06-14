@@ -60,11 +60,11 @@ import static com.google.common.collect.Lists.transform;
  */
 public class HiveApiInputFormat
     extends InputFormat<WritableComparable, HiveReadableRecord> {
-  /** Logger */
-  private static final Logger LOG = LoggerFactory.getLogger(HiveApiInputFormat.class);
-
   /** Default profile ID if none given */
   public static final String DEFAULT_PROFILE_ID = "input-profile";
+
+  /** Logger */
+  private static final Logger LOG = LoggerFactory.getLogger(HiveApiInputFormat.class);
 
   /** Which profile to lookup */
   private String myProfileId = DEFAULT_PROFILE_ID;
@@ -113,16 +113,36 @@ public class HiveApiInputFormat
     return HiveTableSchemas.get(conf, myProfileId);
   }
 
+  /**
+   * Key for profile
+   *
+   * @param profileId profile
+   * @return String key
+   */
   private static String profileConfKey(String profileId) {
     return "hive.input." + profileId;
   }
 
+  /**
+   * Set input description for profile
+   *
+   * @param conf Configuration
+   * @param inputDesc Hive table input description
+   * @param profileId profile ID
+   */
   public static void setProfileInputDesc(Configuration conf,
     HiveInputDescription inputDesc, String profileId) {
     conf.set(profileConfKey(profileId), Writables.writeToEncodedStr(inputDesc));
   }
 
-  private HiveInputDescription readProfileInputDesc(Configuration conf) {
+  /**
+   * Read input description for profile
+   *
+   * @param conf Configuration
+   * @return HiveInputDescription
+   */
+  private HiveInputDescription readProfileInputDesc(Configuration conf)
+  {
     HiveInputDescription inputDesc = new HiveInputDescription();
     Writables.readFieldsFromEncodedStr(conf.get(profileConfKey(myProfileId)), inputDesc);
     return inputDesc;
@@ -145,14 +165,25 @@ public class HiveApiInputFormat
     return getSplits(conf, inputDesc, client);
   }
 
+  /**
+   * Get splits
+   *
+   * @param conf Configuration
+   * @param inputDesc Hive table input description
+   * @param client Metastore client
+   * @return list of input splits
+   * @throws IOException
+   */
   public List<InputSplit> getSplits(Configuration conf,
-      HiveInputDescription inputDesc, ThriftHiveMetastore.Iface client)
-      throws IOException
+    HiveInputDescription inputDesc, ThriftHiveMetastore.Iface client)
+    throws IOException
   {
     Table table;
     try {
       table = client.get_table(inputDesc.getDbName(), inputDesc.getTableName());
+      // CHECKSTYLE: stop IllegalCatch
     } catch (Exception e) {
+      // CHECKSTYLE: resume IllegalCatch
       throw new IOException(e);
     }
 
@@ -166,6 +197,16 @@ public class HiveApiInputFormat
     return splits;
   }
 
+  /**
+   * Compute splits from partitions
+   *
+   * @param conf Configuration
+   * @param inputDesc Hive table input description
+   * @param tableSchema schema for table
+   * @param partitions list of input partitions
+   * @return list of input splits
+   * @throws IOException
+   */
   private List<InputSplit> computeSplits(Configuration conf, HiveInputDescription inputDesc,
     HiveTableSchema tableSchema, List<InputPartition> partitions) throws IOException
   {
@@ -180,8 +221,9 @@ public class HiveApiInputFormat
 
       org.apache.hadoop.mapred.InputSplit[] baseSplits =
           baseInputFormat.getSplits(new JobConf(conf), inputDesc.getNumSplits());
-      LOG.info("Requested {} splits from partition ({} out of {}) partition values: {}, got {} splits from inputFormat {}",
-          inputDesc.getNumSplits(), partitionNum+1, Iterables.size(partitions),
+      LOG.info("Requested {} splits from partition ({} out of {}) partition values: " +
+          "{}, got {} splits from inputFormat {}",
+          inputDesc.getNumSplits(), partitionNum + 1, Iterables.size(partitions),
           inputPartition.getInputSplitData().getPartitionValues(), baseSplits.length,
           baseInputFormat.getClass().getCanonicalName());
 
@@ -196,7 +238,15 @@ public class HiveApiInputFormat
     return splits;
   }
 
-  private int[] computeColumnIds(List<String> columnNames, HiveTableSchema tableSchema) {
+  /**
+   * Compute column IDs from names
+   *
+   * @param columnNames names of columns
+   * @param tableSchema schema for Hive table
+   * @return array of column IDs
+   */
+  private int[] computeColumnIds(List<String> columnNames, HiveTableSchema tableSchema)
+  {
     List<Integer> ints;
     if (columnNames.isEmpty()) {
       Range<Integer> range = Ranges.closedOpen(0, tableSchema.numColumns());
@@ -212,6 +262,15 @@ public class HiveApiInputFormat
     return result;
   }
 
+  /**
+   * Compute partitions to query
+   *
+   * @param inputDesc Hive table input description
+   * @param client Metastore client
+   * @param table Thrift Table
+   * @return list of input partitions
+   * @throws IOException
+   */
   private List<InputPartition> computePartitions(HiveInputDescription inputDesc,
     ThriftHiveMetastore.Iface client, Table table) throws IOException
   {
@@ -226,7 +285,9 @@ public class HiveApiInputFormat
       try {
         hivePartitions = client.get_partitions_by_filter(inputDesc.getDbName(),
             inputDesc.getTableName(), inputDesc.getPartitionFilter(), (short) -1);
+        // CHECKSTYLE: stop IllegalCatch
       } catch (Exception e) {
+        // CHECKSTYLE: resume IllegalCatch
         throw new IOException(e);
       }
       for (Partition hivePartition : hivePartitions) {
@@ -264,9 +325,19 @@ public class HiveApiInputFormat
     return reader;
   }
 
+  /**
+   * Get record parser for the table
+   *
+   * @param exampleValue An example value to use
+   * @param tableName Hive table name
+   * @param split input split
+   * @param columnIds column ids
+   * @param conf Configuration
+   * @return RecordParser
+   */
   private RecordParser<Writable> getParser(Writable exampleValue,
     HiveTableName tableName, HInputSplit split, int[] columnIds,
-      Configuration conf)
+    Configuration conf)
   {
     Deserializer deserializer = split.getDeserializer();
     String[] partitionValues = split.getPartitionValues();

@@ -17,15 +17,24 @@
  */
 package com.facebook.hiveio.options;
 
+/**
+ * Default values
+ */
 public class Defaults {
+  /** metastore host */
   public static final String METASTORE_HOST = "";
+  /** metastore port */
   public static final int METASTORE_PORT = 9083;
 
+  /** database */
   public static final String DATABASE = "default";
 
+  /** input partition filter */
   public static final String PARTITION_FILTER = "";
 
+  /** separator */
   public static final String SEPARATOR = "\t";
 
-  private Defaults() {}
+  /** Don't construct */
+  private Defaults() { }
 }

@@ -23,6 +23,11 @@ import com.facebook.hiveio.record.HiveReadableRecord;
 
 import java.io.IOException;
 
+/**
+ * Interface for record parser
+ *
+ * @param <W> type being parsed
+ */
 public interface RecordParser<W extends Writable> {
   /**
    * Create an empty record. Will be called before any parse() calls are made.
@@ -39,5 +44,5 @@ public interface RecordParser<W extends Writable> {
    * @throws IOException if any problems occur
    */
   HiveReadableRecord parse(W value, HiveReadableRecord record)
-      throws IOException;
+    throws IOException;
 }

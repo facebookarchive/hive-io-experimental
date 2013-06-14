@@ -17,4 +17,10 @@
  */
 package com.facebook.hiveio.testing;
 
-public class Dummy {}
+/**
+ * Dummy class
+ */
+public class Dummy {
+  /** Don't construct */
+  private Dummy() { }
+}

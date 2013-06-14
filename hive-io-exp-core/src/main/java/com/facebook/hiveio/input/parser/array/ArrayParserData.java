@@ -25,16 +25,35 @@ import org.apache.hadoop.hive.serde2.objectinspector.StructObjectInspector;
 
 import com.facebook.hiveio.common.HiveType;
 
+/**
+ * Parser data for array parsers
+ */
 public class ArrayParserData {
+  // CHECKSTYLE: stop VisibilityModifier
+  /** Hive deserializer */
   public final Deserializer deserializer;
+  /** Hive object inspector */
   public final StructObjectInspector inspector;
 
+  /** Column IDs */
   public final int[] columnIndexes;
 
+  /** Hive primitive object inspectors */
   public final PrimitiveObjectInspector[] primitiveInspectors;
+  /** Hive struct fields */
   public final StructField[] structFields;
+  /** Types of columns */
   public final HiveType[] hiveTypes;
+  // CHECKSTYLE: resume VisibilityModifier
 
+  /**
+   * Constructor
+   *
+   * @param deserializer Hive Deserialier
+   * @param columnIndexes column IDs
+   * @param numColumns number of columns
+   * @param partitionValues partition data
+   */
   public ArrayParserData(Deserializer deserializer, int[] columnIndexes,
                          int numColumns, String[] partitionValues) {
     this.deserializer = deserializer;

@@ -17,6 +17,16 @@
  */
 package com.facebook.hiveio.common;
 
+/**
+ * A basic native type
+ */
 public enum NativeType {
-  BOOLEAN, LONG, DOUBLE, STRING
+  /** boolean */
+  BOOLEAN,
+  /** long */
+  LONG,
+  /** double */
+  DOUBLE,
+  /** string */
+  STRING
 }

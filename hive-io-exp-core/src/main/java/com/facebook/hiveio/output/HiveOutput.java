@@ -31,10 +31,25 @@ import com.facebook.hiveio.record.HiveWritableRecord;
 
 import java.io.IOException;
 
+/**
+ * Simple API for writing to Hive
+ */
 public class HiveOutput {
+  /** Don't construct */
+  private HiveOutput() { }
+
+  /**
+   * Write records to a Hive table
+   *
+   * @param outputDesc description of Hive table
+   * @param records the records to write
+   * @throws TException
+   * @throws IOException
+   * @throws InterruptedException
+   */
   public static void writeTable(HiveOutputDescription outputDesc,
-      Iterable<HiveWritableRecord> records)
-      throws TException, IOException, InterruptedException
+    Iterable<HiveWritableRecord> records)
+    throws TException, IOException, InterruptedException
   {
     long uniqueId = System.nanoTime();
     String taskAttemptIdStr = "attempt_200707121733_" + (int) uniqueId + "_m_000005_0";

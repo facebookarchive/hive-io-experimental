@@ -17,8 +17,16 @@
  */
 package com.facebook.hiveio.rows;
 
+/**
+ * Two IDs and their weight.
+ */
 public class IdIdWeightRow {
+  // CHECKSTYLE: stop VisibilityModifier
+  /** Source ID */
   public long id1;
+  /** Target ID */
   public long id2;
+  /** Weight */
   public double weight;
+  // CHECKSTYLE: resume VisibilityModifier
 }

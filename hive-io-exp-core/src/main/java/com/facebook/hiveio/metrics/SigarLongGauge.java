@@ -21,14 +21,25 @@ import org.hyperic.sigar.SigarException;
 
 import com.yammer.metrics.core.Gauge;
 
+/**
+ * Wrapper for Guages producing long values from Sigar
+ */
 public abstract class SigarLongGauge extends Gauge<Long> {
   @Override public Long value() {
     long value = -1;
     try {
       value = computeValue();
-    } catch (SigarException e) {}
+      // CHECKSTYLE: stop EmptyBlock
+    } catch (SigarException e) { }
+    // CHECKSTYLE: resume EmptyBlock
     return value;
   }
 
+  /**
+   * Compute new value
+   *
+   * @return long value
+   * @throws SigarException
+   */
   public abstract long computeValue() throws SigarException;
 }

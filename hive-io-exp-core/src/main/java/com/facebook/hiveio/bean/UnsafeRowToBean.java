@@ -27,10 +27,22 @@ import sun.misc.Unsafe;
 import java.lang.reflect.Field;
 import java.util.List;
 
+/**
+ * {@link RowToBean} using {@link Unsafe}
+ * @param <X> the type
+ */
 public class UnsafeRowToBean<X> implements RowToBean<X> {
+  /** The Unsafe object */
   private static final Unsafe UNSAFE = UnsafeHelper.getUnsafe();
+  /** Copiers for data */
   private final List<FieldCopier> fieldCopiers = Lists.newArrayList();
 
+  /**
+   * Constructor
+   *
+   * @param klass class we're copying to
+   * @param schema Hive schema
+   */
   public UnsafeRowToBean(Class<X> klass, HiveTableSchema schema) {
     for (Field field : klass.getDeclaredFields()) {
       String name = field.getName();

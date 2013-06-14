@@ -29,12 +29,25 @@ import com.google.common.collect.Lists;
 import java.lang.reflect.Field;
 import java.util.List;
 
+/**
+ * {@link RowToBean} using reflectasm
+ * @param <X> type
+ */
 public class ReflectasmRowToBean<X> implements RowToBean<X> {
+  /** Logger */
   private static final Logger LOG = LoggerFactory.getLogger(ReflectasmRowToBean.class);
 
+  /** Copiers for all the columns */
   private final List<FieldCopier> fieldCopiers = Lists.newArrayList();
+  /** Accessor to internals */
   private final FieldAccess fieldAccess;
 
+  /**
+   * Constructor
+   *
+   * @param klass the class
+   * @param tableSchema Hive schema
+   */
   public ReflectasmRowToBean(Class<X> klass, HiveTableSchema tableSchema) {
     fieldAccess = FieldAccess.get(klass);
     for (Field field : klass.getDeclaredFields()) {

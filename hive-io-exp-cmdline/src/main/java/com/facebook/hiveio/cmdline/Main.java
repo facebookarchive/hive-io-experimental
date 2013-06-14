@@ -23,7 +23,19 @@ import com.facebook.hiveio.tailer.TailerCmd;
 import io.airlift.command.Cli;
 import io.airlift.command.Help;
 
+/**
+ * Command line entry point
+ */
 public class Main {
+  /** Don't construct */
+  private Main() { }
+
+  /**
+   * Entry point for command line
+   *
+   * @param args command line args
+   * @throws Exception
+   */
   public static void main(String[] args) throws Exception {
     Cli.CliBuilder<Runnable> builder = Cli.<Runnable>builder("hiveio");
     builder.withDefaultCommand(Help.class);

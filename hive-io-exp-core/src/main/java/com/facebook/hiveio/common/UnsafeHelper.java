@@ -21,13 +21,26 @@ import sun.misc.Unsafe;
 
 import java.lang.reflect.Field;
 
+/**
+ * Helper for retrieving the {@link Unsafe} object
+ */
 public class UnsafeHelper {
+  /** Don't construct */
+  private UnsafeHelper() { }
+
+  /**
+   * Get the {@link Unsafe} object
+   *
+   * @return Unsafe
+   */
   public static Unsafe getUnsafe() {
     try {
       Field f = Unsafe.class.getDeclaredField("theUnsafe");
       f.setAccessible(true);
-      return (Unsafe)f.get(null);
+      return (Unsafe) f.get(null);
+      // CHECKSTYLE: stop IllegalCatch
     } catch (Exception e) {
+      // CHECKSTYLE: resume IllegalCatch
       throw new IllegalStateException("Could not get theUnsafe object");
     }
   }

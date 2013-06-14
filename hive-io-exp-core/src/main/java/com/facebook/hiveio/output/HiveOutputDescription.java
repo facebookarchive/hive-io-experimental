@@ -131,6 +131,13 @@ public class HiveOutputDescription implements Writable {
     return this;
   }
 
+  /**
+   * Put partition data
+   *
+   * @param key partition key
+   * @param value partition value
+   * @return this
+   */
   public HiveOutputDescription putPartitionValue(String key, String value) {
     this.partitionValues.put(key, value);
     return this;
@@ -140,8 +147,14 @@ public class HiveOutputDescription implements Writable {
     return metastoreDesc;
   }
 
-  public ThriftHiveMetastore.Iface metastoreClient(Configuration conf)
-      throws TException {
+  /**
+   * Get client to Metastore
+   *
+   * @param conf Configuration
+   * @return Thrift metastore client
+   * @throws TException
+   */
+  public ThriftHiveMetastore.Iface metastoreClient(Configuration conf) throws TException {
     return metastoreDesc.makeClient(conf);
   }
 

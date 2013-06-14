@@ -30,6 +30,9 @@ import com.facebook.hiveio.record.HiveReadableRecord;
 import java.io.IOException;
 import java.util.List;
 
+/**
+ * Default parser using Hive inspectors
+ */
 public class DefaultParser implements RecordParser {
   /** Hive Deserializer */
   private final Deserializer deserializer;
@@ -40,6 +43,13 @@ public class DefaultParser implements RecordParser {
   /** Number of columns in the table */
   private final int numColumns;
 
+  /**
+   * Constructor
+   *
+   * @param deserializer Hive Deserializer
+   * @param partitionValues partition data
+   * @param numColumns number of columns
+   */
   public DefaultParser(Deserializer deserializer, String[] partitionValues, int numColumns) {
     this.deserializer = deserializer;
     try {
@@ -59,7 +69,8 @@ public class DefaultParser implements RecordParser {
 
   @Override
   public HiveReadableRecord parse(Writable value, HiveReadableRecord record)
-      throws IOException {
+    throws IOException
+  {
     DefaultRecord defaultRecord = (DefaultRecord) record;
 
     Object data;

@@ -34,20 +34,28 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
+/**
+ * Helper for loading Hadoop native libraries
+ */
 public class HadoopNative extends NativeCodeHelper {
+  /** Logger */
   private static final Logger LOG = LoggerFactory.getLogger(HadoopNative.class);
 
-  private static boolean loaded = false;
-  private static Throwable error = null;
+  /** Have we loaded the library already */
+  private static boolean LOADED = false;
+  /** Did the loading cause an error */
+  private static Throwable ERROR = null;
 
-  private HadoopNative() {}
+  /** Don't construct */
+  private HadoopNative() { }
 
+  /** Load native libraries */
   public static synchronized void requireHadoopNative() {
-    if (loaded) {
+    if (LOADED) {
       return;
     }
-    if (error != null) {
-      throw new RuntimeException("failed to load Hadoop native library", error);
+    if (ERROR != null) {
+      throw new RuntimeException("failed to load Hadoop native library", ERROR);
     }
     try {
       loadLibrary("hadoop");
@@ -55,10 +63,10 @@ public class HadoopNative extends NativeCodeHelper {
       field.setAccessible(true);
       field.set(null, true);
 
-      // Use reflection to HACK fix caching bug in CodecPool
-      // This hack works from a concurrency perspective in this codebase
-      // because we assume that all threads that will access the CodecPool will
-      // have already been synchronized by calling requireHadoopNative() at some point.
+      // Use reflection to HACK fix caching bug in CodecPool. This hack works
+      // from a concurrency perspective in this codebase because we assume that
+      // all threads that will access the CodecPool will have already been
+      // synchronized by calling requireHadoopNative() at some point.
       field = CodecPool.class.getDeclaredField("COMPRESSOR_POOL");
       setFinalStatic(field, new HackListMap());
       field = CodecPool.class.getDeclaredField("DECOMPRESSOR_POOL");
@@ -68,15 +76,25 @@ public class HadoopNative extends NativeCodeHelper {
           CompressionCodecFactory.getCodecClasses(new Configuration());
       LOG.info("Compression Codecs: {}", codecs);
 
-      loaded = true;
+      LOADED = true;
+      // CHECKSTYLE: stop IllegalCatch
     } catch (Throwable t) {
-      error = t;
-      throw new RuntimeException("failed to load Hadoop native library", error);
+      // CHECKSTYLE: resume IllegalCatch
+      ERROR = t;
+      throw new RuntimeException("failed to load Hadoop native library", ERROR);
     }
   }
 
+  /**
+   * Set value of a final static field
+   *
+   * @param field Field to alter
+   * @param newValue Value to set to
+   * @throws Exception
+   */
   private static void setFinalStatic(Field field, Object newValue)
-      throws Exception {
+    throws Exception
+  {
     field.setAccessible(true);
 
     Field modifiersField = Field.class.getDeclaredField("modifiers");
@@ -86,6 +104,12 @@ public class HadoopNative extends NativeCodeHelper {
     field.set(null, newValue);
   }
 
+  /**
+   * Hack for map with list values
+   *
+   * @param <K> key type
+   * @param <V> value type
+   */
   private static class HackListMap<K, V>
       extends AbstractMap<K, List<? extends V>> {
     @Override

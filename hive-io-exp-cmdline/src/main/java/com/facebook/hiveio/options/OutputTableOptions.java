@@ -19,14 +19,22 @@ package com.facebook.hiveio.options;
 
 import io.airlift.command.Option;
 
+/**
+ * Options for output table
+ */
 public class OutputTableOptions extends TableOptions {
+  // CHECKSTYLE: stop VisibilityModifier
+  /** Is the table partitioned */
   @Option(name = "--partitioned", description = "Write to a table partitioned by ds")
   public boolean partitioned = false;
+    // CHECKSTYLE: stop VisibilityModifier
 
+  /** Constructor */
   public OutputTableOptions() {
     table = "hiveio_output_test";
   }
 
+  /** Process options */
   public void process() {
     if (partitioned) {
       table = "hiveio_output_test_partitioned";

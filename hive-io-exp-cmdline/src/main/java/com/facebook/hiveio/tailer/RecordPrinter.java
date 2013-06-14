@@ -19,10 +19,24 @@ package com.facebook.hiveio.tailer;
 
 import com.facebook.hiveio.record.HiveReadableRecord;
 
+/**
+ * Printing records interface
+ */
 interface RecordPrinter {
+  /**
+   * Print a record
+   *
+   * @param record Hive record
+   * @param numColumns number of columns
+   * @param context Context
+   * @param args command line args
+   */
   void printRecord(HiveReadableRecord record, int numColumns, Context context,
       TailerArgs args);
 
+  /**
+   * Default printer
+   */
   static class Default implements RecordPrinter {
     @Override public void printRecord(HiveReadableRecord record, int numColumns,
         Context context, TailerArgs args) {
@@ -30,6 +44,14 @@ interface RecordPrinter {
       context.perThread.get().flushBuffer();
     }
 
+    /**
+     * Add a record to the StringBuilder
+     *
+     * @param record Hive record
+     * @param numColumns number of columns
+     * @param context Context
+     * @param args command line args
+     */
     public static void addRecordToStringBuilder(HiveReadableRecord record,
         int numColumns, Context context, TailerArgs args) {
       StringBuilder sb = context.perThread.get().stringBuilder;
@@ -41,6 +63,9 @@ interface RecordPrinter {
     }
   }
 
+  /**
+   * Buffered printer
+   */
   static class Buffered implements RecordPrinter {
     @Override public void printRecord(HiveReadableRecord record, int numColumns,
         Context context, TailerArgs args) {

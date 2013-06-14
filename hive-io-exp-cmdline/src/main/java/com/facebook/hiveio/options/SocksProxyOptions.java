@@ -19,10 +19,17 @@ package com.facebook.hiveio.options;
 
 import io.airlift.command.Option;
 
+/**
+ * Options for SOCKS proxy
+ */
 public class SocksProxyOptions {
+  // CHECKSTYLE: stop VisibilityModifier
+  /** Host */
   @Option(name = "--socks-proxy-host", hidden = true)
   public String host = "localhost";
 
+  /** Port */
   @Option(name = "--socks-proxy-port", hidden = true)
   public int port = -1;
+  // CHECKSTYLE: resume VisibilityModifier
 }

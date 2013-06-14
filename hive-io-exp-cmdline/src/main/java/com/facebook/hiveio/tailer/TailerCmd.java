@@ -54,16 +54,24 @@ import java.util.List;
 
 import static com.facebook.hiveio.input.HiveApiInputFormat.DEFAULT_PROFILE_ID;
 
+/**
+ * hivetail command
+ */
 @Command(name = "tail", description = "Dump a Hive table")
 public class TailerCmd extends BaseCmd
 {
+  /** Logger */
   private static final Logger LOG = LoggerFactory.getLogger(TailerCmd.class);
 
+  /** command line args */
   @Inject private TailerArgs args = new TailerArgs();
 
+  /** record printer */
   private RecordPrinter recordPrinter;
+  /** row parser */
   private RowParser rowParser;
 
+  /** set record printer to use */
   public void chooseRecordPrinter()
   {
     if (args.recordBufferFlush > 1) {
@@ -73,8 +81,13 @@ public class TailerCmd extends BaseCmd
     }
   }
 
+  /**
+   * Set row parser to use
+   *
+   * @param schema table schema
+   */
   public void chooseRowParser(HiveTableSchema schema)
-      throws ClassNotFoundException, InstantiationException, IllegalAccessException
+    throws ClassNotFoundException, InstantiationException, IllegalAccessException
   {
     if (args.parser.beanParser) {
       Class<?> klass = Class.forName(args.parser.rowClassName);
@@ -119,11 +132,12 @@ public class TailerCmd extends BaseCmd
     List<InputSplit> splits = hapi.getSplits(new JobContext(hiveConf, new JobID()));
     LOG.info("Have {} splits to read", splits.size());
 
-    HiveTableName hiveTableName = new HiveTableName(args.inputTable.database, args.inputTable.table);
+    HiveTableName hiveTableName = new HiveTableName(args.inputTable.database,
+        args.inputTable.table);
     HiveTableSchema schema = HiveTableSchemas.lookup(client, hiveTableName);
     chooseRowParser(schema);
 
-    Stats stats = Stats.get(hiveStats);
+    Stats stats = Stats.create(hiveStats);
     Context context = new Context(hapi, hiveConf, schema, hiveStats, stats);
     long startNanos = System.nanoTime();
 
@@ -138,7 +152,11 @@ public class TailerCmd extends BaseCmd
     long timeNanos = System.nanoTime() - startNanos;
     if (args.appendStatsTo != null) {
       OutputStream out = new FileOutputStream(args.appendStatsTo, true);
-      stats.printEndBenchmark(context, args, timeNanos, out);
+      try {
+        stats.printEndBenchmark(context, args, timeNanos, out);
+      } finally {
+        out.close();
+      }
     }
 
     System.err.println("Finished.");
@@ -147,6 +165,12 @@ public class TailerCmd extends BaseCmd
     }
   }
 
+  /**
+   * Initialize hive input
+   *
+   * @param metastoreHostPort metastore location info
+   * @return HiveInputDescription
+   */
   private HiveInputDescription initInput(HostPort metastoreHostPort) {
     HiveInputDescription inputDesc = new HiveInputDescription();
     inputDesc.setDbName(args.inputTable.database);
@@ -159,6 +183,12 @@ public class TailerCmd extends BaseCmd
     return inputDesc;
   }
 
+  /**
+   * Multi threaded execution
+   *
+   * @param context Context
+   * @param numThreads number of threads
+   */
   private void multiThreaded(final Context context, int numThreads)
   {
     List<Thread> threads = Lists.newArrayList();
@@ -179,21 +209,36 @@ public class TailerCmd extends BaseCmd
     }
   }
 
+  /**
+   * Read input splits
+   *
+   * @param context Context
+   */
   private void readSplits(Context context)
   {
     while (context.hasMoreSplitsToRead(args.limit)) {
       InputSplit split = context.splitsQueue.poll();
       try {
         readSplit(split, context);
+        // CHECKSTYLE: stop IllegalCatch
       } catch (Exception e) {
+        // CHECKSTYLE: resume IllegalCatch
         LOG.error("Failed to read split {}", split, e);
       }
     }
     context.perThread.get().flushBuffer();
   }
 
+  /**
+   * Read input split
+   *
+   * @param split InputSplit
+   * @param context Context
+   * @throws IOException
+   * @throws InterruptedException
+   */
   private void readSplit(InputSplit split, Context context)
-      throws IOException, InterruptedException
+    throws IOException, InterruptedException
   {
     TaskAttemptID taskId = new TaskAttemptID();
     TaskAttemptContext taskContext = new TaskAttemptContext(context.hiveConf, taskId);
@@ -221,6 +266,12 @@ public class TailerCmd extends BaseCmd
     context.stats.addRows(rowsParsed);
   }
 
+  /**
+   * Get metastore HostPort
+   *
+   * @return Metastore HostPort
+   * @throws IOException
+   */
   private HostPort getMetastoreHostPort() throws IOException {
     HostPort metastoreInfo;
     if (args.namespace.hasPath()) {

@@ -105,6 +105,11 @@ class HInputSplit extends InputSplit
     return Preconditions.checkNotNull(deserializer);
   }
 
+  /**
+   * Get array of partition values
+   *
+   * @return partition values array
+   */
   public String[] getPartitionValues() {
     List<String> partValues = inputSplitData.getPartitionValues();
     return partValues.toArray(new String[partValues.size()]);
@@ -174,6 +179,9 @@ class HInputSplit extends InputSplit
     return conf;
   }
 
+  /**
+   * Get Configuration object from member variables
+   */
   private void getConfFromMembers() {
     Object[] objectsToCheck = new Object[] {
       baseSplit,

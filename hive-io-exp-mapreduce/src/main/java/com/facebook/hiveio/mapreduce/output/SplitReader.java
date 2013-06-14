@@ -27,21 +27,30 @@ import java.io.IOException;
 import java.util.Iterator;
 import java.util.List;
 
+/**
+ * InputSplit reader
+ */
 public class SplitReader extends RecordReader<NullWritable, MapWritable> {
+  /** Iterator over input */
   private final Iterator<MapWritable> iter;
+  /** Current data */
   private MapWritable currentValue;
 
+  /**
+   * Constructor
+   *
+   * @param rows map records
+   */
   public SplitReader(List<MapWritable> rows) {
     iter = rows.iterator();
   }
 
-  @Override public void close() throws IOException {}
+  @Override public void close() throws IOException { }
 
   @Override public void initialize(InputSplit split, TaskAttemptContext context)
-      throws IOException, InterruptedException {}
+    throws IOException, InterruptedException { }
 
-  @Override public boolean nextKeyValue()
-      throws IOException, InterruptedException {
+  @Override public boolean nextKeyValue() throws IOException, InterruptedException {
     if (iter.hasNext()) {
       currentValue = iter.next();
       return true;
@@ -49,18 +58,15 @@ public class SplitReader extends RecordReader<NullWritable, MapWritable> {
     return false;
   }
 
-  @Override public NullWritable getCurrentKey()
-      throws IOException, InterruptedException {
+  @Override public NullWritable getCurrentKey() throws IOException, InterruptedException {
     return NullWritable.get();
   }
 
-  @Override public MapWritable getCurrentValue()
-      throws IOException, InterruptedException {
+  @Override public MapWritable getCurrentValue() throws IOException, InterruptedException {
     return currentValue;
   }
 
-  @Override public float getProgress()
-      throws IOException, InterruptedException {
+  @Override public float getProgress() throws IOException, InterruptedException {
     return 0;
   }
 }

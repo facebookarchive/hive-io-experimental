@@ -23,9 +23,14 @@ import org.slf4j.LoggerFactory;
 import com.facebook.hiveio.record.HiveReadableRecord;
 import com.google.common.base.Objects;
 
+/**
+ * Copies field from Hive to an Object
+ */
 public abstract class FieldCopier {
+  /** Logger */
   private static final Logger LOG = LoggerFactory.getLogger(FieldCopier.class);
 
+  /** Hive column index */
   private int fromHiveIndex;
 
   protected int getFromHiveIndex() {
@@ -43,5 +48,11 @@ public abstract class FieldCopier {
         .toString();
   }
 
+  /**
+   * Copy the value from Hive to the Object.
+   *
+   * @param fromRecord Hive record
+   * @param toObject Target object
+   */
   protected abstract void setValue(HiveReadableRecord fromRecord, Object toObject);
 }

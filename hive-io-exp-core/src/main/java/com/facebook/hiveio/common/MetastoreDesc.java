@@ -32,6 +32,9 @@ import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
 
+/**
+ * Host/Port describing a metastore server destination
+ */
 public class MetastoreDesc implements Writable {
   /** Hive Metastore Host. If not set will infer from HiveConf */
   private String host;
@@ -54,8 +57,16 @@ public class MetastoreDesc implements Writable {
     this.port = port;
   }
 
+  /**
+   * Create a client to the Metastore
+   *
+   * @param conf Configuration
+   * @return Metastore client
+   * @throws TException
+   */
   public ThriftHiveMetastore.Iface makeClient(Configuration conf)
-      throws TException {
+    throws TException
+  {
     ThriftHiveMetastore.Iface client;
     if (hasHost()) {
       client = HiveMetastores.create(host, port);
@@ -66,6 +77,11 @@ public class MetastoreDesc implements Writable {
     return client;
   }
 
+  /**
+   * Check if host is set
+   *
+   * @return true if host is set
+   */
   public boolean hasHost() {
     return host != null && !CharMatcher.WHITESPACE.matchesAllOf(host);
   }

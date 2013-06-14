@@ -28,23 +28,45 @@ import javax.annotation.concurrent.ThreadSafe;
 import java.util.Queue;
 import java.util.concurrent.atomic.AtomicLong;
 
+/**
+ * Context for computation
+ */
 @ThreadSafe
 class Context {
+  // CHECKSTYLE: stop VisibilityModifier
+  /** Hadoop InputFormat */
   public final HiveApiInputFormat hiveApiInputFormat;
+  /** HiveConf */
   public final HiveConf hiveConf;
+  /** schema */
   public final HiveTableSchema schema;
+  /** stats about table */
   public final HiveStats hiveStats;
+  /** Queue of input splits to process */
   public Queue<InputSplit> splitsQueue;
 
+  /** stats tracking */
   public final Stats stats;
+  /** Number of rows parsed */
   public final AtomicLong rowsParsed;
 
+  /** Per-thread context */
   public final ThreadLocal<ThreadContext> perThread = new ThreadLocal<ThreadContext>() {
     @Override protected ThreadContext initialValue() {
       return new ThreadContext();
     }
   };
+  // CHECKSTYLE: resume VisibilityModifier
 
+  /**
+   * Constructor
+   *
+   * @param hiveApiInputFormat Hadoop InputFormat
+   * @param hiveConf HiveConf
+   * @param schema table schema
+   * @param hiveStats table stats
+   * @param stats overall stats
+   */
   Context(HiveApiInputFormat hiveApiInputFormat, HiveConf hiveConf,
       HiveTableSchema schema, HiveStats hiveStats, Stats stats) {
     this.hiveApiInputFormat = hiveApiInputFormat;
@@ -55,10 +77,22 @@ class Context {
     this.rowsParsed = new AtomicLong();
   }
 
+  /**
+   * Do we have more input splits to read
+   *
+   * @param limit on how many to read
+   * @return true if there are more input splits
+   */
   public boolean hasMoreSplitsToRead(long limit) {
     return !splitsQueue.isEmpty() && !limitReached(limit);
   }
 
+  /**
+   * Have we reached the limit on input splits
+   *
+   * @param limit upper bound
+   * @return true if limit reached
+   */
   public boolean limitReached(long limit) {
     return rowsParsed.get() >= limit;
   }

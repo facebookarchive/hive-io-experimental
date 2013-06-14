@@ -23,15 +23,33 @@ import org.hyperic.sigar.SigarException;
 import com.yammer.metrics.Metrics;
 import com.yammer.metrics.core.MetricsRegistry;
 
+/**
+ * Memory metrics
+ */
 public class ProcessMemoryMetrics {
+  /** Don't construct */
+  private ProcessMemoryMetrics() { }
+
+  /** Register metrics tracked here */
   public static void registerMetrics() {
     registerMetrics(Metrics.defaultRegistry());
   }
 
+  /**
+   * Register metrics tracked here
+   *
+   * @param metrics MetricsRegistry
+   */
   public static void registerMetrics(MetricsRegistry metrics) {
     registerMetrics(metrics, ProcessMemoryMetrics.class);
   }
 
+  /**
+   * Register metrics tracked here
+   *
+   * @param metrics MetricsRegistry
+   * @param owningClass class owning metrics
+   */
   public static void registerMetrics(MetricsRegistry metrics, Class<?> owningClass) {
     final Sigar sigar = new Sigar();
     final long pid = sigar.getPid();

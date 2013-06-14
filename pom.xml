@@ -92,24 +92,36 @@ under the License.
   </modules>
 
   <properties>
-    <dep.hadoop.version>0.20.0</dep.hadoop.version>
-    <dep.hive.version>0.10.0</dep.hive.version>
-
     <dep.airline.version>0.5</dep.airline.version>
+    <dep.airlift-units.version>0.76</dep.airlift-units.version>
     <dep.commons-cli.version>1.2</dep.commons-cli.version>
     <dep.commons-io.version>1.3.2</dep.commons-io.version>
     <dep.fastutil.version>6.5.4</dep.fastutil.version>
     <dep.guava.version>12.0</dep.guava.version>
+    <dep.hadoop.version>0.20.0</dep.hadoop.version>
+    <dep.hive.version>0.10.0</dep.hive.version>
     <dep.jackson.version>2.1.4</dep.jackson.version>
     <dep.metrics.version>2.2.0</dep.metrics.version>
     <dep.reflectasm.version>1.07</dep.reflectasm.version>
     <dep.sigar.version>1.6.5.132-5</dep.sigar.version>
     <dep.slf4j.version>1.7.5</dep.slf4j.version>
+    <dep.testng.version>6.8.5</dep.testng.version>
 
+    <dep.plugin.assembly.version>2.4</dep.plugin.assembly.version>
     <dep.plugin.checkstyle.version>2.10</dep.plugin.checkstyle.version>
+    <dep.plugin.compiler.version>3.1</dep.plugin.compiler.version>
+    <dep.plugin.enforcer.version>1.2</dep.plugin.enforcer.version>
+    <dep.plugin.gpg.version>1.4</dep.plugin.gpg.version>
+    <dep.plugin.jar.version>2.4</dep.plugin.jar.version>
     <dep.plugin.javadoc.version>2.9</dep.plugin.javadoc.version>
     <dep.plugin.findbugs.version>2.5.1</dep.plugin.findbugs.version>
+    <dev.plugin.mavanagaiata.version>0.5.0</dev.plugin.mavanagaiata.version>
+    <dep.plugin.rat.version>0.9</dep.plugin.rat.version>
+    <dep.plugin.release.version>2.4.1</dep.plugin.release.version>
     <dep.plugin.scm.version>1.8.1</dep.plugin.scm.version>
+    <dep.plugin.site.version>3.3</dep.plugin.site.version>
+    <dep.plugin.surefire.version>2.15</dep.plugin.surefire.version>
+    <dep.plugin.source.version>2.2.1</dep.plugin.source.version>
 
     <repo.name>hive-io-experimental</repo.name>
     <root.dir>.</root.dir>
@@ -141,7 +153,7 @@ under the License.
         <plugin>
           <groupId>com.github.koraktor</groupId>
           <artifactId>mavanagaiata</artifactId>
-          <version>0.4.1</version>
+          <version>${dev.plugin.mavanagaiata.version}</version>
           <configuration>
             <gitDir>${root.dir}/.git</gitDir>
           </configuration>
@@ -159,7 +171,7 @@ under the License.
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-assembly-plugin</artifactId>
-          <version>2.4</version>
+          <version>${dep.plugin.assembly.version}</version>
           <configuration>
             <descriptorRefs>
               <descriptorRef>jar-with-dependencies</descriptorRef>
@@ -198,9 +210,10 @@ under the License.
           <version>${dep.plugin.checkstyle.version}</version>
           <configuration>
             <configLocation>${root.dir}/checkstyle.xml</configLocation>
+            <suppressionsLocation>${root.dir}/checkstyle-suppressions.xml</suppressionsLocation>
             <consoleOutput>true</consoleOutput>
             <enableRulesSummary>false</enableRulesSummary>
-            <failOnViolation>false</failOnViolation>
+            <failOnViolation>true</failOnViolation>
             <headerLocation>${root.dir}/license-header.txt</headerLocation>
             <includeTestSourceDirectory>false</includeTestSourceDirectory>
           </configuration>
@@ -216,7 +229,7 @@ under the License.
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-jar-plugin</artifactId>
-          <version>2.3.2</version>
+          <version>${dep.plugin.jar.version}</version>
           <configuration>
             <archive>
               <manifest>
@@ -247,7 +260,7 @@ under the License.
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-compiler-plugin</artifactId>
-          <version>3.0</version>
+          <version>${dep.plugin.compiler.version}</version>
           <configuration>
             <source>1.6</source>
             <target>1.6</target>
@@ -257,7 +270,7 @@ under the License.
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-enforcer-plugin</artifactId>
-          <version>1.0.1</version>
+          <version>${dep.plugin.enforcer.version}</version>
           <executions>
             <execution>
               <id>enforce-maven</id>
@@ -280,7 +293,7 @@ under the License.
           <version>${dep.plugin.findbugs.version}</version>
           <configuration>
             <excludeFilterFile>${root.dir}/findbugs-exclude.xml</excludeFilterFile>
-            <failOnError>false</failOnError>
+            <failOnError>true</failOnError>
             <findbugsXmlOutput>false</findbugsXmlOutput>
             <xmlOutput>true</xmlOutput>
           </configuration>
@@ -296,7 +309,7 @@ under the License.
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-javadoc-plugin</artifactId>
-          <version>2.9</version>
+          <version>${dep.plugin.javadoc.version}</version>
           <executions>
             <execution>
               <id>attach-javadocs</id>
@@ -310,7 +323,7 @@ under the License.
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-source-plugin</artifactId>
-          <version>2.2.1</version>
+          <version>${dep.plugin.source.version}</version>
           <executions>
             <execution>
               <id>attach-sources</id>
@@ -324,7 +337,7 @@ under the License.
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-release-plugin</artifactId>
-          <version>2.4.1</version>
+          <version>${dep.plugin.release.version}</version>
           <configuration>
             <autoVersionSubmodules>true</autoVersionSubmodules>
             <goals>deploy</goals>
@@ -336,17 +349,17 @@ under the License.
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-site-plugin</artifactId>
-          <version>3.2</version>
+          <version>${dep.plugin.site.version}</version>
         </plugin>
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-surefire-plugin</artifactId>
-          <version>2.14.1</version>
+          <version>${dep.plugin.surefire.version}</version>
         </plugin>
         <plugin>
           <groupId>org.apache.rat</groupId>
           <artifactId>apache-rat-plugin</artifactId>
-          <version>0.8</version>
+          <version>${dep.plugin.rat.version}</version>
           <executions>
             <execution>
               <phase>verify</phase>
@@ -456,7 +469,7 @@ under the License.
           <plugin>
             <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-gpg-plugin</artifactId>
-            <version>1.4</version>
+            <version>${dep.plugin.gpg.version}</version>
             <executions>
               <execution>
                 <id>sign-artifacts</id>
@@ -580,6 +593,11 @@ under the License.
         <version>${dep.airline.version}</version>
       </dependency>
       <dependency>
+        <groupId>io.airlift</groupId>
+        <artifactId>units</artifactId>
+        <version>${dep.airlift-units.version}</version>
+      </dependency>
+      <dependency>
         <groupId>org.apache.hive</groupId>
         <artifactId>hive-builtins</artifactId>
         <version>${dep.hive.version}</version>
@@ -630,7 +648,7 @@ under the License.
       <dependency>
         <groupId>org.testng</groupId>
         <artifactId>testng</artifactId>
-        <version>6.8.1</version>
+        <version>${dep.testng.version}</version>
         <scope>test</scope>
         <exclusions>
           <exclusion>

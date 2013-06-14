@@ -150,6 +150,12 @@ class OutputInfo implements Writable {
     return partitionPath;
   }
 
+  /**
+   * Set partition path
+   *
+   * @param partitionPath path to partition data
+   * @return this
+   */
   public OutputInfo setPartitionPath(String partitionPath) {
     LOG.info("Setting partition path to {}", partitionPath);
     this.partitionPath = partitionPath;
@@ -160,6 +166,12 @@ class OutputInfo implements Writable {
     return finalOutputPath;
   }
 
+  /**
+   *  Set final output path
+   *
+   * @param finalOutputPath path to final result
+   * @return this
+   */
   public OutputInfo setFinalOutputPath(String finalOutputPath) {
     LOG.info("Setting final output path to {}", finalOutputPath);
     this.finalOutputPath = finalOutputPath;

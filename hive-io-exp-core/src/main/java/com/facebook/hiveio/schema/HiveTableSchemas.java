@@ -46,6 +46,7 @@ public class HiveTableSchemas {
 
   /**
    * Configure object with hive table schema, if it supports it
+   *
    * @param obj Object
    * @param schema Hive table schema
    */
@@ -73,11 +74,13 @@ public class HiveTableSchemas {
 
   /**
    * Get schema for a profile
+   *
    * @param conf Configuration
    * @param profile Profile ID
    * @return schema
    */
-  public static HiveTableSchema get(Configuration conf, String profile) {
+  public static HiveTableSchema get(Configuration conf, String profile)
+  {
     String key = profileKey(profile);
     String value = conf.get(key);
     if (value == null) {
@@ -90,6 +93,7 @@ public class HiveTableSchemas {
 
   /**
    * Put schema for profile
+   *
    * @param conf Configuration
    * @param profile Profile ID
    * @param hiveTableSchema schema
@@ -101,7 +105,9 @@ public class HiveTableSchemas {
 
   /**
    * Put schema for a Hive table doing lookup in Hive metastore
+   *
    * @param conf Configuration
+   * @param profile Profile ID
    * @param tableName Hive table name
    */
   public static void put(Configuration conf, String profile,
@@ -124,7 +130,9 @@ public class HiveTableSchemas {
     try {
       client = HiveMetastores.create(hiveConf);
       table = client.get_table(tableName.getDatabaseName(), tableName.getTableName());
+      // CHECKSTYLE: stop IllegalCatch
     } catch (Exception e) {
+      // CHECKSTYLE: resume IllegalCatch
       throw new IllegalStateException(e);
     }
     return HiveTableSchemaImpl.fromTable(table);
@@ -141,7 +149,9 @@ public class HiveTableSchemas {
     Table table;
     try {
       table = client.get_table(tableName.getDatabaseName(), tableName.getTableName());
+      // CHECKSTYLE: stop IllegalCatch
     } catch (Exception e) {
+      // CHECKSTYLE: resume IllegalCatch
       throw new IllegalStateException(e);
     }
     return HiveTableSchemaImpl.fromTable(table);

@@ -30,13 +30,19 @@ import io.airlift.command.Command;
 
 import javax.inject.Inject;
 
+/**
+ * Command for writing to a table
+ */
 @Command(name = "output")
 public class OutputCmd extends BaseCmd {
+  /** Number of columns */
   public static final int NUM_COLUMNS = 4;
 
+  /** Logger */
   private static final Logger LOG = LoggerFactory.getLogger(OutputCmd.class);
 
-  @Inject OutputArgs args = new OutputArgs();
+  /** Command line args */
+  @Inject private OutputArgs args = new OutputArgs();
 
   /**
    * Before running this:
@@ -95,12 +101,25 @@ public class OutputCmd extends BaseCmd {
     outputCommitter.commitJob(threadLocal.jobContext());
   }
 
+  /**
+   * Single threaded execution
+   *
+   * @param context Context
+   * @throws Exception
+   */
   private void singleThreaded(Context context) throws Exception {
     write(context);
   }
 
+  /**
+   * Multi threaded execution
+   *
+   * @param context Context
+   * @throws InterruptedException
+   */
   private void multiThreaded(final Context context)
-      throws InterruptedException {
+    throws InterruptedException
+  {
     Thread[] threads = new Thread[args.multiThread.threads];
     for (int i = 0; i < args.multiThread.threads; ++i) {
       final int threadId = i + 1;
@@ -108,7 +127,9 @@ public class OutputCmd extends BaseCmd {
         @Override public void run() {
           try {
             write(context);
+            // CHECKSTYLE: stop IllegalCatch
           } catch (Exception e) {
+            // CHECKSTYLE: resume IllegalCatch
             LOG.error("Thread {} failed to write", Thread.currentThread().getId(), e);
           }
         }
@@ -121,6 +142,12 @@ public class OutputCmd extends BaseCmd {
     }
   }
 
+  /**
+   * Write output
+   *
+   * @param context Context
+   * @throws Exception
+   */
   public void write(Context context) throws Exception
   {
     PerThread threadLocal = context.perThread.get();
@@ -135,7 +162,8 @@ public class OutputCmd extends BaseCmd {
 
     HiveWritableRecord record = HiveRecordFactory.newWritableRecord(NUM_COLUMNS);
 
-    record.set(0, 11L);     // TODO: allow type promotions: see https://github.com/facebook/hive-io-experimental/issues/15
+    // TODO: allow type promotions: see https://github.com/facebook/hive-io-experimental/issues/15
+    record.set(0, 11L);
     record.set(1, 22.22);
     record.set(2, true);
     record.set(3, "foo");

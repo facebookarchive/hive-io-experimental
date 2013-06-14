@@ -34,4 +34,12 @@
     <Class name="com.facebook.hiveio.input.parser.hive.DefaultParser"/>
     <Bug pattern="EI_EXPOSE_REP2"/>
   </Match>
+  <Match>
+    <Class name="com.facebook.hiveio.rows.IdIdSimRow"/>
+    <Bug pattern="UUF_UNUSED_PUBLIC_OR_PROTECTED_FIELD"/>
+  </Match>
+  <Match>
+    <Class name="com.facebook.hiveio.rows.IdIdWeightRow"/>
+    <Bug pattern="UUF_UNUSED_PUBLIC_OR_PROTECTED_FIELD"/>
+  </Match>
 </FindBugsFilter>

@@ -24,9 +24,19 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 
+/**
+ * Helper for loading native libraries
+ */
 public class NativeCodeHelper {
-  protected NativeCodeHelper() {}
+  /** Don't construct */
+  protected NativeCodeHelper() { }
 
+  /**
+   * Load a library
+   *
+   * @param name String name of library
+   * @throws IOException
+   */
   protected static void loadLibrary(String name) throws IOException {
     URL url = Resources.getResource(HadoopNative.class, getLibraryPath(name));
     File file = File.createTempFile(name, null);
@@ -35,10 +45,21 @@ public class NativeCodeHelper {
     System.load(file.getAbsolutePath());
   }
 
+  /**
+   * Get platform specific path to library
+   *
+   * @param name String name of library
+   * @return platform specific path to library
+   */
   protected static String getLibraryPath(String name) {
     return "/nativelib/" + getPlatform() + "/" + System.mapLibraryName(name);
   }
 
+  /**
+   * Get platform we're on
+   *
+   * @return platform string
+   */
   protected static String getPlatform() {
     String name = System.getProperty("os.name");
     String arch = System.getProperty("os.arch");

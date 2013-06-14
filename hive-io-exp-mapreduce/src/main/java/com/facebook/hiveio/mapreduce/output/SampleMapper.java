@@ -27,8 +27,12 @@ import com.facebook.hiveio.record.HiveWritableRecord;
 
 import java.io.IOException;
 
+/**
+ * Mapper
+ */
 public class SampleMapper extends Mapper<NullWritable, MapWritable,
     NullWritable, HiveWritableRecord> {
+  /** Logger */
   private static final Logger LOG = LoggerFactory.getLogger(SampleMapper.class);
 
   @Override protected void map(NullWritable key, MapWritable value,

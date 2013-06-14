@@ -17,23 +17,37 @@
  */
 package com.facebook.hiveio.metrics;
 
-import org.hyperic.sigar.SigarException;
-
 import com.yammer.metrics.Metrics;
 import com.yammer.metrics.core.MetricsRegistry;
 
+/**
+ * Metrics using Hyperic Sigar
+ */
 public class SigarMetrics {
-  protected SigarMetrics() {}
+  /** Don't construct */
+  protected SigarMetrics() { }
 
+  /** Register metrics tracked here */
   public static void registerMetrics() {
     registerMetrics(Metrics.defaultRegistry());
   }
 
+  /**
+   * Register metrics tracked here
+   *
+   * @param metrics MetricsRegistry
+   */
   public static void registerMetrics(MetricsRegistry metrics) {
     ProcessCpuMetrics.registerMetrics(metrics);
     ProcessMemoryMetrics.registerMetrics(metrics);
   }
 
+  /**
+   * Register metrics tracked here
+   *
+   * @param metrics MetricsRegistry
+   * @param owningClass class owning metrics
+   */
   public static void registerMetrics(MetricsRegistry metrics, Class<?> owningClass) {
     ProcessCpuMetrics.registerMetrics(metrics, owningClass);
     ProcessMemoryMetrics.registerMetrics(metrics, owningClass);

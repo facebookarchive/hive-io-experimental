@@ -23,8 +23,16 @@ import com.facebook.hiveio.options.OutputTableOptions;
 
 import javax.inject.Inject;
 
+/**
+ * Options for output command
+ */
 class OutputArgs {
-  @Inject MetastoreOptions metastore = new MetastoreOptions();
-  @Inject OutputTableOptions table = new OutputTableOptions();
-  @Inject MultiThreadOptions multiThread = new MultiThreadOptions();
+  // CHECKSTYLE: stop VisibilityModifier
+  /** metastore */
+  @Inject public MetastoreOptions metastore = new MetastoreOptions();
+  /** output table */
+  @Inject public OutputTableOptions table = new OutputTableOptions();
+  /** multi-threaded */
+  @Inject public MultiThreadOptions multiThread = new MultiThreadOptions();
+  // CHECKSTYLE: resume VisibilityModifier
 }

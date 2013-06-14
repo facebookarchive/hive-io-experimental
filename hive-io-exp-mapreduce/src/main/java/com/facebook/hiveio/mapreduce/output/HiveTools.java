@@ -37,39 +37,75 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * Helpers for MapReduce job
+ */
 public class HiveTools {
-  private static final Logger LOG = LoggerFactory.getLogger(HiveTools.class);
-  
+  /** number of columns */
   public static final int NUM_COLUMNS = 3;
 
-  public static final MapWritable row1 = new MapWritable();
-  public static final MapWritable row2 = new MapWritable();
-  public static final MapWritable row3 = new MapWritable();
-  public static final MapWritable row4 = new MapWritable();
+  /** first row */
+  private static final MapWritable ROW_1 = new MapWritable();
+  /** second row */
+  private static final MapWritable ROW_2 = new MapWritable();
+  /** third row */
+  private static final MapWritable ROW_3 = new MapWritable();
+  /** fourth row */
+  private static final MapWritable ROW_4 = new MapWritable();
+
+  /** first mapper data */
+  private static final List<MapWritable> MAPPER_DATA_1 = ImmutableList.of(ROW_1, ROW_2);
+  /** second mapper data */
+  private static final List<MapWritable> MAPPER_DATA_2 = ImmutableList.of(ROW_3, ROW_4);
+
+  /** Logger */
+  private static final Logger LOG = LoggerFactory.getLogger(HiveTools.class);
 
   static {
-    row1.put(new IntWritable(0), new LongWritable(23));
-    row1.put(new IntWritable(1), new LongWritable(34));
-    row1.put(new IntWritable(2), new LongWritable(45));
+    ROW_1.put(new IntWritable(0), new LongWritable(23));
+    ROW_1.put(new IntWritable(1), new LongWritable(34));
+    ROW_1.put(new IntWritable(2), new LongWritable(45));
 
-    row2.put(new IntWritable(0), new LongWritable(11));
-    row2.put(new IntWritable(1), new LongWritable(22));
-    row2.put(new IntWritable(2), new LongWritable(33));
+    ROW_2.put(new IntWritable(0), new LongWritable(11));
+    ROW_2.put(new IntWritable(1), new LongWritable(22));
+    ROW_2.put(new IntWritable(2), new LongWritable(33));
 
-    row3.put(new IntWritable(0), new LongWritable(67));
-    row3.put(new IntWritable(1), new LongWritable(78));
-    row3.put(new IntWritable(2), new LongWritable(89));
+    ROW_3.put(new IntWritable(0), new LongWritable(67));
+    ROW_3.put(new IntWritable(1), new LongWritable(78));
+    ROW_3.put(new IntWritable(2), new LongWritable(89));
 
-    row4.put(new IntWritable(0), new LongWritable(99));
-    row4.put(new IntWritable(1), new LongWritable(88));
-    row4.put(new IntWritable(2), new LongWritable(77));
+    ROW_4.put(new IntWritable(0), new LongWritable(99));
+    ROW_4.put(new IntWritable(1), new LongWritable(88));
+    ROW_4.put(new IntWritable(2), new LongWritable(77));
   }
 
-  public static final List<MapWritable> mapperData1 = ImmutableList.of(row1, row2);
-  public static final List<MapWritable> mapperData2 = ImmutableList.of(row3, row4);
+  /** Don't construct */
+  private HiveTools() { }
 
-  private HiveTools() {}
+  /**
+   * Get first mapper data
+   *
+   * @return first mapper data
+   */
+  public static List<MapWritable> getMapperData1() {
+    return MAPPER_DATA_1;
+  }
 
+  /**
+   * Get second mapper data
+   *
+   * @return second mapper data
+   */
+  public static List<MapWritable> getMapperData2() {
+    return MAPPER_DATA_2;
+  }
+
+  /**
+   * Setup the job
+   *
+   * @param conf Configuration
+   * @throws IOException
+   */
   public static void setupJob(Configuration conf) throws IOException {
     HiveOutputDescription outputDesc = new HiveOutputDescription();
     outputDesc.setDbName("default");
@@ -85,6 +121,12 @@ public class HiveTools {
     }
   }
 
+  /**
+   * Map hive record
+   *
+   * @param value data
+   * @return hive record
+   */
   public static HiveWritableRecord mapToHiveRecord(MapWritable value) {
     HiveWritableRecord record = HiveRecordFactory.newWritableRecord(HiveTools.NUM_COLUMNS);
     for (Map.Entry<Writable, Writable> entry : value.entrySet()) {

@@ -27,10 +27,22 @@ import com.google.common.base.Charsets;
 
 import java.io.IOException;
 
+/**
+ * Hand written parser that is more performant
+ */
 public class BytesParser implements RecordParser {
+  /** column IDs */
   private final int[] columnIndexes;
+  /** record to write to */
   private final ArrayRecord record;
 
+  /**
+   * Constructor
+   *
+   * @param partitionValues partition data
+   * @param numColumns number of columns
+   * @param parserData parser data
+   */
   public BytesParser(String[] partitionValues, int numColumns, ArrayParserData parserData) {
     columnIndexes = parserData.columnIndexes;
     record = new ArrayRecord(numColumns, partitionValues, parserData.hiveTypes);
@@ -67,6 +79,14 @@ public class BytesParser implements RecordParser {
     return arrayRecord;
   }
 
+  /**
+   * Parse a primitive column
+   *
+   * @param column index of column
+   * @param bytes raw byte[] of data
+   * @param start offset to start of data
+   * @param length size of data
+   */
   private void parsePrimitiveColumn(int column, byte[] bytes, int start, int length) {
     switch (record.getNativeType(column)) {
       case BOOLEAN:
@@ -99,10 +119,26 @@ public class BytesParser implements RecordParser {
     }
   }
 
+  /**
+   * Parse a string from raw bytes
+   *
+   * @param bytes byte[]
+   * @param start offset to start
+   * @param length size of data
+   * @return String
+   */
   public static String parseString(byte[] bytes, int start, int length) {
     return new String(bytes, start, length, Charsets.UTF_8);
   }
 
+  /**
+   * Parse a boolean from raw bytes
+   *
+   * @param bytes byte[]
+   * @param start offset to start
+   * @param length size of data
+   * @return Boolean
+   */
   public static Boolean parseBoolean(byte[] bytes, int start, int length) {
     if ((length == 4) &&
         (toUpperCase(bytes[start + 0]) == 'T') &&
@@ -122,14 +158,34 @@ public class BytesParser implements RecordParser {
     return null;
   }
 
+  /**
+   * Convert to upper case
+   *
+   * @param b byte to convert
+   * @return upper case char
+   */
   private static byte toUpperCase(byte b) {
     return isLowerCase(b) ? ((byte) (b - 32)) : b;
   }
 
+  /**
+   * Check if character is lower case
+   *
+   * @param b byte to check
+   * @return true if char is lower case
+   */
   private static boolean isLowerCase(byte b) {
     return (b >= 'a') && (b <= 'z');
   }
 
+  /**
+   * Parse long
+   *
+   * @param bytes byte[]
+   * @param start offset to start
+   * @param length size of data
+   * @return long value
+   */
   public static long parseLong(byte[] bytes, int start, int length) {
     int limit = start + length;
 
@@ -148,6 +204,14 @@ public class BytesParser implements RecordParser {
     return value * sign;
   }
 
+  /**
+   * Parse double
+   *
+   * @param bytes byte[]
+   * @param start offset to start
+   * @param length size of data
+   * @return double value
+   */
   public static double parseDouble(byte[] bytes, int start, int length) {
     char[] chars = new char[length];
     for (int pos = 0; pos < length; pos++) {

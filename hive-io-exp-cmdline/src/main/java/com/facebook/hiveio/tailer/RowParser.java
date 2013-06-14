@@ -23,9 +23,24 @@ import com.facebook.hiveio.record.HiveReadableRecord;
 import com.facebook.hiveio.rows.IdIdSimRow;
 import com.facebook.hiveio.schema.HiveTableSchema;
 
+/**
+ * Row parser interface
+ *
+ * @param <Row> row class
+ */
 interface RowParser<Row> {
+  /**
+   * Parse a record
+   *
+   * @param record Hive record to parse
+   */
   void parse(HiveReadableRecord record);
 
+  /**
+   * Default parser
+   *
+   * @param <X> row class
+   */
   static class Default<X> implements RowParser<X> {
     @Override public void parse(HiveReadableRecord record) {
       for (int index = 0; index < record.numColumns(); ++index) {
@@ -34,6 +49,7 @@ interface RowParser<Row> {
     }
   }
 
+  /** long-long-double parser */
   static class LongLongDouble implements RowParser<IdIdSimRow> {
     @Override public void parse(HiveReadableRecord record) {
       record.getLong(0);
@@ -42,12 +58,28 @@ interface RowParser<Row> {
     }
   }
 
+  /**
+   * Bean row parser
+   *
+   * @param <X> bean class
+   */
   static class Bean<X> implements RowParser<X> {
+    /** row */
     private final X row;
+    /** bean mapper */
     private final RowToBean<X> rowMapper;
 
+    /**
+     * Constructor
+     *
+     * @param schema table schema
+     * @param klass bean class
+     * @throws IllegalAccessException
+     * @throws InstantiationException
+     */
     public Bean(HiveTableSchema schema, Class<X> klass)
-        throws IllegalAccessException, InstantiationException {
+      throws IllegalAccessException, InstantiationException
+    {
       row = klass.newInstance();
       rowMapper = new ReflectasmRowToBean<X>(klass, schema);
     }

@@ -39,7 +39,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 
-/*
+/**
   CREATE TABLE hive_io_test (
     i1 BIGINT,
     i2 BIGINT,
@@ -49,6 +49,7 @@ import java.util.List;
   TBLPROPERTIES ('RETENTION_PLATINUM'='90')
  */
 public class WritingTool extends Configured implements Tool {
+  /** Logger */
   private static final Logger LOG = LoggerFactory.getLogger(WritingTool.class);
 
   @Override
@@ -77,6 +78,8 @@ public class WritingTool extends Configured implements Tool {
 
   /**
    * set hive configuration
+   *
+   * @param conf Configuration
    */
   private void adjustConfigurationForHive(Configuration conf) {
     // when output partitions are used, workers register them to the
@@ -136,11 +139,9 @@ public class WritingTool extends Configured implements Tool {
   /**
    * process arguments
    *
-   * @param args to process
-   * @return CommandLine instance
-   * @throws org.apache.commons.cli.ParseException
-   *                              error parsing arguments
-   * @throws InterruptedException interrupted
+   * @param args arguments
+   * @param conf Configuration
+   * @throws ParseException
    */
   private void handleCommandLine(String[] args, Configuration conf) throws ParseException {
     Options options = new Options();
@@ -158,6 +159,7 @@ public class WritingTool extends Configured implements Tool {
    * Process -hiveconf/-D options from command line
    *
    * @param cmdln Command line options
+   * @param conf Configuration
    */
   private void processHiveConfOptions(CommandLine cmdln, Configuration conf) {
     for (String hiveconf : cmdln.getOptionValues("hiveconf")) {

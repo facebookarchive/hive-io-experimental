@@ -20,27 +20,39 @@ package com.facebook.hiveio.common;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * Helper to load native Hyperic Sigar library
+ */
 public class SigarNative extends NativeCodeHelper {
+  /** Logger */
   private static final Logger LOG = LoggerFactory.getLogger(HadoopNative.class);
 
-  private static boolean loaded = false;
-  private static Throwable error = null;
+  /** Have we loaded the library already */
+  private static boolean LOADED = false;
+  /** Did the loading create an error */
+  private static Throwable ERROR = null;
 
-  private SigarNative() {}
+  /** Don't construct */
+  private SigarNative() { }
 
+  /**
+   * Load the Hyperic Sigar library
+   */
   public static void requireSigarNative() {
-    if (loaded) {
+    if (LOADED) {
       return;
     }
-    if (error != null) {
-      throw new RuntimeException("failed to load Sigar native library", error);
+    if (ERROR != null) {
+      throw new RuntimeException("failed to load Sigar native library", ERROR);
     }
     try {
       loadLibrary("sigar");
-      loaded = true;
+      LOADED = true;
+      // CHECKSTYLE: stop IllegalCatch
     } catch (Throwable t) {
-      error = t;
-      throw new RuntimeException("failed to load Sigar native library", error);
+      // CHECKSTYLE: resume IllegalCatch
+      ERROR = t;
+      throw new RuntimeException("failed to load Sigar native library", ERROR);
     }
   }
 }

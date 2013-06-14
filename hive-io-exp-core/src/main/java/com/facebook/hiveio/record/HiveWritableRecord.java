@@ -26,6 +26,7 @@ import java.util.List;
 public interface HiveWritableRecord {
   /**
    * Set value for column at index.
+   *
    * @param index Column offset
    * @param value Data for column
    */

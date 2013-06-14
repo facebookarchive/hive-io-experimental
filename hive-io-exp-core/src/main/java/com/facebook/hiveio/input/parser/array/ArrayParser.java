@@ -24,15 +24,28 @@ import org.apache.hadoop.hive.serde2.objectinspector.PrimitiveObjectInspector;
 import org.apache.hadoop.hive.serde2.objectinspector.StructField;
 import org.apache.hadoop.io.Writable;
 
+import com.facebook.hiveio.common.NativeType;
 import com.facebook.hiveio.input.parser.RecordParser;
 import com.facebook.hiveio.record.HiveReadableRecord;
 
 import java.io.IOException;
 
+/**
+ * Parser using array of record data
+ */
 public class ArrayParser implements RecordParser {
+  /** parser data */
   private final ArrayParserData parserData;
+  /** record to store in */
   private final ArrayRecord record;
 
+  /**
+   * Constructor
+   *
+   * @param partitionValues partition info
+   * @param numColumns number of columns
+   * @param parserData parser data
+   */
   public ArrayParser(String[] partitionValues, int numColumns, ArrayParserData parserData) {
     this.parserData = parserData;
     this.record = new ArrayRecord(numColumns, partitionValues, parserData.hiveTypes);
@@ -45,7 +58,8 @@ public class ArrayParser implements RecordParser {
 
   @Override
   public HiveReadableRecord parse(Writable value, HiveReadableRecord record)
-      throws IOException {
+    throws IOException
+  {
     ArrayRecord arrayRecord = (ArrayRecord) record;
     arrayRecord.reset();
 
@@ -78,11 +92,19 @@ public class ArrayParser implements RecordParser {
     return arrayRecord;
   }
 
+  /**
+   * Parse a primitive value
+   *
+   * @param arrayRecord record
+   * @param columnIndex index of column
+   * @param fieldData data to parse
+   */
   private void parsePrimitive(ArrayRecord arrayRecord, int columnIndex, Object fieldData) {
     PrimitiveObjectInspector fieldInspector = parserData.primitiveInspectors[columnIndex];
     Object primitiveData = fieldInspector.getPrimitiveJavaObject(fieldData);
 
-    switch (arrayRecord.getNativeType(columnIndex)) {
+    NativeType nativeType = arrayRecord.getNativeType(columnIndex);
+    switch (nativeType) {
       case BOOLEAN:
         arrayRecord.setBoolean(columnIndex, (Boolean) primitiveData);
         break;
@@ -95,6 +117,8 @@ public class ArrayParser implements RecordParser {
       case STRING:
         arrayRecord.setString(columnIndex, (String) primitiveData);
         break;
+      default:
+        throw new IllegalArgumentException("Unexpected native type " + nativeType);
     }
   }
 }

@@ -1,3 +1,4 @@
+// CHECKSTYLE: stop all
 package com.barney4j.utils.unit;
 
 
@@ -342,3 +343,5 @@ public enum ByteUnit {
   }
 
 }
+
+// CHECKSTYLE: resume all

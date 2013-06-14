@@ -22,10 +22,17 @@ import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
 
+/**
+ * Base class of commands
+ */
 public abstract class BaseCmd implements Runnable {
+  /** Logger */
   private static final Logger LOG = LoggerFactory.getLogger(BaseCmd.class);
 
+  // CHECKSTYLE: stop VisibilityModifier
+  /** Socks options */
   @Inject public SocksProxyOptions socksOpts = new SocksProxyOptions();
+  // CHECKSTYLE: resumeVisibilityModifier
 
   @Override public void run() {
     if (socksOpts.port != -1) {
@@ -34,10 +41,17 @@ public abstract class BaseCmd implements Runnable {
     }
     try {
       execute();
+      // CHECKSTYLE: stop IllegalCatch
     } catch (Exception e) {
+      // CHECKSTYLE: resume IllegalCatch
       e.printStackTrace();
     }
   }
 
+  /**
+   * Run command
+   *
+   * @throws Exception
+   */
   public abstract void execute() throws Exception;
 }

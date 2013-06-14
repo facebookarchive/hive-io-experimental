@@ -87,6 +87,11 @@ public class OutputConf {
     return getProfileId() + OUTPUT_DESCRIPTION_KEY;
   }
 
+  /**
+   * Whether we should reset slow writes
+   *
+   * @return true if slow writes should be reset
+   */
   public boolean shouldResetSlowWrites() {
     return RESET_SLOW_WRITES.get(conf);
   }

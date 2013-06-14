@@ -23,17 +23,34 @@ import com.facebook.hiveio.input.parser.Parsers;
 import com.facebook.hiveio.input.parser.RecordParser;
 import io.airlift.command.Option;
 
+/**
+ * Options for input table
+ */
 public class InputTableOptions extends TableOptions {
-  @Option(name = {"-f", "--partition-filter"}, description = "Partition filter")
+  // CHECKSTYLE: stop VisibilityModifier
+  /** partition filter */
+  @Option(name = { "-f", "--partition-filter" }, description = "Partition filter")
   public String partitionFilter = Defaults.PARTITION_FILTER;
 
+  /** parser to use */
   @Option(name = "--parser", description = "Force Input parser to use")
   public String parser;
+  // CHECKSTYLE: resume VisibilityModifier
 
+  /**
+   * Process Configuration
+   *
+   * @param conf Configuration
+   */
   public void process(Configuration conf) {
     processParser(conf);
   }
 
+  /**
+   * Process parser
+   *
+   * @param conf Configuration
+   */
   private void processParser(Configuration conf) {
     if (parser != null) {
       Class<?> klass;

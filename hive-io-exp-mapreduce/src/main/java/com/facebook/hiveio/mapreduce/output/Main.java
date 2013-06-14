@@ -20,7 +20,19 @@ package com.facebook.hiveio.mapreduce.output;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.util.ToolRunner;
 
+/**
+ * Entry point
+ */
 public class Main {
+  /** Don't construct */
+  private Main() { }
+
+  /**
+   * Command line entry point
+   *
+   * @param args command line args
+   * @throws Exception
+   */
   public static void main(String[] args) throws Exception {
     ToolRunner.run(new Configuration(), new WritingTool(), args);
   }

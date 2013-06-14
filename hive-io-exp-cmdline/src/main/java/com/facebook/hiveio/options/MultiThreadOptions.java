@@ -19,9 +19,15 @@ package com.facebook.hiveio.options;
 
 import io.airlift.command.Option;
 
+/**
+ * Options for multi-threaded
+ */
 public class MultiThreadOptions {
+  // CHECKSTYLE: stop VisibilityModifier
+  /** Number of threads to use */
   @Option(name = "--threads", description = "Number of threads to use")
   public int threads = 1;
+  // CHECKSTYLE: resume VisibilityModifier
 
   public boolean isMultiThreaded() {
     return threads > 1;

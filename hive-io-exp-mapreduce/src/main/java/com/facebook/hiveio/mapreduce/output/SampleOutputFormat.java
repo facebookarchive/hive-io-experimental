@@ -19,9 +19,16 @@ package com.facebook.hiveio.mapreduce.output;
 
 import com.facebook.hiveio.output.HiveApiOutputFormat;
 
+/**
+ * OutputFormat
+ */
 public class SampleOutputFormat extends HiveApiOutputFormat {
+  /** profile ID */
   public static final String SAMPLE_PROFILE_ID = "sample-profile";
 
+  /**
+   * Constructor
+   */
   public SampleOutputFormat() {
     setMyProfileId(SAMPLE_PROFILE_ID);
   }

@@ -24,12 +24,21 @@ import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
 
+/**
+ * InputSplit
+ */
 public class SampleInputSplit extends InputSplit implements Writable {
+  /** number */
   private int num;
 
   /** Constructor for reflection */
   public SampleInputSplit() { }
 
+  /**
+   * Constructor
+   *
+   * @param num number
+   */
   public SampleInputSplit(int num) {
     this.num = num;
   }
@@ -42,8 +51,7 @@ public class SampleInputSplit extends InputSplit implements Writable {
     return 0;
   }
 
-  @Override public String[] getLocations()
-      throws IOException, InterruptedException {
+  @Override public String[] getLocations() throws IOException, InterruptedException {
     return new String[0];
   }
 
