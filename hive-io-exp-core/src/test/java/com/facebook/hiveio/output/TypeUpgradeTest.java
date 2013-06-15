@@ -17,34 +17,27 @@
  */
 package com.facebook.hiveio.output;
 
-import org.apache.thrift.TException;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-import com.beust.jcommander.internal.Lists;
 import com.facebook.hiveio.common.HiveMetastores;
 import com.facebook.hiveio.common.HiveTableName;
-import com.facebook.hiveio.input.HiveInput;
 import com.facebook.hiveio.input.HiveInputDescription;
-import com.facebook.hiveio.record.HiveReadableRecord;
 import com.facebook.hiveio.record.HiveRecordFactory;
 import com.facebook.hiveio.record.HiveWritableRecord;
 import com.facebook.hiveio.schema.HiveTableSchema;
 import com.facebook.hiveio.schema.HiveTableSchemas;
 import com.facebook.hiveio.testing.LocalHiveServer;
+import com.google.common.collect.Lists;
 
-import java.io.IOException;
-import java.util.Iterator;
 import java.util.List;
 
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertFalse;
-import static org.testng.Assert.assertTrue;
+import static org.testng.Assert.fail;
 
-public class OutputTest {
+public class TypeUpgradeTest {
   private final LocalHiveServer hiveServer = new LocalHiveServer("hiveio-test");
   private final HiveTableName hiveTableName = new HiveTableName("default",
-      OutputTest.class.getSimpleName());
+      TypeUpgradeTest.class.getSimpleName());
 
   @BeforeMethod
   public void beforeSuite() throws Exception {
@@ -53,10 +46,10 @@ public class OutputTest {
   }
 
   @Test
-  public void testOutput() throws Exception
-  {
+  public void testDowngradeThrows() throws Exception {
     hiveServer.createTable("CREATE TABLE " + hiveTableName.getTableName() +
-        " (i1 INT, d1 DOUBLE) " +
+        " (t1 TINYINT, s1 SMALLINT, i1 INT, l1 BIGINT, " +
+        "  f1 FLOAT, d1 DOUBLE) " +
         " ROW FORMAT DELIMITED FIELDS TERMINATED BY '\t'");
 
     HiveOutputDescription outputDesc = new HiveOutputDescription();
@@ -65,74 +58,92 @@ public class OutputTest {
     HiveTableSchema schema = HiveTableSchemas.lookup(hiveServer.getClient(),
         null, hiveTableName);
 
-    writeData(outputDesc, schema);
+    List<HiveWritableRecord> writeRecords = Lists.newArrayList();
+    HiveWritableRecord r1 = HiveRecordFactory.newWritableRecord(schema);
+    writeRecords.add(r1);
 
-    HiveInputDescription inputDesc = new HiveInputDescription();
-    inputDesc.setHiveTableName(hiveTableName);
+    r1.set(0, (byte) 4);
+    checkSetThrows(r1, 0, (short) 4);
+    checkSetThrows(r1, 0, 4);
+    checkSetThrows(r1, 0, (long) 4);
+    r1.set(0, null);
 
-    verifyData(inputDesc);
+    r1.set(1, (byte) 4);
+    r1.set(1, (short) 4);
+    checkSetThrows(r1, 1, 4);
+    checkSetThrows(r1, 1, (long) 4);
+    r1.set(1, null);
+
+    r1.set((byte) 2, 4);
+    r1.set((short) 2, 4);
+    r1.set(2, 4);
+    checkSetThrows(r1, 2, (long) 4);
+    r1.set(2, null);
+
+    r1.set(4, 4.2f);
+    checkSetThrows(r1, 4, 4.2d);
+    r1.set(4, null);
+  }
+
+  private void checkSetThrows(HiveWritableRecord record, int index, Object data) {
+    try {
+      record.set(index, data);
+    } catch (IllegalArgumentException e) {
+      return;
+    }
+    fail();
   }
 
   @Test
-  public void testOutputWithPartitions() throws Exception
-  {
+  public void testUpgrade() throws Exception {
     hiveServer.createTable("CREATE TABLE " + hiveTableName.getTableName() +
-        " (i1 INT, d1 DOUBLE) " +
-        " PARTITIONED BY (ds STRING) " +
+        " (t1 TINYINT, s1 SMALLINT, i1 INT, l1 BIGINT, " +
+        "  f1 FLOAT, d1 DOUBLE) " +
         " ROW FORMAT DELIMITED FIELDS TERMINATED BY '\t'");
 
     HiveOutputDescription outputDesc = new HiveOutputDescription();
-    outputDesc.putPartitionValue("ds", "foobar");
     outputDesc.setHiveTableName(hiveTableName);
+
+    HiveInputDescription inputDesc = new HiveInputDescription();
+    inputDesc.setHiveTableName(hiveTableName);
 
     HiveTableSchema schema = HiveTableSchemas.lookup(hiveServer.getClient(),
         null, hiveTableName);
 
-    writeData(outputDesc, schema);
-
-    HiveInputDescription inputDesc = new HiveInputDescription();
-    inputDesc.setPartitionFilter("ds='foobar'");
-    inputDesc.setHiveTableName(hiveTableName);
-
-    verifyData(inputDesc);
-  }
-
-  private void writeData(HiveOutputDescription outputDesc, HiveTableSchema schema)
-      throws TException, IOException, InterruptedException
-  {
     List<HiveWritableRecord> writeRecords = Lists.newArrayList();
-
     HiveWritableRecord r1 = HiveRecordFactory.newWritableRecord(schema);
     writeRecords.add(r1);
-    r1.set(0, 1);
-    r1.set(1, 1.1);
 
-    HiveWritableRecord r2 = HiveRecordFactory.newWritableRecord(schema);
-    writeRecords.add(r2);
-    r2.set(0, 2);
-    r2.set(1, 2.2);
-
+    r1.set(1, (byte) 4);
     HiveOutput.writeTable(outputDesc, writeRecords);
-  }
+    r1.set(1, (short) 4);
+    HiveOutput.writeTable(outputDesc, writeRecords);
+    r1.set(1, null);
+    HiveOutput.writeTable(outputDesc, writeRecords);
 
-  private void verifyData(HiveInputDescription inputDesc)
-      throws IOException, InterruptedException
-  {
-    Iterator<HiveReadableRecord> readRecords = HiveInput.readTable(inputDesc).iterator();
+    r1.set(2, (byte) 4);
+    HiveOutput.writeTable(outputDesc, writeRecords);
+    r1.set(2, (short) 4);
+    HiveOutput.writeTable(outputDesc, writeRecords);
+    r1.set(2, 4);
+    HiveOutput.writeTable(outputDesc, writeRecords);
+    r1.set(2, null);
+    HiveOutput.writeTable(outputDesc, writeRecords);
 
-    assertTrue(readRecords.hasNext());
+    r1.set(3, (byte) 4);
+    HiveOutput.writeTable(outputDesc, writeRecords);
+    r1.set(3, (short) 4);
+    HiveOutput.writeTable(outputDesc, writeRecords);
+    r1.set(3, 4);
+    HiveOutput.writeTable(outputDesc, writeRecords);
+    r1.set(3, 4L);
+    HiveOutput.writeTable(outputDesc, writeRecords);
+    r1.set(3, null);
+    HiveOutput.writeTable(outputDesc, writeRecords);
 
-    HiveReadableRecord record = readRecords.next();
-    assertEquals(Long.class, record.get(0).getClass());
-    assertEquals(Double.class, record.get(1).getClass());
-    assertEquals(1, record.getLong(0));
-    assertEquals(1.1, record.getDouble(1));
-
-    assertTrue(readRecords.hasNext());
-    record = readRecords.next();
-    assertEquals(2, record.getLong(0));
-    assertEquals(2.2, record.getDouble(1));
-
-    assertFalse(readRecords.hasNext());
+    r1.set(5, 4.2f);
+    HiveOutput.writeTable(outputDesc, writeRecords);
+    r1.set(5, 4.2d);
+    HiveOutput.writeTable(outputDesc, writeRecords);
   }
 }

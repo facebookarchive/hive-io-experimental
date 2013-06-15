@@ -64,7 +64,7 @@ public class DefaultParser implements RecordParser {
 
   @Override
   public HiveReadableRecord createRecord() {
-    return new DefaultRecord(numColumns, partitionValues);
+    return DefaultRecord.forReading(numColumns, partitionValues);
   }
 
   @Override

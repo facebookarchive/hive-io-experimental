@@ -18,6 +18,7 @@
 package com.facebook.hiveio.record;
 
 import com.facebook.hiveio.input.parser.hive.DefaultRecord;
+import com.facebook.hiveio.schema.HiveTableSchema;
 
 /**
  * Factory for creating {@link HiveWritableRecord}
@@ -29,10 +30,10 @@ public class HiveRecordFactory {
   /**
    * Create a new {@link HiveWritableRecord} for writing
    *
-   * @param numColumns int number of columns
+   * @param schema Hive table schema
    * @return new record
    */
-  public static HiveWritableRecord newWritableRecord(int numColumns) {
-    return new DefaultRecord(numColumns, new String[0]);
+  public static HiveWritableRecord newWritableRecord(HiveTableSchema schema) {
+    return DefaultRecord.forWriting(schema);
   }
 }

@@ -158,7 +158,7 @@ public class HiveApiOutputFormat
       outputInfo.setFinalOutputPath(table.getSd().getLocation());
     }
 
-    HiveTableSchema tableSchema = HiveTableSchemaImpl.fromTable(table);
+    HiveTableSchema tableSchema = HiveTableSchemaImpl.fromTable(conf, table);
     HiveTableSchemas.put(conf, profileId, tableSchema);
 
     OutputConf outputConf = new OutputConf(conf, profileId);
