@@ -63,26 +63,46 @@ public class TypeUpgradeTest {
     writeRecords.add(r1);
 
     r1.set(0, (byte) 4);
+    HiveOutput.writeTable(outputDesc, writeRecords);
     checkSetThrows(r1, 0, (short) 4);
     checkSetThrows(r1, 0, 4);
     checkSetThrows(r1, 0, (long) 4);
+    checkSetThrows(r1, 0, 4.2f);
+    checkSetThrows(r1, 0, 4.2d);
     r1.set(0, null);
+    HiveOutput.writeTable(outputDesc, writeRecords);
 
     r1.set(1, (byte) 4);
+    HiveOutput.writeTable(outputDesc, writeRecords);
     r1.set(1, (short) 4);
+    HiveOutput.writeTable(outputDesc, writeRecords);
     checkSetThrows(r1, 1, 4);
     checkSetThrows(r1, 1, (long) 4);
+    checkSetThrows(r1, 1, 4.2f);
+    checkSetThrows(r1, 1, 4.2d);
     r1.set(1, null);
+    HiveOutput.writeTable(outputDesc, writeRecords);
 
     r1.set((byte) 2, 4);
+    HiveOutput.writeTable(outputDesc, writeRecords);
     r1.set((short) 2, 4);
+    HiveOutput.writeTable(outputDesc, writeRecords);
     r1.set(2, 4);
+    HiveOutput.writeTable(outputDesc, writeRecords);
     checkSetThrows(r1, 2, (long) 4);
+    checkSetThrows(r1, 2, 4.2f);
+    checkSetThrows(r1, 2, 4.2d);
     r1.set(2, null);
+    HiveOutput.writeTable(outputDesc, writeRecords);
+
+    checkSetThrows(r1, 3, 4.2f);
+    checkSetThrows(r1, 3, 4.2d);
 
     r1.set(4, 4.2f);
+    HiveOutput.writeTable(outputDesc, writeRecords);
     checkSetThrows(r1, 4, 4.2d);
     r1.set(4, null);
+    HiveOutput.writeTable(outputDesc, writeRecords);
   }
 
   private void checkSetThrows(HiveWritableRecord record, int index, Object data) {
@@ -118,16 +138,12 @@ public class TypeUpgradeTest {
     HiveOutput.writeTable(outputDesc, writeRecords);
     r1.set(1, (short) 4);
     HiveOutput.writeTable(outputDesc, writeRecords);
-    r1.set(1, null);
-    HiveOutput.writeTable(outputDesc, writeRecords);
 
     r1.set(2, (byte) 4);
     HiveOutput.writeTable(outputDesc, writeRecords);
     r1.set(2, (short) 4);
     HiveOutput.writeTable(outputDesc, writeRecords);
     r1.set(2, 4);
-    HiveOutput.writeTable(outputDesc, writeRecords);
-    r1.set(2, null);
     HiveOutput.writeTable(outputDesc, writeRecords);
 
     r1.set(3, (byte) 4);
@@ -138,9 +154,26 @@ public class TypeUpgradeTest {
     HiveOutput.writeTable(outputDesc, writeRecords);
     r1.set(3, 4L);
     HiveOutput.writeTable(outputDesc, writeRecords);
-    r1.set(3, null);
+
+    r1.set(4, (byte) 4);
+    HiveOutput.writeTable(outputDesc, writeRecords);
+    r1.set(4, (short) 4);
+    HiveOutput.writeTable(outputDesc, writeRecords);
+    r1.set(4, 4);
+    HiveOutput.writeTable(outputDesc, writeRecords);
+    r1.set(4, 4L);
+    HiveOutput.writeTable(outputDesc, writeRecords);
+    r1.set(4, 4.2f);
     HiveOutput.writeTable(outputDesc, writeRecords);
 
+    r1.set(5, (byte) 4);
+    HiveOutput.writeTable(outputDesc, writeRecords);
+    r1.set(5, (short) 4);
+    HiveOutput.writeTable(outputDesc, writeRecords);
+    r1.set(5, 4);
+    HiveOutput.writeTable(outputDesc, writeRecords);
+    r1.set(5, 4L);
+    HiveOutput.writeTable(outputDesc, writeRecords);
     r1.set(5, 4.2f);
     HiveOutput.writeTable(outputDesc, writeRecords);
     r1.set(5, 4.2d);

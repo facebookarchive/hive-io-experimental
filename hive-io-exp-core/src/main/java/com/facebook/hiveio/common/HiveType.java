@@ -66,15 +66,19 @@ public enum HiveType {
   /** long */
   LONG(NativeType.LONG) {
     @Override public Object checkAndUpgrade(Object data) {
-      Preconditions.checkArgument(data instanceof Number);
+      Preconditions.checkArgument(data instanceof Long ||
+        data instanceof Integer || data instanceof Short ||
+        data instanceof Byte);
       return ((Number) data).longValue();
     }
   },
   /** float */
   FLOAT(NativeType.DOUBLE) {
     @Override public Object checkAndUpgrade(Object data) {
-      Preconditions.checkArgument(data instanceof Float);
-      return data;
+      Preconditions.checkArgument(data instanceof Float ||
+          data instanceof Long || data instanceof Integer ||
+          data instanceof Short || data instanceof Byte);
+      return ((Number) data).floatValue();
     }
   },
   /** double */
