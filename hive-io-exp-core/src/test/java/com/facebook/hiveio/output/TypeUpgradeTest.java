@@ -22,7 +22,7 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import com.facebook.hiveio.common.HiveMetastores;
-import com.facebook.hiveio.common.HiveTableName;
+import com.facebook.hiveio.common.HiveTableDesc;
 import com.facebook.hiveio.input.HiveInput;
 import com.facebook.hiveio.input.HiveInputDescription;
 import com.facebook.hiveio.record.HiveReadableRecord;
@@ -46,7 +46,7 @@ public class TypeUpgradeTest {
   private static final double DELTA = 0.00001;
 
   private final LocalHiveServer hiveServer = new LocalHiveServer("hiveio-test");
-  private final HiveTableName hiveTableName = new HiveTableName("default",
+  private final HiveTableDesc hiveTableDesc = new HiveTableDesc("default",
       TypeUpgradeTest.class.getSimpleName());
 
   @BeforeMethod
@@ -60,13 +60,13 @@ public class TypeUpgradeTest {
     createTestTable();
 
     HiveOutputDescription outputDesc = new HiveOutputDescription();
-    outputDesc.setHiveTableName(hiveTableName);
+    outputDesc.setTableDesc(hiveTableDesc);
 
     HiveInputDescription inputDesc = new HiveInputDescription();
-    inputDesc.setHiveTableName(hiveTableName);
+    inputDesc.setTableDesc(hiveTableDesc);
 
     HiveTableSchema schema = HiveTableSchemas.lookup(hiveServer.getClient(),
-        null, hiveTableName);
+        null, hiveTableDesc);
 
     List<HiveWritableRecord> writeRecords = Lists.newArrayList();
     HiveWritableRecord writeRecord = HiveRecordFactory.newWritableRecord(schema);
@@ -161,12 +161,12 @@ public class TypeUpgradeTest {
   }
 
   private void recreateTable() throws TException {
-    hiveServer.dropTable(hiveTableName.getTableName());
+    hiveServer.dropTable(hiveTableDesc.getTableName());
     createTestTable();
   }
 
   private void createTestTable() throws TException {
-    hiveServer.createTable("CREATE TABLE " + hiveTableName.getTableName() +
+    hiveServer.createTable("CREATE TABLE " + hiveTableDesc.getTableName() +
         " (t1 TINYINT, s1 SMALLINT, i1 INT, l1 BIGINT, " +
         "  f1 FLOAT, d1 DOUBLE) " +
         " ROW FORMAT DELIMITED FIELDS TERMINATED BY '\t'");
@@ -195,13 +195,13 @@ public class TypeUpgradeTest {
     createTestTable();
 
     HiveOutputDescription outputDesc = new HiveOutputDescription();
-    outputDesc.setHiveTableName(hiveTableName);
+    outputDesc.setTableDesc(hiveTableDesc);
 
     HiveInputDescription inputDesc = new HiveInputDescription();
-    inputDesc.setHiveTableName(hiveTableName);
+    inputDesc.setTableDesc(hiveTableDesc);
 
     HiveTableSchema schema = HiveTableSchemas.lookup(hiveServer.getClient(),
-        null, hiveTableName);
+        null, hiveTableDesc);
 
     List<HiveWritableRecord> writeRecords = Lists.newArrayList();
     HiveWritableRecord r1 = HiveRecordFactory.newWritableRecord(schema);

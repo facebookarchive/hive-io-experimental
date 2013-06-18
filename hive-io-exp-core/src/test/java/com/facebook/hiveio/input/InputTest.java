@@ -55,7 +55,7 @@ public class InputTest {
     hiveServer.loadData(tableName, rows);
 
     HiveInputDescription inputDesc = new HiveInputDescription();
-    inputDesc.setTableName(tableName);
+    inputDesc.getTableDesc().setTableName(tableName);
 
     verifyData(inputDesc);
   }
@@ -77,7 +77,7 @@ public class InputTest {
     hiveServer.loadData(tableName, partition, rows);
 
     HiveInputDescription inputDesc = new HiveInputDescription();
-    inputDesc.setTableName(tableName);
+    inputDesc.getTableDesc().setTableName(tableName);
     inputDesc.setPartitionFilter(partition);
 
     verifyData(inputDesc);

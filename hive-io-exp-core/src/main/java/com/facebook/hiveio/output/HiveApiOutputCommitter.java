@@ -123,8 +123,8 @@ class HiveApiOutputCommitter extends OutputCommitter {
   private void registerPartitions(Configuration conf, HiveOutputDescription outputDesc,
       OutputInfo outputInfo) throws IOException
   {
-    String dbName = outputDesc.getDbName();
-    String tableName = outputDesc.getTableName();
+    String dbName = outputDesc.getTableDesc().getDatabaseName();
+    String tableName = outputDesc.getTableDesc().getTableName();
 
     ThriftHiveMetastore.Iface client;
     Table hiveTable;

@@ -32,7 +32,7 @@ import org.slf4j.LoggerFactory;
 import com.facebook.hiveio.common.HadoopNative;
 import com.facebook.hiveio.common.HiveMetastores;
 import com.facebook.hiveio.common.HiveStats;
-import com.facebook.hiveio.common.HiveTableName;
+import com.facebook.hiveio.common.HiveTableDesc;
 import com.facebook.hiveio.common.HiveUtils;
 import com.facebook.hiveio.input.HiveApiInputFormat;
 import com.facebook.hiveio.input.HiveInputDescription;
@@ -132,10 +132,10 @@ public class TailerCmd extends BaseCmd
     List<InputSplit> splits = hapi.getSplits(new JobContext(hiveConf, new JobID()));
     LOG.info("Have {} splits to read", splits.size());
 
-    HiveTableName hiveTableName = new HiveTableName(args.inputTable.database,
+    HiveTableDesc hiveTableDesc = new HiveTableDesc(args.inputTable.database,
         args.inputTable.table);
     HiveTableSchema schema = HiveTableSchemas.lookup(client, hiveConf,
-        hiveTableName);
+        hiveTableDesc);
     chooseRowParser(schema);
 
     Stats stats = Stats.create(hiveStats);
@@ -174,8 +174,8 @@ public class TailerCmd extends BaseCmd
    */
   private HiveInputDescription initInput(HostPort metastoreHostPort) {
     HiveInputDescription inputDesc = new HiveInputDescription();
-    inputDesc.setDbName(args.inputTable.database);
-    inputDesc.setTableName(args.inputTable.table);
+    inputDesc.getTableDesc().setDatabaseName(args.inputTable.database);
+    inputDesc.getTableDesc().setTableName(args.inputTable.table);
     inputDesc.setPartitionFilter(args.inputTable.partitionFilter);
     args.splits.compute(args.multiThread.threads);
     inputDesc.setNumSplits(args.splits.requestNumSplits);

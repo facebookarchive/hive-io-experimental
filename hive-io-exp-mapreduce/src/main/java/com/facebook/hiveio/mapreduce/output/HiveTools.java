@@ -26,7 +26,7 @@ import org.apache.thrift.TException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.facebook.hiveio.common.HiveTableName;
+import com.facebook.hiveio.common.HiveTableDesc;
 import com.facebook.hiveio.output.HiveApiOutputFormat;
 import com.facebook.hiveio.output.HiveOutputDescription;
 import com.facebook.hiveio.record.HiveRecordFactory;
@@ -105,8 +105,8 @@ public class HiveTools {
    *
    * @return HiveTableName
    */
-  private static HiveTableName getHiveTableName() {
-    return new HiveTableName("default", "hive_io_test");
+  private static HiveTableDesc getHiveTableName() {
+    return new HiveTableDesc("default", "hive_io_test");
   }
 
   /**
@@ -117,7 +117,7 @@ public class HiveTools {
    */
   public static void setupJob(Configuration conf) throws IOException {
     HiveOutputDescription outputDesc = new HiveOutputDescription();
-    outputDesc.setHiveTableName(getHiveTableName());
+    outputDesc.setTableDesc(getHiveTableName());
     Map<String, String> partitionValues = ImmutableMap.of("ds", "2013-04-01");
     outputDesc.setPartitionValues(partitionValues);
     LOG.info("Writing to {}", outputDesc);

@@ -82,7 +82,7 @@ public class BeanInputTest {
     hiveServer.loadData(tableName, input);
 
     HiveInputDescription inputDesc = new HiveInputDescription();
-    inputDesc.setTableName(tableName);
+    inputDesc.getTableDesc().setTableName(tableName);
 
     Iterator<Row> rows = HiveInput.readTable(inputDesc, Row.class).iterator();
 

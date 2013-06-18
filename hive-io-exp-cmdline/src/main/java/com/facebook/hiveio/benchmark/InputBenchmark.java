@@ -64,8 +64,8 @@ class InputBenchmark {
     TimerContext allTimerContext = allTime.time();
 
     HiveInputDescription input = new HiveInputDescription();
-    input.setDbName(args.tableOpts.database);
-    input.setTableName(args.tableOpts.table);
+    input.getTableDesc().setDatabaseName(args.tableOpts.database);
+    input.getTableDesc().setTableName(args.tableOpts.table);
     input.setPartitionFilter(args.tableOpts.partitionFilter);
     input.getMetastoreDesc().setHost(args.metastoreOpts.host);
     input.getMetastoreDesc().setPort(args.metastoreOpts.port);
