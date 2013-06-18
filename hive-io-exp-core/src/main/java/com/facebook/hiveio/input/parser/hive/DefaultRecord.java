@@ -22,7 +22,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.facebook.hiveio.common.HiveType;
+import com.facebook.hiveio.record.HiveReadableRecord;
 import com.facebook.hiveio.record.HiveRecord;
+import com.facebook.hiveio.record.HiveWritableRecord;
 import com.facebook.hiveio.schema.HiveTableSchema;
 import com.google.common.base.Objects;
 
@@ -64,7 +66,7 @@ public class DefaultRecord implements HiveRecord {
    * @param partitionValues partition data
    * @return new DefaultRecord
    */
-  public static DefaultRecord forReading(int numColumns, String[] partitionValues) {
+  public static HiveReadableRecord forReading(int numColumns, String[] partitionValues) {
     return new DefaultRecord(null, numColumns, partitionValues);
   }
 
@@ -74,7 +76,7 @@ public class DefaultRecord implements HiveRecord {
    * @param schema Hive table schema
    * @return new DefaultRecord
    */
-  public static DefaultRecord forWriting(HiveTableSchema schema) {
+  public static HiveWritableRecord forWriting(HiveTableSchema schema) {
     return new DefaultRecord(schema, schema.numColumns(), new String[0]);
   }
 

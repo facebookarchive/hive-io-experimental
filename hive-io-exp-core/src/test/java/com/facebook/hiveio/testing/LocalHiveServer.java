@@ -66,6 +66,10 @@ public class LocalHiveServer {
     client.execute("CREATE DATABASE IF NOT EXISTS default");
   }
 
+  public void dropTable(String name) throws TException {
+    client.execute("DROP TABLE " + name);
+  }
+
   public void createTable(String hql) throws TException {
     client.execute(hql);
   }
