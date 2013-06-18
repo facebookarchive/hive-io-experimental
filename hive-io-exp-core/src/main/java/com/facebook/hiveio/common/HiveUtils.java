@@ -122,8 +122,9 @@ public class HiveUtils {
   public static HiveStats statsOf(ThriftHiveMetastore.Iface client,
       HiveInputDescription inputDesc) throws TException
   {
+    HiveTableDesc tableDesc = inputDesc.getTableDesc();
     List<Partition> partitions = client.get_partitions_by_filter(
-        inputDesc.getDbName(), inputDesc.getTableName(),
+        tableDesc.getDatabaseName(), tableDesc.getTableName(),
         inputDesc.getPartitionFilter(), (short) -1);
 
     HiveStats hiveStats = new HiveStats();

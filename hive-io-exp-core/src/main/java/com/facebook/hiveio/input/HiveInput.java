@@ -95,7 +95,7 @@ public class HiveInput {
    */
   public static <X> RowToBean<X> rowToBean(HiveInputDescription inputDesc, Class<X> rowClass) {
     HiveConf conf = HiveUtils.newHiveConf(HiveInput.class);
-    HiveTableSchema schema = HiveTableSchemas.lookup(conf, inputDesc.hiveTableName());
+    HiveTableSchema schema = HiveTableSchemas.lookup(conf, inputDesc.getTableDesc());
     RowToBean<X> rowToBean = new UnsafeRowToBean<X>(rowClass, schema);
     return rowToBean;
   }

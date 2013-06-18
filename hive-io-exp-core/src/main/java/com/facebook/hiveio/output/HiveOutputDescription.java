@@ -21,10 +21,9 @@ package com.facebook.hiveio.output;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.hive.metastore.api.ThriftHiveMetastore;
 import org.apache.hadoop.io.Writable;
-import org.apache.hadoop.io.WritableUtils;
 import org.apache.thrift.TException;
 
-import com.facebook.hiveio.common.HiveTableName;
+import com.facebook.hiveio.common.HiveTableDesc;
 import com.facebook.hiveio.common.MetastoreDesc;
 import com.facebook.hiveio.common.Writables;
 import com.google.common.base.Objects;
@@ -41,73 +40,17 @@ import java.util.Map;
 public class HiveOutputDescription implements Writable {
   /** Metastore to use. Optional. */
   private MetastoreDesc metastoreDesc = new MetastoreDesc();
-  /** Hive database */
-  private String dbName = "default";
   /** Hive table */
-  private String tableName = "";
+  private HiveTableDesc tableDesc = new HiveTableDesc();
   /** Partition to write to */
   private Map<String, String> partitionValues = Maps.newHashMap();
 
-  public String getDbName() {
-    return dbName;
+  public HiveTableDesc getTableDesc() {
+    return tableDesc;
   }
 
-  /**
-   * Set database name
-   * @param dbName database name
-   * @return this
-   */
-  public HiveOutputDescription setDbName(String dbName) {
-    this.dbName = dbName;
-    return this;
-  }
-
-  /**
-   * Check if we have a database name
-   * @return true if we have a database name
-   */
-  public boolean hasDbName() {
-    return dbName != null && !dbName.isEmpty();
-  }
-
-  public String getTableName() {
-    return tableName;
-  }
-
-  /**
-   * Set table name
-   * @param tableName Hive table name
-   * @return this
-   */
-  public HiveOutputDescription setTableName(String tableName) {
-    this.tableName = tableName;
-    return this;
-  }
-
-  /**
-   * Check if we have a table name
-   * @return true if table name set
-   */
-  public boolean hasTableName() {
-    return tableName != null && !tableName.isEmpty();
-  }
-
-  /**
-   * Set database and table name from a HiveTableName
-   *
-   * @param hiveTableName HiveTableName to use
-   */
-  public void setHiveTableName(HiveTableName hiveTableName) {
-    setTableName(hiveTableName.getTableName());
-    setDbName(hiveTableName.getDatabaseName());
-  }
-
-  /**
-   * Make hive table name from this
-   * @return HiveTableName
-   */
-  public HiveTableName hiveTableName() {
-    return new HiveTableName(dbName, tableName);
+  public void setTableDesc(HiveTableDesc tableDesc) {
+    this.tableDesc = tableDesc;
   }
 
   public Map<String, String> getPartitionValues() {
@@ -171,24 +114,22 @@ public class HiveOutputDescription implements Writable {
   @Override
   public void write(DataOutput out) throws IOException {
     metastoreDesc.write(out);
-    WritableUtils.writeString(out, dbName);
-    WritableUtils.writeString(out, tableName);
+    tableDesc.write(out);
     Writables.writeStrStrMap(out, partitionValues);
   }
 
   @Override
   public void readFields(DataInput in) throws IOException {
     metastoreDesc.readFields(in);
-    dbName = WritableUtils.readString(in);
-    tableName = WritableUtils.readString(in);
+    tableDesc.readFields(in);
     Writables.readStrStrMap(in, partitionValues);
   }
 
   @Override
   public String toString() {
     return Objects.toStringHelper(this)
-        .add("dbName", dbName)
-        .add("tableName", tableName)
+        .add("metastoreDesc", metastoreDesc)
+        .add("tableDesc", tableDesc)
         .add("partitionValues", partitionValues)
         .toString();
   }

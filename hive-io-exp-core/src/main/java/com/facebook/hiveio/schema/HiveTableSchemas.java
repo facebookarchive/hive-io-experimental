@@ -26,7 +26,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.facebook.hiveio.common.HiveMetastores;
-import com.facebook.hiveio.common.HiveTableName;
+import com.facebook.hiveio.common.HiveTableDesc;
 import com.facebook.hiveio.common.HiveUtils;
 import com.facebook.hiveio.common.Writables;
 import com.google.common.base.Function;
@@ -110,7 +110,7 @@ public class HiveTableSchemas {
    * @param tableName Hive table name
    * @return Hive table schema
    */
-  public static HiveTableSchema lookup(Configuration conf, HiveTableName tableName)
+  public static HiveTableSchema lookup(Configuration conf, HiveTableDesc tableName)
   {
     HiveConf hiveConf = HiveUtils.newHiveConf(conf, HiveTableSchemas.class);
     ThriftHiveMetastore.Iface client;
@@ -136,7 +136,7 @@ public class HiveTableSchemas {
    * @return Hive table schema
    */
   public static HiveTableSchema lookup(ThriftHiveMetastore.Iface client,
-      Configuration conf, HiveTableName tableName)
+      Configuration conf, HiveTableDesc tableName)
   {
     Table table;
     try {
