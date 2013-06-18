@@ -18,12 +18,17 @@
 
 package com.facebook.hiveio.schema;
 
+import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.hive.metastore.api.StorageDescriptor;
 import org.apache.hadoop.hive.metastore.api.Table;
 import org.apache.hadoop.io.WritableUtils;
 
 import com.facebook.hiveio.common.HiveTableName;
+import com.facebook.hiveio.common.HiveType;
+import com.facebook.hiveio.common.HiveUtils;
 import com.facebook.hiveio.common.Writables;
 import com.google.common.base.Objects;
+import com.google.common.base.Preconditions;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Ordering;
 
@@ -42,10 +47,14 @@ import static com.google.common.collect.Lists.transform;
 public class HiveTableSchemaImpl implements HiveTableSchema {
   /** Hive table name */
   private HiveTableName tableName;
+
   /** Partition keys */
   private final Map<String, Integer> partitionPositions;
   /** Positions of columns in the row */
   private final Map<String, Integer> columnPositions;
+
+  /** Column types */
+  private HiveType[] hiveTypes;
 
   /** Number of columns. Not serialized */
   private int numColumns;
@@ -59,6 +68,7 @@ public class HiveTableSchemaImpl implements HiveTableSchema {
     tableName = new HiveTableName("_unknown_", "_unknown_");
     partitionPositions = Maps.newHashMap();
     columnPositions = Maps.newHashMap();
+    hiveTypes = new HiveType[0];
   }
 
   /**
@@ -67,26 +77,33 @@ public class HiveTableSchemaImpl implements HiveTableSchema {
    * @param tableName Name of Hive table
    * @param partitionPositions Partition keys
    * @param columnPositions Positions of columns in row
+   * @param hiveTypes Types of columns
    */
   public HiveTableSchemaImpl(HiveTableName tableName,
                              Map<String, Integer> partitionPositions,
-                             Map<String, Integer> columnPositions) {
+                             Map<String, Integer> columnPositions,
+                             HiveType[] hiveTypes) {
     this.tableName = tableName;
     this.partitionPositions = partitionPositions;
     this.columnPositions = columnPositions;
+    this.hiveTypes = hiveTypes;
     numColumns = sizeFromIndexes(columnPositions);
     numPartitionKeys = sizeFromIndexes(partitionPositions);
   }
   /**
    * Create from a Hive table
    *
+   * @param conf Configuration
    * @param table Hive table
    * @return Schema
    */
-  public static HiveTableSchemaImpl fromTable(Table table) {
+  public static HiveTableSchemaImpl fromTable(Configuration conf, Table table) {
     int index = 0;
 
-    List<String> columnNames = transform(table.getSd().getCols(), FIELD_SCHEMA_NAME_GETTER);
+    StorageDescriptor storageDescriptor = table.getSd();
+    HiveType[] hiveTypes = HiveUtils.columnTypes(conf, storageDescriptor);
+
+    List<String> columnNames = transform(storageDescriptor.getCols(), FIELD_SCHEMA_NAME_GETTER);
     Map<String, Integer> columnToIndex = Maps.newHashMap();
     for (String columnName : columnNames) {
       columnToIndex.put(columnName, index++);
@@ -99,7 +116,7 @@ public class HiveTableSchemaImpl implements HiveTableSchema {
     }
 
     HiveTableName hiveTableName = new HiveTableName(table.getDbName(), table.getTableName());
-    return new HiveTableSchemaImpl(hiveTableName, partitionToIndex, columnToIndex);
+    return new HiveTableSchemaImpl(hiveTableName, partitionToIndex, columnToIndex, hiveTypes);
   }
 
   /**
@@ -142,12 +159,18 @@ public class HiveTableSchemaImpl implements HiveTableSchema {
     return index;
   }
 
+  @Override public HiveType columnType(int columnIndex) {
+    Preconditions.checkElementIndex(columnIndex, hiveTypes.length);
+    return hiveTypes[columnIndex];
+  }
+
   @Override
   public void write(DataOutput out) throws IOException {
     Writables.writeStrIntMap(out, partitionPositions);
     Writables.writeStrIntMap(out, columnPositions);
     WritableUtils.writeString(out, tableName.getDatabaseName());
     WritableUtils.writeString(out, tableName.getTableName());
+    Writables.writeEnumArray(out, hiveTypes);
   }
 
   @Override
@@ -158,13 +181,16 @@ public class HiveTableSchemaImpl implements HiveTableSchema {
     String dbName = WritableUtils.readString(in);
     String tblName = WritableUtils.readString(in);
     tableName = new HiveTableName(dbName, tblName);
+    hiveTypes = Writables.readEnumArray(in, HiveType.class);
   }
 
   @Override
   public String toString() {
     return Objects.toStringHelper(this)
+        .add("tableName", tableName)
         .add("partitionKeys", partitionPositions)
         .add("columnPositions", columnPositions)
+        .add("hiveTypes", hiveTypes)
         .toString();
   }
 }

@@ -26,10 +26,13 @@ import org.apache.thrift.TException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.facebook.hiveio.common.HiveTableName;
 import com.facebook.hiveio.output.HiveApiOutputFormat;
 import com.facebook.hiveio.output.HiveOutputDescription;
 import com.facebook.hiveio.record.HiveRecordFactory;
 import com.facebook.hiveio.record.HiveWritableRecord;
+import com.facebook.hiveio.schema.HiveTableSchema;
+import com.facebook.hiveio.schema.HiveTableSchemas;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 
@@ -41,9 +44,6 @@ import java.util.Map;
  * Helpers for MapReduce job
  */
 public class HiveTools {
-  /** number of columns */
-  public static final int NUM_COLUMNS = 3;
-
   /** first row */
   private static final MapWritable ROW_1 = new MapWritable();
   /** second row */
@@ -101,6 +101,15 @@ public class HiveTools {
   }
 
   /**
+   * Get name of table we're writing to
+   *
+   * @return HiveTableName
+   */
+  private static HiveTableName getHiveTableName() {
+    return new HiveTableName("default", "hive_io_test");
+  }
+
+  /**
    * Setup the job
    *
    * @param conf Configuration
@@ -108,8 +117,7 @@ public class HiveTools {
    */
   public static void setupJob(Configuration conf) throws IOException {
     HiveOutputDescription outputDesc = new HiveOutputDescription();
-    outputDesc.setDbName("default");
-    outputDesc.setTableName("hive_io_test");
+    outputDesc.setHiveTableName(getHiveTableName());
     Map<String, String> partitionValues = ImmutableMap.of("ds", "2013-04-01");
     outputDesc.setPartitionValues(partitionValues);
     LOG.info("Writing to {}", outputDesc);
@@ -124,11 +132,13 @@ public class HiveTools {
   /**
    * Map hive record
    *
+   * @param conf Configuration
    * @param value data
    * @return hive record
    */
-  public static HiveWritableRecord mapToHiveRecord(MapWritable value) {
-    HiveWritableRecord record = HiveRecordFactory.newWritableRecord(HiveTools.NUM_COLUMNS);
+  public static HiveWritableRecord mapToHiveRecord(Configuration conf, MapWritable value) {
+    HiveTableSchema schema = HiveTableSchemas.lookup(conf, getHiveTableName());
+    HiveWritableRecord record = HiveRecordFactory.newWritableRecord(schema);
     for (Map.Entry<Writable, Writable> entry : value.entrySet()) {
       IntWritable intKey = (IntWritable) entry.getKey();
       LongWritable longValue = (LongWritable) entry.getValue();

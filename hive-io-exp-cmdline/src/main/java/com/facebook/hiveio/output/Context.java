@@ -20,6 +20,7 @@ package com.facebook.hiveio.output;
 import org.apache.hadoop.conf.Configuration;
 
 import com.facebook.hiveio.common.HiveUtils;
+import com.facebook.hiveio.schema.HiveTableSchema;
 
 /**
  * Context for output command
@@ -30,6 +31,8 @@ class Context {
   public Configuration conf;
   /** OutputFormat */
   public HiveApiOutputFormat outputFormat;
+  /** Schema */
+  public HiveTableSchema schema;
 
   /** Thread safe context */
   public ThreadLocal<PerThread> perThread = new ThreadLocal<PerThread>() {

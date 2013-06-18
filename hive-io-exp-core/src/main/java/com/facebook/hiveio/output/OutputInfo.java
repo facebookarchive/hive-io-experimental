@@ -23,6 +23,7 @@ import org.apache.hadoop.hive.metastore.api.FieldSchema;
 import org.apache.hadoop.hive.metastore.api.SerDeInfo;
 import org.apache.hadoop.hive.metastore.api.StorageDescriptor;
 import org.apache.hadoop.hive.metastore.api.Table;
+import org.apache.hadoop.hive.serde2.SerDe;
 import org.apache.hadoop.hive.serde2.Serializer;
 import org.apache.hadoop.io.Writable;
 import org.apache.hadoop.io.WritableUtils;
@@ -63,7 +64,7 @@ class OutputInfo implements Writable {
   private final List<FieldSchema> columnInfo;
 
   /** Class used for serialization */
-  private Class<? extends Serializer> serializerClass;
+  private Class<? extends SerDe> serializerClass;
   /** Parameters for serializer */
   private final Map<String, String> serializerParams;
 
@@ -100,8 +101,7 @@ class OutputInfo implements Writable {
 
     StorageDescriptor storageDescriptor = table.getSd();
     tableParams = table.getParameters();
-    outputFormatClass =
-        Classes.classForName(storageDescriptor.getOutputFormat());
+    outputFormatClass = Classes.classForName(storageDescriptor.getOutputFormat());
     columnInfo = storageDescriptor.getCols();
     tableRoot = storageDescriptor.getLocation();
 

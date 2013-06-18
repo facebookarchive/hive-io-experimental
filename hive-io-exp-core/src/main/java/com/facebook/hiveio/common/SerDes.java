@@ -30,6 +30,7 @@ import org.apache.hadoop.hive.serde2.Serializer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.lang.reflect.Constructor;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
@@ -70,6 +71,7 @@ public class SerDes {
 
   /**
    * Initialize a Deserializer
+   *
    * @param deserializer Deserializer to initialize
    * @param conf Configuration to use
    * @param fieldSchemas column information
@@ -91,6 +93,7 @@ public class SerDes {
 
   /**
    * Initialize a Serializer
+   *
    * @param serializer Serializer to initialize
    * @param conf Configuration to use
    * @param fieldSchemas column information
@@ -111,11 +114,63 @@ public class SerDes {
   }
 
   /**
+   * Initialize a SerDe
+   *
+   * @param serDe SerDe to initialize
+   * @param conf Configuration to use
+   * @param fieldSchemas column information
+   * @param params SerDe parameters
+   * @return configured SerDe
+   */
+  public static SerDe initSerDe(
+      SerDe serDe, Configuration conf,
+      List<FieldSchema> fieldSchemas, Map<String, String> params) {
+    Properties props = getSerDeProperties(fieldSchemas, params);
+    try {
+      serDe.initialize(conf, props);
+    } catch (SerDeException e) {
+      throw new IllegalStateException("Initializing Serializer " +
+          serDe, e);
+    }
+    return serDe;
+  }
+
+  /**
    * Get Class object for SerDe
    * @param serDeInfo SerDe information
    * @return Class that extends SerDe
    */
   public static Class<? extends SerDe> getSerDeClass(SerDeInfo serDeInfo) {
     return Classes.classForName(serDeInfo.getSerializationLib());
+  }
+
+  /**
+   * Create SerDe from class
+   *
+   * @param serDeClass class of SerDe
+   * @return SerDe
+   */
+  public static SerDe createSerDe(Class<? extends SerDe> serDeClass) {
+    SerDe serDe = null;
+    try {
+      Constructor<? extends SerDe> constructor = serDeClass.getDeclaredConstructor();
+      constructor.setAccessible(true);
+      serDe = constructor.newInstance();
+      // CHECKSTYLE: stop IllegalCatch
+    } catch (Exception e) {
+      // CHECKSTYLE: resume IllegalCatch
+      LOG.error("Could not instantiate SerDe {}", serDeClass, e);
+    }
+    return serDe;
+  }
+
+  /**
+   * Create SerDe from information
+   *
+   * @param serDeInfo SerDeInfo
+   * @return SerDe
+   */
+  public static SerDe createSerDe(SerDeInfo serDeInfo) {
+    return createSerDe(getSerDeClass(serDeInfo));
   }
 }

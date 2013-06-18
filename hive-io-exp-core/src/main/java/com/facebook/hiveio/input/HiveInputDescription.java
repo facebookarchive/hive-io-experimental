@@ -142,6 +142,16 @@ public class HiveInputDescription implements Writable {
   }
 
   /**
+   * Set database and table name from a HiveTableName
+   *
+   * @param hiveTableName HiveTableName
+   */
+  public void setHiveTableName(HiveTableName hiveTableName) {
+    setTableName(hiveTableName.getTableName());
+    setDbName(hiveTableName.getDatabaseName());
+  }
+
+  /**
    * Make hive table name from this
    * @return HiveTableName
    */

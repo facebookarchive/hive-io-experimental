@@ -104,20 +104,8 @@ public class HiveTableSchemas {
   }
 
   /**
-   * Put schema for a Hive table doing lookup in Hive metastore
-   *
-   * @param conf Configuration
-   * @param profile Profile ID
-   * @param tableName Hive table name
-   */
-  public static void put(Configuration conf, String profile,
-                         HiveTableName tableName)
-  {
-    put(conf, profile, lookup(conf, tableName));
-  }
-
-  /**
    * Lookup schema from Hive metastore
+   *
    * @param conf Configuration
    * @param tableName Hive table name
    * @return Hive table schema
@@ -135,16 +123,20 @@ public class HiveTableSchemas {
       // CHECKSTYLE: resume IllegalCatch
       throw new IllegalStateException(e);
     }
-    return HiveTableSchemaImpl.fromTable(table);
+    return HiveTableSchemaImpl.fromTable(conf, table);
   }
 
   /**
    * Lookup schema from Hive metastore
+   *
+   *
    * @param client Metastore client
+   * @param conf Configuration
    * @param tableName Hive table name
    * @return Hive table schema
    */
-  public static HiveTableSchema lookup(ThriftHiveMetastore.Iface client, HiveTableName tableName)
+  public static HiveTableSchema lookup(ThriftHiveMetastore.Iface client,
+      Configuration conf, HiveTableName tableName)
   {
     Table table;
     try {
@@ -154,7 +146,7 @@ public class HiveTableSchemas {
       // CHECKSTYLE: resume IllegalCatch
       throw new IllegalStateException(e);
     }
-    return HiveTableSchemaImpl.fromTable(table);
+    return HiveTableSchemaImpl.fromTable(conf, table);
   }
 
   /**

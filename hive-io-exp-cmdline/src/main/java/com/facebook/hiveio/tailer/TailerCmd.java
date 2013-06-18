@@ -134,7 +134,8 @@ public class TailerCmd extends BaseCmd
 
     HiveTableName hiveTableName = new HiveTableName(args.inputTable.database,
         args.inputTable.table);
-    HiveTableSchema schema = HiveTableSchemas.lookup(client, hiveTableName);
+    HiveTableSchema schema = HiveTableSchemas.lookup(client, hiveConf,
+        hiveTableName);
     chooseRowParser(schema);
 
     Stats stats = Stats.create(hiveStats);

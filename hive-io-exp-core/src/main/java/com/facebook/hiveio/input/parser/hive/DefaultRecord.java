@@ -18,21 +18,16 @@
 
 package com.facebook.hiveio.input.parser.hive;
 
-import org.apache.hadoop.hive.serde2.Deserializer;
-import org.apache.hadoop.hive.serde2.SerDeException;
-import org.apache.hadoop.hive.serde2.objectinspector.ObjectInspector;
-import org.apache.hadoop.hive.serde2.objectinspector.ObjectInspector.Category;
-import org.apache.hadoop.hive.serde2.objectinspector.ObjectInspectorUtils;
-import org.apache.hadoop.hive.serde2.objectinspector.StructObjectInspector;
-import org.apache.hadoop.io.Writable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.facebook.hiveio.common.HiveType;
+import com.facebook.hiveio.record.HiveReadableRecord;
 import com.facebook.hiveio.record.HiveRecord;
+import com.facebook.hiveio.record.HiveWritableRecord;
+import com.facebook.hiveio.schema.HiveTableSchema;
 import com.google.common.base.Objects;
-import com.google.common.base.Preconditions;
 
-import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 
@@ -43,20 +38,46 @@ public class DefaultRecord implements HiveRecord {
   /** Logger */
   private static final Logger LOG = LoggerFactory.getLogger(DefaultRecord.class);
 
-  /** Partition data */
-  private final String[] partitionValues;
+  /** Table schema - only set for writing */
+  private final HiveTableSchema schema;
+
   /** Raw data for row */
   private final Object[] rowData;
+  /** Partition data */
+  private final String[] partitionValues;
 
   /**
    * Constructor
    *
+   * @param schema HiveTableSchema
    * @param numColumns number of columns
    * @param partitionValues partition data
    */
-  public DefaultRecord(int numColumns, String[] partitionValues) {
-    this.partitionValues = partitionValues;
+  private DefaultRecord(HiveTableSchema schema, int numColumns, String[] partitionValues) {
+    this.schema = schema;
     this.rowData = new Object[numColumns];
+    this.partitionValues = partitionValues;
+  }
+
+  /**
+   * Create a new record for reading
+   *
+   * @param numColumns number of column
+   * @param partitionValues partition data
+   * @return new DefaultRecord
+   */
+  public static HiveReadableRecord forReading(int numColumns, String[] partitionValues) {
+    return new DefaultRecord(null, numColumns, partitionValues);
+  }
+
+  /**
+   * Create a new record for writing
+   *
+   * @param schema Hive table schema
+   * @return new DefaultRecord
+   */
+  public static HiveWritableRecord forWriting(HiveTableSchema schema) {
+    return new DefaultRecord(schema, schema.numColumns(), new String[0]);
   }
 
   @Override
@@ -103,7 +124,23 @@ public class DefaultRecord implements HiveRecord {
 
   @Override
   public void set(int index, Object value) {
-    rowData[index] = value;
+    rowData[index] = upgradeType(schema, index, value);
+  }
+
+  /**
+   * Upgrade type if schema allows it.
+   *
+   * @param schema HiveTableSchema
+   * @param index column index
+   * @param value data to set
+   * @return upgraded data
+   */
+  private static Object upgradeType(HiveTableSchema schema, int index, Object value) {
+    if (value == null) {
+      return null;        // pass through nulls
+    }
+    HiveType type = schema.columnType(index);
+    return type.checkAndUpgrade(value);
   }
 
   @Override
@@ -114,36 +151,6 @@ public class DefaultRecord implements HiveRecord {
   @Override
   public int numPartitionValues() {
     return partitionValues.length;
-  }
-
-  /**
-   * Parse a row
-   *
-   * @param value Row from Hive
-   * @param deserializer Deserializer
-   * @throws IOException I/O errors
-   */
-  public void parse(Writable value, Deserializer deserializer)
-    throws IOException {
-    Object data;
-    ObjectInspector dataInspector;
-    try {
-      data = deserializer.deserialize(value);
-      dataInspector = deserializer.getObjectInspector();
-    } catch (SerDeException e) {
-      throw new IOException(e);
-    }
-
-    Preconditions.checkArgument(dataInspector.getCategory() == Category.STRUCT);
-    StructObjectInspector structInspector =
-        (StructObjectInspector) dataInspector;
-
-    Object parsedData = ObjectInspectorUtils.copyToStandardJavaObject(data,
-        structInspector);
-    List<Object> parsedList = (List<Object>) parsedData;
-    for (int i = 0; i < parsedList.size(); ++i) {
-      set(i, parsedList.get(i));
-    }
   }
 
   @Override

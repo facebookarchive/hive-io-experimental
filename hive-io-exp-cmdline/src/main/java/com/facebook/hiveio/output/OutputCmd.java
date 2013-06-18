@@ -90,6 +90,8 @@ public class OutputCmd extends BaseCmd {
     HiveApiOutputCommitter outputCommitter =
         context.outputFormat.getOutputCommitter(threadLocal.taskContext());
 
+    context.schema = context.outputFormat.getTableSchema(context.conf);
+
     outputCommitter.setupJob(threadLocal.jobContext());
 
     if (args.multiThread.isMultiThreaded()) {
@@ -160,7 +162,7 @@ public class OutputCmd extends BaseCmd {
     RecordWriter<WritableComparable, HiveWritableRecord> recordWriter =
         context.outputFormat.getRecordWriter(threadLocal.taskContext());
 
-    HiveWritableRecord record = HiveRecordFactory.newWritableRecord(NUM_COLUMNS);
+    HiveWritableRecord record = HiveRecordFactory.newWritableRecord(context.schema);
 
     // TODO: allow type promotions: see https://github.com/facebook/hive-io-experimental/issues/15
     record.set(0, 11L);

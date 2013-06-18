@@ -22,6 +22,11 @@ import org.apache.hadoop.hive.serde2.objectinspector.PrimitiveObjectInspector;
 import org.apache.hadoop.hive.serde2.typeinfo.TypeInfo;
 import org.apache.hadoop.hive.serde2.typeinfo.TypeInfoUtils;
 
+import com.google.common.base.Preconditions;
+
+import java.util.List;
+import java.util.Map;
+
 import static org.apache.hadoop.hive.serde2.objectinspector.PrimitiveObjectInspector.PrimitiveCategory;
 
 /**
@@ -29,29 +34,95 @@ import static org.apache.hadoop.hive.serde2.objectinspector.PrimitiveObjectInspe
  */
 public enum HiveType {
   /** boolean */
-  BOOLEAN(NativeType.BOOLEAN),
+  BOOLEAN(NativeType.BOOLEAN) {
+    @Override public Object checkAndUpgrade(Object data) {
+      Preconditions.checkArgument(data instanceof Boolean);
+      return data;
+    }
+  },
   /** byte */
-  BYTE(NativeType.LONG),
+  BYTE(NativeType.LONG) {
+    @Override public Object checkAndUpgrade(Object data) {
+      Preconditions.checkArgument(data instanceof Byte);
+      return data;
+    }
+  },
   /** short */
-  SHORT(NativeType.LONG),
+  SHORT(NativeType.LONG) {
+    @Override public Object checkAndUpgrade(Object data) {
+      Preconditions.checkArgument(data instanceof Short ||
+        data instanceof Byte);
+      return ((Number) data).shortValue();
+    }
+  },
   /** int */
-  INT(NativeType.LONG),
+  INT(NativeType.LONG) {
+    @Override public Object checkAndUpgrade(Object data) {
+      Preconditions.checkArgument(data instanceof Integer ||
+        data instanceof Short || data instanceof Byte);
+      return ((Number) data).intValue();
+    }
+  },
   /** long */
-  LONG(NativeType.LONG),
+  LONG(NativeType.LONG) {
+    @Override public Object checkAndUpgrade(Object data) {
+      Preconditions.checkArgument(data instanceof Long ||
+        data instanceof Integer || data instanceof Short ||
+        data instanceof Byte);
+      return ((Number) data).longValue();
+    }
+  },
   /** float */
-  FLOAT(NativeType.DOUBLE),
+  FLOAT(NativeType.DOUBLE) {
+    @Override public Object checkAndUpgrade(Object data) {
+      Preconditions.checkArgument(data instanceof Float ||
+          data instanceof Long || data instanceof Integer ||
+          data instanceof Short || data instanceof Byte);
+      return ((Number) data).floatValue();
+    }
+  },
   /** double */
-  DOUBLE(NativeType.DOUBLE),
+  DOUBLE(NativeType.DOUBLE) {
+    @Override public Object checkAndUpgrade(Object data) {
+      Preconditions.checkArgument(data instanceof Number);
+      return ((Number) data).doubleValue();
+    }
+  },
   /** string */
-  STRING(NativeType.STRING),
+  STRING(NativeType.STRING) {
+    @Override public Object checkAndUpgrade(Object data) {
+      Preconditions.checkArgument(data instanceof String);
+      return data;
+    }
+  },
   /** list */
-  LIST(null),
+  LIST(null) {
+    @Override public Object checkAndUpgrade(Object data) {
+      Preconditions.checkArgument(data instanceof List);
+      return data;
+    }
+  },
   /** map */
-  MAP(null),
+  MAP(null) {
+    @Override public Object checkAndUpgrade(Object data) {
+      Preconditions.checkArgument(data instanceof Map);
+      return data;
+    }
+  },
   /** struct */
-  STRUCT(null),
+  STRUCT(null) {
+    @Override public Object checkAndUpgrade(Object data) {
+      Preconditions.checkArgument(data instanceof Map);
+      return data;
+    }
+  },
   /** union */
-  UNION(null);
+  UNION(null) {
+    @Override public Object checkAndUpgrade(Object data) {
+      Preconditions.checkArgument(data instanceof Map);
+      return data;
+    }
+  };
 
   /** Java native type representing this Hive column type */
   private final NativeType nativeType;
@@ -64,6 +135,15 @@ public enum HiveType {
   HiveType(NativeType nativeType) {
     this.nativeType = nativeType;
   }
+
+  /**
+   * Check if data is valid for this column. Upgrade it if necessary (for example
+   * do Integer => Long conversion).
+   *
+   * @param data value to set
+   * @return upgraded value
+   */
+  public abstract Object checkAndUpgrade(Object data);
 
   public boolean isCollection() {
     return nativeType == null;
@@ -108,7 +188,7 @@ public enum HiveType {
    * @param primitiveCategory Hive primitive category
    * @return HiveType
    */
-  public static HiveType fromHivePrimitiveCategory(PrimitiveCategory primitiveCategory) {
+  private static HiveType fromHivePrimitiveCategory(PrimitiveCategory primitiveCategory) {
     switch (primitiveCategory) {
       case BOOLEAN:
         return BOOLEAN;

@@ -21,6 +21,7 @@ package com.facebook.hiveio.schema;
 import org.apache.hadoop.io.Writable;
 
 import com.facebook.hiveio.common.HiveTableName;
+import com.facebook.hiveio.common.HiveType;
 
 /**
  * Schema for a Hive table
@@ -28,6 +29,7 @@ import com.facebook.hiveio.common.HiveTableName;
 public interface HiveTableSchema extends Writable {
   /**
    * Get Hive table name
+   *
    * @return Hive table name
    */
   HiveTableName getTableName();
@@ -44,13 +46,23 @@ public interface HiveTableSchema extends Writable {
   int positionOf(String columnOrPartitionKeyName);
 
   /**
+   * Get HiveType of column
+   *
+   * @param columnIndex column
+   * @return HiveType
+   */
+  HiveType columnType(int columnIndex);
+
+  /**
    * Get number of columns in table
+   *
    * @return Number of columns in table
    */
   int numColumns();
 
   /**
    * Get number of partition keys for this table
+   *
    * @return number of partition keys
    */
   int numPartitionKeys();

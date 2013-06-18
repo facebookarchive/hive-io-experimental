@@ -37,6 +37,6 @@ public class SampleMapper extends Mapper<NullWritable, MapWritable,
 
   @Override protected void map(NullWritable key, MapWritable value,
       Context context) throws IOException, InterruptedException {
-    context.write(key, HiveTools.mapToHiveRecord(value));
+    context.write(key, HiveTools.mapToHiveRecord(context.getConfiguration(), value));
   }
 }
