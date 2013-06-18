@@ -83,6 +83,43 @@ public class Writables {
   }
 
   /**
+   * Read an enum array
+   *
+   * @param in DataInput
+   * @param klass enum class
+   * @param <E> type of enum
+   * @return array of enums
+   * @throws IOException
+   */
+  public static <E extends Enum<E>> E[] readEnumArray(DataInput in, Class<E> klass)
+    throws IOException
+  {
+    int length = in.readInt();
+    E[] enums = (E[]) new Enum[length];
+    for (int i = 0; i < length; ++i) {
+      enums[i] = WritableUtils.readEnum(in, klass);
+    }
+    return (E[]) enums;
+  }
+
+  /**
+   * Write an array of enums
+   *
+   * @param enums Enum array
+   * @param out DataOutput
+   * @param <E> type of enum
+   * @throws IOException
+   */
+  public static <E extends Enum<E>> void writeEnumArray(DataOutput out, Enum<E>[] enums)
+    throws IOException
+  {
+    out.writeInt(enums.length);
+    for (Enum<E> val : enums) {
+      WritableUtils.writeEnum(out, val);
+    }
+  }
+
+  /**
    * Read a new instance of a class. Reads class name and creates a new
    * instance using reflection.
    *

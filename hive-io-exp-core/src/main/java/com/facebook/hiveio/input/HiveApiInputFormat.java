@@ -187,7 +187,7 @@ public class HiveApiInputFormat
       throw new IOException(e);
     }
 
-    final HiveTableSchema tableSchema = HiveTableSchemaImpl.fromTable(table);
+    final HiveTableSchema tableSchema = HiveTableSchemaImpl.fromTable(conf, table);
     HiveTableSchemas.put(conf, myProfileId, tableSchema);
 
     List<InputPartition> partitions = computePartitions(inputDesc, client, table);

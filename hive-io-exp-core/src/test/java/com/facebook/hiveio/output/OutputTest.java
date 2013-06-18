@@ -23,11 +23,14 @@ import org.testng.annotations.Test;
 
 import com.beust.jcommander.internal.Lists;
 import com.facebook.hiveio.common.HiveMetastores;
+import com.facebook.hiveio.common.HiveTableName;
 import com.facebook.hiveio.input.HiveInput;
 import com.facebook.hiveio.input.HiveInputDescription;
 import com.facebook.hiveio.record.HiveReadableRecord;
 import com.facebook.hiveio.record.HiveRecordFactory;
 import com.facebook.hiveio.record.HiveWritableRecord;
+import com.facebook.hiveio.schema.HiveTableSchema;
+import com.facebook.hiveio.schema.HiveTableSchemas;
 import com.facebook.hiveio.testing.LocalHiveServer;
 
 import java.io.IOException;
@@ -39,7 +42,9 @@ import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertTrue;
 
 public class OutputTest {
-  private LocalHiveServer hiveServer = new LocalHiveServer("hiveio-test");
+  private final LocalHiveServer hiveServer = new LocalHiveServer("hiveio-test");
+  private final HiveTableName hiveTableName = new HiveTableName("default",
+      OutputTest.class.getSimpleName());
 
   @BeforeMethod
   public void beforeSuite() throws Exception {
@@ -50,18 +55,20 @@ public class OutputTest {
   @Test
   public void testOutput() throws Exception
   {
-    String tableName = "test1";
-    hiveServer.createTable("CREATE TABLE " + tableName +
+    hiveServer.createTable("CREATE TABLE " + hiveTableName.getTableName() +
         " (i1 INT, d1 DOUBLE) " +
         " ROW FORMAT DELIMITED FIELDS TERMINATED BY '\t'");
 
     HiveOutputDescription outputDesc = new HiveOutputDescription();
-    outputDesc.setTableName(tableName);
+    outputDesc.setHiveTableName(hiveTableName);
 
-    writeData(outputDesc);
+    HiveTableSchema schema = HiveTableSchemas.lookup(hiveServer.getClient(),
+        null, hiveTableName);
+
+    writeData(outputDesc, schema);
 
     HiveInputDescription inputDesc = new HiveInputDescription();
-    inputDesc.setTableName(tableName);
+    inputDesc.setHiveTableName(hiveTableName);
 
     verifyData(inputDesc);
   }
@@ -69,36 +76,38 @@ public class OutputTest {
   @Test
   public void testOutputWithPartitions() throws Exception
   {
-    String tableName = "test1";
-    hiveServer.createTable("CREATE TABLE " + tableName +
+    hiveServer.createTable("CREATE TABLE " + hiveTableName.getTableName() +
         " (i1 INT, d1 DOUBLE) " +
         " PARTITIONED BY (ds STRING) " +
         " ROW FORMAT DELIMITED FIELDS TERMINATED BY '\t'");
 
     HiveOutputDescription outputDesc = new HiveOutputDescription();
     outputDesc.putPartitionValue("ds", "foobar");
-    outputDesc.setTableName(tableName);
+    outputDesc.setHiveTableName(hiveTableName);
 
-    writeData(outputDesc);
+    HiveTableSchema schema = HiveTableSchemas.lookup(hiveServer.getClient(),
+        null, hiveTableName);
+
+    writeData(outputDesc, schema);
 
     HiveInputDescription inputDesc = new HiveInputDescription();
     inputDesc.setPartitionFilter("ds='foobar'");
-    inputDesc.setTableName(tableName);
+    inputDesc.setHiveTableName(hiveTableName);
 
     verifyData(inputDesc);
   }
 
-  private void writeData(HiveOutputDescription outputDesc)
+  private void writeData(HiveOutputDescription outputDesc, HiveTableSchema schema)
       throws TException, IOException, InterruptedException
   {
     List<HiveWritableRecord> writeRecords = Lists.newArrayList();
 
-    HiveWritableRecord r1 = HiveRecordFactory.newWritableRecord(2);
+    HiveWritableRecord r1 = HiveRecordFactory.newWritableRecord(schema);
     writeRecords.add(r1);
     r1.set(0, 1);
     r1.set(1, 1.1);
 
-    HiveWritableRecord r2 = HiveRecordFactory.newWritableRecord(2);
+    HiveWritableRecord r2 = HiveRecordFactory.newWritableRecord(schema);
     writeRecords.add(r2);
     r2.set(0, 2);
     r2.set(1, 2.2);

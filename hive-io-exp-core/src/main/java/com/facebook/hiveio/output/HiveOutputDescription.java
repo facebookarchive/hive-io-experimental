@@ -93,10 +93,20 @@ public class HiveOutputDescription implements Writable {
   }
 
   /**
+   * Set database and table name from a HiveTableName
+   *
+   * @param hiveTableName HiveTableName to use
+   */
+  public void setHiveTableName(HiveTableName hiveTableName) {
+    setTableName(hiveTableName.getTableName());
+    setDbName(hiveTableName.getDatabaseName());
+  }
+
+  /**
    * Make hive table name from this
    * @return HiveTableName
    */
-  public HiveTableName  hiveTableName() {
+  public HiveTableName hiveTableName() {
     return new HiveTableName(dbName, tableName);
   }
 

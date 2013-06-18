@@ -22,6 +22,7 @@ import org.apache.hadoop.hive.metastore.api.FieldSchema;
 import org.apache.hadoop.hive.metastore.api.SerDeInfo;
 import org.apache.hadoop.hive.metastore.api.StorageDescriptor;
 import org.apache.hadoop.hive.serde2.Deserializer;
+import org.apache.hadoop.hive.serde2.SerDe;
 import org.apache.hadoop.io.Writable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -36,7 +37,6 @@ import com.google.common.collect.Maps;
 import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
-import java.lang.reflect.Constructor;
 import java.util.List;
 import java.util.Map;
 
@@ -48,7 +48,7 @@ class InputSplitData implements Writable {
   private static final Logger LOG = LoggerFactory.getLogger(InputSplitData.class);
 
   /** CLass for Deserializer */
-  private Class<? extends Deserializer> deserializerClass;
+  private Class<? extends SerDe> deserializerClass;
   /** Parameters to pass to Deserializer */
   private final Map<String, String> deserializerParams;
 
@@ -84,19 +84,7 @@ class InputSplitData implements Writable {
    * @return Deserializer created
    */
   public Deserializer createDeserializer() {
-    Preconditions.checkNotNull(deserializerClass);
-    Deserializer deserializer = null;
-    try {
-      Constructor<? extends Deserializer> constructor =
-          deserializerClass.getDeclaredConstructor();
-      constructor.setAccessible(true);
-      deserializer = constructor.newInstance();
-      // CHECKSTYLE: stop IllegalCatch
-    } catch (Exception e) {
-      // CHECKSTYLE: resume IllegalCatch
-      LOG.error("Could not instantiate Deserializer {}", deserializerClass, e);
-    }
-    return deserializer;
+    return SerDes.createSerDe(deserializerClass);
   }
 
   /**

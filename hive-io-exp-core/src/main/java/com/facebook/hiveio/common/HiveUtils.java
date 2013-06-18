@@ -24,8 +24,14 @@ import org.apache.hadoop.hive.metastore.Warehouse;
 import org.apache.hadoop.hive.metastore.api.FieldSchema;
 import org.apache.hadoop.hive.metastore.api.MetaException;
 import org.apache.hadoop.hive.metastore.api.Partition;
+import org.apache.hadoop.hive.metastore.api.SerDeInfo;
+import org.apache.hadoop.hive.metastore.api.StorageDescriptor;
 import org.apache.hadoop.hive.metastore.api.ThriftHiveMetastore;
 import org.apache.hadoop.hive.serde2.ColumnProjectionUtils;
+import org.apache.hadoop.hive.serde2.SerDe;
+import org.apache.hadoop.hive.serde2.SerDeException;
+import org.apache.hadoop.hive.serde2.objectinspector.StructField;
+import org.apache.hadoop.hive.serde2.objectinspector.StructObjectInspector;
 import org.apache.thrift.TException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -157,6 +163,37 @@ public class HiveUtils {
       }
     }
     return uris;
+  }
+
+  /**
+   * Get column types from table's SerDeInfo
+   *
+   * @param conf Configuration
+   * @param storageDescriptor StorageDescriptor
+   * @return array of HiveType
+   * @throws SerDeException
+   */
+  public static HiveType[] columnTypes(Configuration conf, StorageDescriptor storageDescriptor)
+  {
+    SerDeInfo serDeInfo = storageDescriptor.getSerdeInfo();
+    SerDe serDe = SerDes.createSerDe(serDeInfo);
+    SerDes.initSerDe(serDe, conf, storageDescriptor.getCols(), serDeInfo.getParameters());
+    StructObjectInspector inspector = null;
+    try {
+      inspector = (StructObjectInspector) serDe.getObjectInspector();
+    } catch (SerDeException e) {
+      LOG.error("Failed to get object inspector from table at {}",
+          storageDescriptor.getLocation());
+      throw new IllegalArgumentException("Failed to get object inspector from table at " +
+          storageDescriptor.getLocation(), e);
+    }
+    List<? extends StructField> fields = inspector.getAllStructFieldRefs();
+    HiveType[] types = new HiveType[fields.size()];
+    for (int i = 0; i < fields.size(); ++i) {
+      types[i] = HiveType.fromHiveObjectInspector(
+          fields.get(i).getFieldObjectInspector());
+    }
+    return types;
   }
 
   /**
