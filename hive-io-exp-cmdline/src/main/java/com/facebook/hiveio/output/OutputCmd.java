@@ -73,8 +73,8 @@ public class OutputCmd extends BaseCmd {
     context.conf.setInt("mapred.task.partition", 1);
 
     HiveOutputDescription outputDesc = new HiveOutputDescription();
-    outputDesc.setDbName(args.table.database);
-    outputDesc.setTableName(args.table.table);
+    outputDesc.getTableDesc().setDatabaseName(args.table.database);
+    outputDesc.getTableDesc().setTableName(args.table.table);
     outputDesc.getMetastoreDesc().setHost(args.metastore.host);
     outputDesc.getMetastoreDesc().setPort(args.metastore.port);
     if (args.table.partitioned) {

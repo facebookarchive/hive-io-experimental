@@ -23,7 +23,7 @@ import org.testng.annotations.Test;
 
 import com.beust.jcommander.internal.Lists;
 import com.facebook.hiveio.common.HiveMetastores;
-import com.facebook.hiveio.common.HiveTableName;
+import com.facebook.hiveio.common.HiveTableDesc;
 import com.facebook.hiveio.input.HiveInput;
 import com.facebook.hiveio.input.HiveInputDescription;
 import com.facebook.hiveio.record.HiveReadableRecord;
@@ -43,7 +43,7 @@ import static org.testng.Assert.assertTrue;
 
 public class OutputTest {
   private final LocalHiveServer hiveServer = new LocalHiveServer("hiveio-test");
-  private final HiveTableName hiveTableName = new HiveTableName("default",
+  private final HiveTableDesc hiveTableDesc = new HiveTableDesc("default",
       OutputTest.class.getSimpleName());
 
   @BeforeMethod
@@ -55,20 +55,20 @@ public class OutputTest {
   @Test
   public void testOutput() throws Exception
   {
-    hiveServer.createTable("CREATE TABLE " + hiveTableName.getTableName() +
+    hiveServer.createTable("CREATE TABLE " + hiveTableDesc.getTableName() +
         " (i1 INT, d1 DOUBLE) " +
         " ROW FORMAT DELIMITED FIELDS TERMINATED BY '\t'");
 
     HiveOutputDescription outputDesc = new HiveOutputDescription();
-    outputDesc.setHiveTableName(hiveTableName);
+    outputDesc.setTableDesc(hiveTableDesc);
 
     HiveTableSchema schema = HiveTableSchemas.lookup(hiveServer.getClient(),
-        null, hiveTableName);
+        null, hiveTableDesc);
 
     writeData(outputDesc, schema);
 
     HiveInputDescription inputDesc = new HiveInputDescription();
-    inputDesc.setHiveTableName(hiveTableName);
+    inputDesc.setTableDesc(hiveTableDesc);
 
     verifyData(inputDesc);
   }
@@ -76,23 +76,23 @@ public class OutputTest {
   @Test
   public void testOutputWithPartitions() throws Exception
   {
-    hiveServer.createTable("CREATE TABLE " + hiveTableName.getTableName() +
+    hiveServer.createTable("CREATE TABLE " + hiveTableDesc.getTableName() +
         " (i1 INT, d1 DOUBLE) " +
         " PARTITIONED BY (ds STRING) " +
         " ROW FORMAT DELIMITED FIELDS TERMINATED BY '\t'");
 
     HiveOutputDescription outputDesc = new HiveOutputDescription();
     outputDesc.putPartitionValue("ds", "foobar");
-    outputDesc.setHiveTableName(hiveTableName);
+    outputDesc.setTableDesc(hiveTableDesc);
 
     HiveTableSchema schema = HiveTableSchemas.lookup(hiveServer.getClient(),
-        null, hiveTableName);
+        null, hiveTableDesc);
 
     writeData(outputDesc, schema);
 
     HiveInputDescription inputDesc = new HiveInputDescription();
     inputDesc.setPartitionFilter("ds='foobar'");
-    inputDesc.setHiveTableName(hiveTableName);
+    inputDesc.setTableDesc(hiveTableDesc);
 
     verifyData(inputDesc);
   }

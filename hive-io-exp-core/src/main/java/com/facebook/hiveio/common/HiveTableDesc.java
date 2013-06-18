@@ -17,16 +17,42 @@
  */
 package com.facebook.hiveio.common;
 
+import org.apache.hadoop.io.Writable;
+import org.apache.hadoop.io.WritableUtils;
+
 import com.google.common.base.Objects;
+
+import java.io.DataInput;
+import java.io.DataOutput;
+import java.io.IOException;
 
 /**
  * Name of a table in Hive
  */
-public class HiveTableName {
+public class HiveTableDesc implements Writable {
+  /** defautl database */
+  private static final String DEFAULT_DATABASE = "default";
+
   /** Database where table is located */
-  private final String databaseName;
+  private String databaseName;
   /** Name of the table */
-  private final String tableName;
+  private String tableName;
+
+  /** Empty constructor */
+  public HiveTableDesc() {
+    databaseName = DEFAULT_DATABASE;
+    tableName = "_unknown_";
+  }
+
+  /**
+   * Constructor
+   *
+   * @param tableName table
+   */
+  public HiveTableDesc(String tableName) {
+    this.databaseName = DEFAULT_DATABASE;
+    this.tableName = tableName;
+  }
 
   /**
    * Constructor
@@ -34,7 +60,7 @@ public class HiveTableName {
    * @param databaseName database
    * @param tableName table
    */
-  public HiveTableName(String databaseName, String tableName) {
+  public HiveTableDesc(String databaseName, String tableName) {
     this.databaseName = databaseName;
     this.tableName = tableName;
   }
@@ -47,6 +73,14 @@ public class HiveTableName {
     return tableName;
   }
 
+  public void setDatabaseName(String databaseName) {
+    this.databaseName = databaseName;
+  }
+
+  public void setTableName(String tableName) {
+    this.tableName = tableName;
+  }
+
   /**
    * Convert to string in dot format
    *
@@ -54,6 +88,18 @@ public class HiveTableName {
    */
   public String dotString() {
     return databaseName + "." + tableName;
+  }
+
+  @Override
+  public void readFields(DataInput in) throws IOException {
+    databaseName = WritableUtils.readString(in);
+    tableName = WritableUtils.readString(in);
+  }
+
+  @Override
+  public void write(DataOutput out) throws IOException {
+    WritableUtils.writeString(out, databaseName);
+    WritableUtils.writeString(out, tableName);
   }
 
   @Override
@@ -73,7 +119,7 @@ public class HiveTableName {
       return false;
     }
 
-    HiveTableName that = (HiveTableName) o;
+    HiveTableDesc that = (HiveTableDesc) o;
 
     return Objects.equal(databaseName, that.databaseName) &&
         Objects.equal(tableName, that.tableName);

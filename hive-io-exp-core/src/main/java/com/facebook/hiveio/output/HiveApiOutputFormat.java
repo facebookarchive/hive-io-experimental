@@ -130,8 +130,8 @@ public class HiveApiOutputFormat
                                  HiveOutputDescription outputDesc,
                                  String profileId)
     throws TException {
-    String dbName = outputDesc.getDbName();
-    String tableName = outputDesc.getTableName();
+    String dbName = outputDesc.getTableDesc().getDatabaseName();
+    String tableName = outputDesc.getTableDesc().getTableName();
 
     ThriftHiveMetastore.Iface client = outputDesc.metastoreClient(conf);
 
@@ -252,7 +252,7 @@ public class HiveApiOutputFormat
     FileSystem fs = tablePath.getFileSystem(conf);
 
     if (fs.exists(tablePath) && FileSystems.dirHasNonHiddenFiles(fs, tablePath)) {
-      throw new IOException("Table " + description.getTableName() +
+      throw new IOException("Table " + description.getTableDesc().getTableName() +
           " has existing data");
     }
   }
@@ -275,8 +275,8 @@ public class HiveApiOutputFormat
       throw new IOException(e);
     }
 
-    String db = description.getDbName();
-    String table = description.getTableName();
+    String db = description.getTableDesc().getDatabaseName();
+    String table = description.getTableDesc().getTableName();
 
     if (oti.hasPartitionInfo()) {
       Map<String, String> partitionSpec = description.getPartitionValues();

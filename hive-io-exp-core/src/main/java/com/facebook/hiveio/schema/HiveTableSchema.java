@@ -20,7 +20,7 @@ package com.facebook.hiveio.schema;
 
 import org.apache.hadoop.io.Writable;
 
-import com.facebook.hiveio.common.HiveTableName;
+import com.facebook.hiveio.common.HiveTableDesc;
 import com.facebook.hiveio.common.HiveType;
 
 /**
@@ -32,7 +32,7 @@ public interface HiveTableSchema extends Writable {
    *
    * @return Hive table name
    */
-  HiveTableName getTableName();
+  HiveTableDesc getTableName();
 
   /**
    * Get index of a column or a paritition key

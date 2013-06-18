@@ -27,7 +27,7 @@ import org.apache.hadoop.io.Writable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.facebook.hiveio.common.HiveTableName;
+import com.facebook.hiveio.common.HiveTableDesc;
 import com.facebook.hiveio.common.HiveType;
 import com.facebook.hiveio.conf.ClassConfOption;
 import com.facebook.hiveio.input.parser.array.ArrayParser;
@@ -73,7 +73,7 @@ public class Parsers {
    * @return RecordParser
    */
   public static RecordParser<Writable> bestParser(Deserializer deserializer,
-      int numColumns, int[] columnIndexes, HiveTableName tableName,
+      int numColumns, int[] columnIndexes, HiveTableDesc tableName,
       String[] partitionValues, Writable exampleValue, Configuration conf)
   {
     ArrayParserData data = new ArrayParserData(deserializer, columnIndexes, numColumns,

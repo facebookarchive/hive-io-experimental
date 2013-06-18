@@ -35,7 +35,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.facebook.hiveio.common.HadoopUtils;
-import com.facebook.hiveio.common.HiveTableName;
+import com.facebook.hiveio.common.HiveTableDesc;
 import com.facebook.hiveio.common.HiveUtils;
 import com.facebook.hiveio.common.Writables;
 import com.facebook.hiveio.input.parser.Parsers;
@@ -178,9 +178,10 @@ public class HiveApiInputFormat
     HiveInputDescription inputDesc, ThriftHiveMetastore.Iface client)
     throws IOException
   {
+    HiveTableDesc tableDesc = inputDesc.getTableDesc();
     Table table;
     try {
-      table = client.get_table(inputDesc.getDbName(), inputDesc.getTableName());
+      table = client.get_table(tableDesc.getDatabaseName(), tableDesc.getTableName());
       // CHECKSTYLE: stop IllegalCatch
     } catch (Exception e) {
       // CHECKSTYLE: resume IllegalCatch
@@ -282,9 +283,10 @@ public class HiveApiInputFormat
     } else {
       // table with partitions, find matches to user filter.
       List<Partition> hivePartitions;
+      HiveTableDesc tableDesc = inputDesc.getTableDesc();
       try {
-        hivePartitions = client.get_partitions_by_filter(inputDesc.getDbName(),
-            inputDesc.getTableName(), inputDesc.getPartitionFilter(), (short) -1);
+        hivePartitions = client.get_partitions_by_filter(tableDesc.getDatabaseName(),
+            tableDesc.getTableName(), inputDesc.getPartitionFilter(), (short) -1);
         // CHECKSTYLE: stop IllegalCatch
       } catch (Exception e) {
         // CHECKSTYLE: resume IllegalCatch
@@ -336,7 +338,7 @@ public class HiveApiInputFormat
    * @return RecordParser
    */
   private RecordParser<Writable> getParser(Writable exampleValue,
-    HiveTableName tableName, HInputSplit split, int[] columnIds,
+    HiveTableDesc tableName, HInputSplit split, int[] columnIds,
     Configuration conf)
   {
     Deserializer deserializer = split.getDeserializer();
