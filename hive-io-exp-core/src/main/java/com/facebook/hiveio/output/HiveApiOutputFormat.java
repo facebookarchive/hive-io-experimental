@@ -212,18 +212,57 @@ public class HiveApiOutputFormat
 
   @Override
   public void checkOutputSpecs(JobContext jobContext)
-    throws IOException, InterruptedException {
+    throws IOException, InterruptedException
+  {
     Configuration conf = jobContext.getConfiguration();
     OutputConf outputConf = new OutputConf(conf, myProfileId);
 
     HiveOutputDescription description = outputConf.readOutputDescription();
     OutputInfo oti = outputConf.readOutputTableInfo();
 
-    if (description == null || oti == null) {
-      LOG.error("OutputConf information is null, nothing to check");
+    if (description == null) {
+      LOG.error("HiveOutputDescription is null in Configuration, nothing to check");
       return;
     }
+    checkTableExists(conf, description);
 
+    if (oti == null) {
+      LOG.error("OutputInfo is null in Configuration, nothing to check");
+      return;
+    }
+    checkPartitionInfo(conf, description, oti);
+  }
+
+  /**
+   * Check that the table exists
+   *
+   * @param conf Configuration
+   * @param description HiveOutputDescription
+   * @throws IOException
+   */
+  private void checkTableExists(Configuration conf, HiveOutputDescription description)
+      throws IOException
+  {
+    ThriftHiveMetastore.Iface client;
+    try {
+      client = description.metastoreClient(conf);
+      client.get_table(description.getTableDesc().getDatabaseName(),
+          description.getTableDesc().getTableName());
+    } catch (TException e) {
+      throw new IOException(e);
+    }
+  }
+
+  /**
+   * Check that the table's partition info and the user's match.
+   *
+   * @param conf Configuration
+   * @param description HiveInputDescription
+   * @param oti OutputInfo
+   * @throws IOException
+   */
+  private void checkPartitionInfo(Configuration conf,
+      HiveOutputDescription description, OutputInfo oti) throws IOException {
     if (oti.hasPartitionInfo()) {
       if (!description.hasPartitionValues()) {
         throw new IOException("table is partitioned but user input isn't");
