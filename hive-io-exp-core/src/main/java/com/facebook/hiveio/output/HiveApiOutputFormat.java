@@ -241,7 +241,7 @@ public class HiveApiOutputFormat
    * @throws IOException
    */
   private void checkTableExists(Configuration conf, HiveOutputDescription description)
-      throws IOException
+    throws IOException
   {
     ThriftHiveMetastore.Iface client;
     try {
