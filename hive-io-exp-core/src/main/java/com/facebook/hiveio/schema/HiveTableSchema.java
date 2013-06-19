@@ -32,7 +32,7 @@ public interface HiveTableSchema extends Writable {
    *
    * @return Hive table name
    */
-  HiveTableDesc getTableName();
+  HiveTableDesc getTableDesc();
 
   /**
    * Get index of a column or a paritition key

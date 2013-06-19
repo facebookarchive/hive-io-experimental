@@ -24,6 +24,7 @@ import org.apache.hadoop.hive.serde2.objectinspector.StructField;
 import org.apache.hadoop.hive.serde2.objectinspector.StructObjectInspector;
 
 import com.facebook.hiveio.common.HiveType;
+import com.facebook.hiveio.schema.HiveTableSchema;
 
 /**
  * Parser data for array parsers
@@ -44,6 +45,8 @@ public class ArrayParserData {
   public final StructField[] structFields;
   /** Types of columns */
   public final HiveType[] hiveTypes;
+  /** Hive table schema */
+  public final HiveTableSchema schema;
   // CHECKSTYLE: resume VisibilityModifier
 
   /**
@@ -51,14 +54,18 @@ public class ArrayParserData {
    *
    * @param deserializer Hive Deserialier
    * @param columnIndexes column IDs
-   * @param numColumns number of columns
+   * @param schema Hive table schema
    * @param partitionValues partition data
    */
   public ArrayParserData(Deserializer deserializer, int[] columnIndexes,
-                         int numColumns, String[] partitionValues) {
+                         HiveTableSchema schema, String[] partitionValues)
+  {
+    this.schema = schema;
     this.deserializer = deserializer;
 
     this.columnIndexes = columnIndexes;
+
+    int numColumns = schema.numColumns();
 
     this.primitiveInspectors = new PrimitiveObjectInspector[numColumns];
     this.structFields = new StructField[numColumns];

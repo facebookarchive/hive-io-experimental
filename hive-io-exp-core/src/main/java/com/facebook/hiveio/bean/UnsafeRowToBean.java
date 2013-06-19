@@ -50,7 +50,7 @@ public class UnsafeRowToBean<X> implements RowToBean<X> {
       UnsafeFieldCopier fieldCopier = UnsafeFieldCopier.fromType(field.getType());
       int hiveIndex = schema.positionOf(name);
       if (hiveIndex == -1) {
-        throw new IllegalArgumentException("Table " + schema.getTableName() +
+        throw new IllegalArgumentException("Table " + schema.getTableDesc() +
           " does not have column " + name);
       }
       fieldCopier.setFromHiveIndex(hiveIndex);

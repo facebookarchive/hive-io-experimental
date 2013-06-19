@@ -59,16 +59,30 @@ public class HiveInput {
    * Read a Hive table
    *
    * @param inputDesc Hive table description
-   * @return iterable of Hive records
+   * @return Iterable of Hive records
    * @throws IOException
    * @throws InterruptedException
    */
   public static Iterable<HiveReadableRecord> readTable(HiveInputDescription inputDesc)
     throws IOException, InterruptedException
   {
-    String profileID = Long.toString(System.currentTimeMillis());
-
     final HiveConf conf = HiveUtils.newHiveConf(HiveInput.class);
+    return readTable(inputDesc, conf);
+  }
+
+  /**
+   * Read a Hive table
+   *
+   * @param inputDesc Hive table description
+   * @param conf Configuration
+   * @return Iterable of Hive records
+   * @throws IOException
+   * @throws InterruptedException
+   */
+  public static Iterable<HiveReadableRecord> readTable(HiveInputDescription inputDesc,
+      final Configuration conf) throws IOException, InterruptedException
+  {
+    String profileID = Long.toString(System.currentTimeMillis());
 
     HiveApiInputFormat.setProfileInputDesc(conf, inputDesc, profileID);
 

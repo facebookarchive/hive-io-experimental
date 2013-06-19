@@ -132,7 +132,7 @@ public class HiveTableSchemaImpl implements HiveTableSchema {
   }
 
   @Override
-  public HiveTableDesc getTableName() {
+  public HiveTableDesc getTableDesc() {
     return tableName;
   }
 

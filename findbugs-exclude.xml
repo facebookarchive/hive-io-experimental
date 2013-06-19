@@ -27,6 +27,10 @@
     <Bug pattern="NP_BOOLEAN_RETURN_NULL"/>
   </Match>
   <Match>
+    <Class name="com.facebook.hiveio.input.parser.array.ArrayRecord"/>
+    <Bug pattern="EI_EXPOSE_REP2"/>
+  </Match>
+  <Match>
     <Class name="com.facebook.hiveio.input.parser.hive.DefaultRecord"/>
     <Bug pattern="EI_EXPOSE_REP2"/>
   </Match>

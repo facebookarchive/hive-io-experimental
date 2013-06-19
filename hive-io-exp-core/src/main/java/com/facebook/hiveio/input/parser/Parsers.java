@@ -34,6 +34,7 @@ import com.facebook.hiveio.input.parser.array.ArrayParser;
 import com.facebook.hiveio.input.parser.array.ArrayParserData;
 import com.facebook.hiveio.input.parser.array.BytesParser;
 import com.facebook.hiveio.input.parser.hive.DefaultParser;
+import com.facebook.hiveio.schema.HiveTableSchema;
 import com.google.common.collect.ImmutableSet;
 
 import java.util.Set;
@@ -64,20 +65,22 @@ public class Parsers {
    * Choose the best parser available
    *
    * @param deserializer Hive Deserializer
-   * @param numColumns number of columns
+   * @param schema Hive table schema
    * @param columnIndexes column IDs
-   * @param tableName Hive table name
    * @param partitionValues partition data
    * @param exampleValue example Writable
    * @param conf Configuration
    * @return RecordParser
    */
   public static RecordParser<Writable> bestParser(Deserializer deserializer,
-      int numColumns, int[] columnIndexes, HiveTableDesc tableName,
-      String[] partitionValues, Writable exampleValue, Configuration conf)
+      HiveTableSchema schema, int[] columnIndexes, String[] partitionValues,
+      Writable exampleValue, Configuration conf)
   {
-    ArrayParserData data = new ArrayParserData(deserializer, columnIndexes, numColumns,
+    ArrayParserData data = new ArrayParserData(deserializer, columnIndexes, schema,
         partitionValues);
+
+    int numColumns = schema.numColumns();
+    HiveTableDesc tableDesc = schema.getTableDesc();
 
     for (int i = 0; i < numColumns; ++i) {
       data.structFields[i] = data.inspector.getAllStructFieldRefs().get(i);
@@ -101,20 +104,20 @@ public class Parsers {
     RecordParser<Writable> parser = null;
 
     if (!hasCollections && exampleValue instanceof BytesRefArrayWritable) {
-      parser = new BytesParser(partitionValues, numColumns, data);
+      parser = new BytesParser(partitionValues, data);
     } else {
-      parser = new ArrayParser(partitionValues, numColumns, data);
+      parser = new ArrayParser(partitionValues, data);
     }
 
     Class<? extends RecordParser> forcedParserClass = FORCE_PARSER.get(conf);
     if (forcedParserClass == null) {
       LOG.info("Using {} to parse hive records from table {}",
-          parser.getClass().getSimpleName(), tableName.dotString());
+          parser.getClass().getSimpleName(), tableDesc.dotString());
     } else {
       LOG.info("Using {} chosen by user instead of {} to parse hive records from table {}",
           forcedParserClass.getSimpleName(), parser.getClass().getSimpleName(),
-          tableName.dotString());
-      parser = createForcedParser(deserializer, numColumns, partitionValues,
+          tableDesc.dotString());
+      parser = createForcedParser(deserializer, schema, partitionValues,
           data, forcedParserClass);
     }
 
@@ -125,23 +128,23 @@ public class Parsers {
    * Create a parser forced by user
    *
    * @param deserializer Hive Deserializer
-   * @param numColumns number of columns
+   * @param schema Hive table schema
    * @param partitionValues partition data
    * @param data array parser data
    * @param forcedParserClass class of record parser
    * @return RecordParser
    */
   private static RecordParser<Writable> createForcedParser(Deserializer deserializer,
-      int numColumns, String[] partitionValues, ArrayParserData data,
+      HiveTableSchema schema, String[] partitionValues, ArrayParserData data,
       Class<? extends RecordParser> forcedParserClass)
   {
     RecordParser<Writable> forcedParser;
     if (BytesParser.class.equals(forcedParserClass)) {
-      forcedParser = new BytesParser(partitionValues, numColumns, data);
+      forcedParser = new BytesParser(partitionValues, data);
     } else if (ArrayParser.class.equals(forcedParserClass)) {
-      forcedParser = new ArrayParser(partitionValues, numColumns, data);
+      forcedParser = new ArrayParser(partitionValues, data);
     } else if (DefaultParser.class.equals(forcedParserClass)) {
-      forcedParser = new DefaultParser(deserializer, partitionValues, numColumns);
+      forcedParser = new DefaultParser(deserializer, partitionValues, schema);
     } else {
       throw new IllegalArgumentException("Don't know how to create parser " +
           forcedParserClass.getCanonicalName());

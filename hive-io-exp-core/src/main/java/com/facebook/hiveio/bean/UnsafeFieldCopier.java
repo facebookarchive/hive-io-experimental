@@ -88,7 +88,7 @@ public abstract class UnsafeFieldCopier extends FieldCopier {
     @Override
     public void setValue(HiveReadableRecord fromRecord, Object toObject) {
       UNSAFE.putByte(toObject, getToObjectOffset(),
-          (byte) fromRecord.getLong(getFromHiveIndex()));
+          fromRecord.getByte(getFromHiveIndex()));
     }
   }
 
@@ -97,7 +97,7 @@ public abstract class UnsafeFieldCopier extends FieldCopier {
     @Override
     public void setValue(HiveReadableRecord fromRecord, Object toObject) {
       UNSAFE.putShort(toObject, getToObjectOffset(),
-          (short) fromRecord.getLong(getFromHiveIndex()));
+          fromRecord.getShort(getFromHiveIndex()));
     }
   }
 
@@ -106,7 +106,7 @@ public abstract class UnsafeFieldCopier extends FieldCopier {
     @Override
     public void setValue(HiveReadableRecord fromRecord, Object toObject) {
       UNSAFE.putInt(toObject, getToObjectOffset(),
-          (int) fromRecord.getLong(getFromHiveIndex()));
+          fromRecord.getInt(getFromHiveIndex()));
     }
   }
 
@@ -124,7 +124,7 @@ public abstract class UnsafeFieldCopier extends FieldCopier {
     @Override
     public void setValue(HiveReadableRecord fromRecord, Object toObject) {
       UNSAFE.putFloat(toObject, getToObjectOffset(),
-          (float) fromRecord.getDouble(getFromHiveIndex()));
+          fromRecord.getFloat(getFromHiveIndex()));
     }
   }
 

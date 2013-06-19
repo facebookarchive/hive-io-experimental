@@ -95,7 +95,7 @@ public abstract class ReflectasmFieldCopier extends FieldCopier {
     @Override
     public void setValue(HiveReadableRecord fromRecord, Object toObject) {
       getFieldAccess().setByte(toObject, getToObjectIndex(),
-          (byte) fromRecord.getLong(getFromHiveIndex()));
+          fromRecord.getByte(getFromHiveIndex()));
     }
   }
 
@@ -104,7 +104,7 @@ public abstract class ReflectasmFieldCopier extends FieldCopier {
     @Override
     public void setValue(HiveReadableRecord fromRecord, Object toObject) {
       getFieldAccess().setShort(toObject, getToObjectIndex(),
-          (short) fromRecord.getLong(getFromHiveIndex()));
+          fromRecord.getShort(getFromHiveIndex()));
     }
   }
 
@@ -113,7 +113,7 @@ public abstract class ReflectasmFieldCopier extends FieldCopier {
     @Override
     public void setValue(HiveReadableRecord fromRecord, Object toObject) {
       getFieldAccess().setInt(toObject, getToObjectIndex(),
-          (int) fromRecord.getLong(getFromHiveIndex()));
+          fromRecord.getInt(getFromHiveIndex()));
     }
   }
 
@@ -131,7 +131,7 @@ public abstract class ReflectasmFieldCopier extends FieldCopier {
     @Override
     public void setValue(HiveReadableRecord fromRecord, Object toObject) {
       getFieldAccess().setFloat(toObject, getToObjectIndex(),
-          (float) fromRecord.getDouble(getFromHiveIndex()));
+          fromRecord.getFloat(getFromHiveIndex()));
     }
   }
 
