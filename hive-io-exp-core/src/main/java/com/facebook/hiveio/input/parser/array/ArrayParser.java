@@ -43,12 +43,12 @@ public class ArrayParser implements RecordParser {
    * Constructor
    *
    * @param partitionValues partition info
-   * @param numColumns number of columns
    * @param parserData parser data
    */
-  public ArrayParser(String[] partitionValues, int numColumns, ArrayParserData parserData) {
+  public ArrayParser(String[] partitionValues, ArrayParserData parserData) {
     this.parserData = parserData;
-    this.record = new ArrayRecord(numColumns, partitionValues, parserData.hiveTypes);
+    this.record = new ArrayRecord(parserData.schema.numColumns(), partitionValues,
+        parserData.hiveTypes);
   }
 
   @Override

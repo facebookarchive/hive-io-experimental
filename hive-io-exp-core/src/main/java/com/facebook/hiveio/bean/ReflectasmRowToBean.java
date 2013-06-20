@@ -57,7 +57,7 @@ public class ReflectasmRowToBean<X> implements RowToBean<X> {
       fieldCopier.setFieldAccess(fieldAccess);
       int hiveIndex = tableSchema.positionOf(name);
       if (hiveIndex == -1) {
-        throw new IllegalArgumentException("Table " + tableSchema.getTableName() +
+        throw new IllegalArgumentException("Table " + tableSchema.getTableDesc() +
           " does not have column " + name);
       }
       fieldCopier.setFromHiveIndex(hiveIndex);

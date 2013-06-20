@@ -15,7 +15,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.facebook.hiveio.input.parser;
+package com.facebook.hiveio.input;
 
 import org.testng.annotations.Test;
 

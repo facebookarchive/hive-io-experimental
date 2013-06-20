@@ -19,15 +19,18 @@ package com.facebook.hiveio.input.parser.array;
 
 import com.facebook.hiveio.common.HiveType;
 import com.facebook.hiveio.common.NativeType;
+import com.facebook.hiveio.input.parser.Records;
 import com.facebook.hiveio.record.HiveReadableRecord;
 import com.google.common.base.Objects;
 
 import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Record backed by arrays
  */
-class ArrayRecord implements HiveReadableRecord {
+public class ArrayRecord implements HiveReadableRecord {
   /** Number of columns */
   private final int numColumns;
 
@@ -183,6 +186,11 @@ class ArrayRecord implements HiveReadableRecord {
     }
   }
 
+  @Override
+  public Object get(int index, HiveType hiveType) {
+    return Records.get(this, index, hiveType);
+  }
+
   /**
    * Get primitive column value
    *
@@ -207,45 +215,67 @@ class ArrayRecord implements HiveReadableRecord {
 
   @Override
   public boolean getBoolean(int index) {
-//    verifyType(index, NativeType.BOOLEAN);
+    Records.verifyType(index, HiveType.BOOLEAN, hiveTypes[index]);
     return booleans[index];
   }
 
   @Override
+  public byte getByte(int index) {
+    Records.verifyType(index, HiveType.BYTE, hiveTypes[index]);
+    return (byte) longs[index];
+  }
+
+  @Override
+  public short getShort(int index) {
+    Records.verifyType(index, HiveType.SHORT, hiveTypes[index]);
+    return (short) longs[index];
+  }
+
+  @Override
+  public int getInt(int index) {
+    Records.verifyType(index, HiveType.INT, hiveTypes[index]);
+    return (int) longs[index];
+  }
+
+  @Override
   public long getLong(int index) {
-//    verifyType(index, NativeType.LONG);
+    Records.verifyType(index, HiveType.LONG, hiveTypes[index]);
     return longs[index];
   }
 
   @Override
+  public float getFloat(int index) {
+    Records.verifyType(index, HiveType.FLOAT, hiveTypes[index]);
+    return (float) doubles[index];
+  }
+
+  @Override
   public double getDouble(int index) {
-//    verifyType(index, NativeType.DOUBLE);
+    Records.verifyType(index, HiveType.DOUBLE, hiveTypes[index]);
     return doubles[index];
   }
 
   @Override
   public String getString(int index) {
-//    verifyType(index, NativeType.STRING);
+    Records.verifyType(index, HiveType.STRING, hiveTypes[index]);
     return strings[index];
+  }
+
+  @Override
+  public <K, V> Map<K, V> getMap(int index) {
+    Records.verifyMapLike(index, hiveTypes[index]);
+    return (Map<K, V>) objects[index];
+  }
+
+  @Override
+  public <T> List<T> getList(int index) {
+    Records.verifyType(index, HiveType.LIST, hiveTypes[index]);
+    return (List<T>) objects[index];
   }
 
   @Override
   public boolean isNull(int index) {
     return nulls[index];
-  }
-
-  /**
-   * Verify column's type is what we expect
-   *
-   * @param index column index
-   * @param expectedType expected type
-   */
-  private void verifyType(int index, NativeType expectedType) {
-    if (hiveTypes[index].getNativeType() != expectedType) {
-      throw new IllegalStateException(
-          String.format("Got an unexpected type %s from row %s for column %d, should be %s",
-              hiveTypes[index], this, index, expectedType));
-    }
   }
 
   @Override

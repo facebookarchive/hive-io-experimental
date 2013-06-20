@@ -26,6 +26,7 @@ import org.apache.hadoop.io.Writable;
 
 import com.facebook.hiveio.input.parser.RecordParser;
 import com.facebook.hiveio.record.HiveReadableRecord;
+import com.facebook.hiveio.schema.HiveTableSchema;
 
 import java.io.IOException;
 import java.util.List;
@@ -40,17 +41,18 @@ public class DefaultParser implements RecordParser {
   private final ObjectInspector rowInspector;
   /** Partition information */
   private final String[] partitionValues;
-  /** Number of columns in the table */
-  private final int numColumns;
+  /** Schema for hive table */
+  private final HiveTableSchema schema;
 
   /**
    * Constructor
    *
    * @param deserializer Hive Deserializer
    * @param partitionValues partition data
-   * @param numColumns number of columns
+   * @param schema Hive table schema
    */
-  public DefaultParser(Deserializer deserializer, String[] partitionValues, int numColumns) {
+  public DefaultParser(Deserializer deserializer, String[] partitionValues,
+      HiveTableSchema schema) {
     this.deserializer = deserializer;
     try {
       this.rowInspector = (StructObjectInspector) deserializer.getObjectInspector();
@@ -59,12 +61,12 @@ public class DefaultParser implements RecordParser {
     }
 
     this.partitionValues = partitionValues;
-    this.numColumns = numColumns;
+    this.schema = schema;
   }
 
   @Override
   public HiveReadableRecord createRecord() {
-    return DefaultRecord.forReading(numColumns, partitionValues);
+    return DefaultRecord.forReading(schema, partitionValues);
   }
 
   @Override

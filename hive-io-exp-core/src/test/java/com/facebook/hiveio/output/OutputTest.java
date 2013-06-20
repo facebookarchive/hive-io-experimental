@@ -125,12 +125,12 @@ public class OutputTest {
     HiveReadableRecord record = readRecords.next();
     assertEquals(Long.class, record.get(0).getClass());
     assertEquals(Double.class, record.get(1).getClass());
-    assertEquals(1, record.getLong(0));
+    assertEquals(1, record.getInt(0));
     assertEquals(1.1, record.getDouble(1));
 
     assertTrue(readRecords.hasNext());
     record = readRecords.next();
-    assertEquals(2, record.getLong(0));
+    assertEquals(2, record.getInt(0));
     assertEquals(2.2, record.getDouble(1));
 
     assertFalse(readRecords.hasNext());
