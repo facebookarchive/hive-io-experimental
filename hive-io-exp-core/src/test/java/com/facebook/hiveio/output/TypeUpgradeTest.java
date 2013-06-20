@@ -77,7 +77,7 @@ public class TypeUpgradeTest {
     writeRecord.set(0, (byte) 4);
     HiveOutput.writeTable(outputDesc, writeRecords);
     readRecord = readSingleRecord(inputDesc);
-    assertEquals(4, readRecord.getLong(0));
+    assertEquals(4, readRecord.getByte(0));
 
     checkSetThrows(writeRecord, 0, (short) 4);
     checkSetThrows(writeRecord, 0, 4);
@@ -95,13 +95,13 @@ public class TypeUpgradeTest {
     writeRecord.set(1, (byte) 4);
     HiveOutput.writeTable(outputDesc, writeRecords);
     readRecord = readSingleRecord(inputDesc);
-    assertEquals(4, readRecord.getLong(1));
+    assertEquals(4, readRecord.getShort(1));
 
     recreateTable();
     writeRecord.set(1, (short) 4);
     HiveOutput.writeTable(outputDesc, writeRecords);
     readRecord = readSingleRecord(inputDesc);
-    assertEquals(4, readRecord.getLong(1));
+    assertEquals(4, readRecord.getShort(1));
 
     checkSetThrows(writeRecord, 1, 4);
     checkSetThrows(writeRecord, 1, (long) 4);
@@ -118,19 +118,19 @@ public class TypeUpgradeTest {
     writeRecord.set((byte) 2, 4);
     HiveOutput.writeTable(outputDesc, writeRecords);
     readRecord = readSingleRecord(inputDesc);
-    assertEquals(4, readRecord.getLong(2));
+    assertEquals(4, readRecord.getInt(2));
 
     recreateTable();
     writeRecord.set((short) 2, 4);
     HiveOutput.writeTable(outputDesc, writeRecords);
     readRecord = readSingleRecord(inputDesc);
-    assertEquals(4, readRecord.getLong(2));
+    assertEquals(4, readRecord.getInt(2));
 
     recreateTable();
     writeRecord.set(2, 4);
     HiveOutput.writeTable(outputDesc, writeRecords);
     readRecord = readSingleRecord(inputDesc);
-    assertEquals(4, readRecord.getLong(2));
+    assertEquals(4, readRecord.getInt(2));
 
     checkSetThrows(writeRecord, 2, (long) 4);
     checkSetThrows(writeRecord, 2, 4.2f);
@@ -149,7 +149,7 @@ public class TypeUpgradeTest {
     writeRecord.set(4, 4.2f);
     HiveOutput.writeTable(outputDesc, writeRecords);
     readRecord = readSingleRecord(inputDesc);
-    assertEquals(4.2, readRecord.getDouble(4), DELTA);
+    assertEquals(4.2, readRecord.getFloat(4), DELTA);
 
     checkSetThrows(writeRecord, 4, 4.2d);
 
@@ -212,31 +212,31 @@ public class TypeUpgradeTest {
     r1.set(1, (byte) 4);
     HiveOutput.writeTable(outputDesc, writeRecords);
     readRecord = readSingleRecord(inputDesc);
-    assertEquals(4, readRecord.getLong(1));
+    assertEquals(4, readRecord.getShort(1));
 
     recreateTable();
     r1.set(1, (short) 4);
     HiveOutput.writeTable(outputDesc, writeRecords);
     readRecord = readSingleRecord(inputDesc);
-    assertEquals(4, readRecord.getLong(1));
+    assertEquals(4, readRecord.getShort(1));
 
     recreateTable();
     r1.set(2, (byte) 4);
     HiveOutput.writeTable(outputDesc, writeRecords);
     readRecord = readSingleRecord(inputDesc);
-    assertEquals(4, readRecord.getLong(2));
+    assertEquals(4, readRecord.getInt(2));
 
     recreateTable();
     r1.set(2, (short) 4);
     HiveOutput.writeTable(outputDesc, writeRecords);
     readRecord = readSingleRecord(inputDesc);
-    assertEquals(4, readRecord.getLong(2));
+    assertEquals(4, readRecord.getInt(2));
 
     recreateTable();
     r1.set(2, 4);
     HiveOutput.writeTable(outputDesc, writeRecords);
     readRecord = readSingleRecord(inputDesc);
-    assertEquals(4, readRecord.getLong(2));
+    assertEquals(4, readRecord.getInt(2));
 
     recreateTable();
     r1.set(3, (byte) 4);
@@ -266,31 +266,31 @@ public class TypeUpgradeTest {
     r1.set(4, (byte) 4);
     HiveOutput.writeTable(outputDesc, writeRecords);
     readRecord = readSingleRecord(inputDesc);
-    assertEquals(4, readRecord.getDouble(4), DELTA);
+    assertEquals(4, readRecord.getFloat(4), DELTA);
 
     recreateTable();
     r1.set(4, (short) 4);
     HiveOutput.writeTable(outputDesc, writeRecords);
     readRecord = readSingleRecord(inputDesc);
-    assertEquals(4, readRecord.getDouble(4), DELTA);
+    assertEquals(4, readRecord.getFloat(4), DELTA);
 
     recreateTable();
     r1.set(4, 4);
     HiveOutput.writeTable(outputDesc, writeRecords);
     readRecord = readSingleRecord(inputDesc);
-    assertEquals(4, readRecord.getDouble(4), DELTA);
+    assertEquals(4, readRecord.getFloat(4), DELTA);
 
     recreateTable();
     r1.set(4, 4L);
     HiveOutput.writeTable(outputDesc, writeRecords);
     readRecord = readSingleRecord(inputDesc);
-    assertEquals(4, readRecord.getDouble(4), DELTA);
+    assertEquals(4, readRecord.getFloat(4), DELTA);
 
     recreateTable();
     r1.set(4, 4.2f);
     HiveOutput.writeTable(outputDesc, writeRecords);
     readRecord = readSingleRecord(inputDesc);
-    assertEquals(4.2, readRecord.getDouble(4), DELTA);
+    assertEquals(4.2, readRecord.getFloat(4), DELTA);
 
     recreateTable();
     r1.set(5, (byte) 4);

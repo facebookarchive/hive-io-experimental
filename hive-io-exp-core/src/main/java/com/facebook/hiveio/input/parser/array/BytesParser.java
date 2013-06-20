@@ -40,12 +40,12 @@ public class BytesParser implements RecordParser {
    * Constructor
    *
    * @param partitionValues partition data
-   * @param numColumns number of columns
    * @param parserData parser data
    */
-  public BytesParser(String[] partitionValues, int numColumns, ArrayParserData parserData) {
+  public BytesParser(String[] partitionValues, ArrayParserData parserData) {
     columnIndexes = parserData.columnIndexes;
-    record = new ArrayRecord(numColumns, partitionValues, parserData.hiveTypes);
+    record = new ArrayRecord(parserData.schema.numColumns(), partitionValues,
+        parserData.hiveTypes);
   }
 
   @Override

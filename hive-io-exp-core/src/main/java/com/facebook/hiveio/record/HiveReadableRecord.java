@@ -18,6 +18,11 @@
 
 package com.facebook.hiveio.record;
 
+import com.facebook.hiveio.common.HiveType;
+
+import java.util.List;
+import java.util.Map;
+
 /**
  * Hive record representing a row for reading.
  */
@@ -47,25 +52,77 @@ public interface HiveReadableRecord {
    *
    * @param index column index
    * @return Object for column
+   * @deprecated use {@link HiveReadableRecord#get(int, com.facebook.hiveio.common.HiveType)}
+   *             or one of the getX() methods
    */
+  @Deprecated
   Object get(int index);
 
   /**
+   * Get column at given index.
+   *
+   * Regular data columns from the tables should always be placed first, and then
+   * partition value columns.
+   *
+   * You should probably be using one of getX() methods below instead.
+   *
+   * @param index column index
+   * @param hiveType HiveType
+   * @return Object for column
+   */
+  Object get(int index, HiveType hiveType);
+
+  /**
    * Get boolean column at given index
+   *
    * @param index column index
    * @return boolean at index
    */
   boolean getBoolean(int index);
 
   /**
+   * Get byte column at given index
+   *
+   * @param index column index
+   * @return byte at index
+   */
+  byte getByte(int index);
+
+  /**
+   * Get short column at given index
+   *
+   * @param index column index
+   * @return short at index
+   */
+  short getShort(int index);
+
+  /**
+   * Get int column at given index
+   *
+   * @param index column index
+   * @return int at index
+   */
+  int getInt(int index);
+
+  /**
    * Get long column at given index
+   *
    * @param index column index
    * @return long at index
    */
   long getLong(int index);
 
   /**
+   * Get float column at given index
+   *
+   * @param index column index
+   * @return float at index
+   */
+  float getFloat(int index);
+
+  /**
    * Get double column at given index
+   *
    * @param index column index
    * @return double at index
    */
@@ -81,7 +138,29 @@ public interface HiveReadableRecord {
   String getString(int index);
 
   /**
+   * Get Map column at given index.
+   * Note that partition values are all strings.
+   *
+   * @param <K> key type
+   * @param <V> value type
+   * @param index column index
+   * @return Map at index
+   */
+  <K, V> Map<K, V> getMap(int index);
+
+  /**
+   * Get List column at given index.
+   * Note that partition values are all strings.
+   *
+   * @param <T> item type
+   * @param index column index
+   * @return List at index
+   */
+  <T> List<T> getList(int index);
+
+  /**
    * Check if value at column is null
+   *
    * @param index column index
    * @return true if value at at column is null
    */
