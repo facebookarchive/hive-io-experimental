@@ -32,6 +32,7 @@ import org.slf4j.LoggerFactory;
 import com.facebook.hiveio.common.Classes;
 import com.facebook.hiveio.common.HadoopUtils;
 import com.facebook.hiveio.common.Writables;
+import com.facebook.hiveio.hadoop.shims.api.HadoopShims;
 import com.google.common.base.Preconditions;
 
 import java.io.DataInput;
@@ -50,7 +51,7 @@ class InputPartition implements Writable {
   /** Data for this partition */
   private final InputSplitData inputSplitData;
   /** Class for InputFormat to read this partition */
-  private Class<? extends InputFormat> inputFormatClass;
+  private Class<? extends HadoopShims.InputFormatShim> inputFormatClass;
   /** Location in Hadoop */
   private String location;
 

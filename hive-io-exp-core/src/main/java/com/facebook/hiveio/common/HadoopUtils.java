@@ -32,6 +32,8 @@ import org.apache.hadoop.mapreduce.lib.output.FileOutputCommitter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.facebook.hiveio.hadoop.shims.api.HadoopShims;
+
 import java.io.IOException;
 
 /**
@@ -104,7 +106,7 @@ public class HadoopUtils {
    * @param conf Configuration to use
    * @return output directory
    */
-  public static String getOutputDir(Configuration conf) {
+  public static String getOutputDir(HadoopShims.ConfigurationShim conf) {
     return conf.get(OUTPUT_DIR_KEY);
   }
 
@@ -113,7 +115,7 @@ public class HadoopUtils {
    * @param conf Configuration to use
    * @return Path to output directory
    */
-  public static Path getOutputPath(Configuration conf) {
+  public static Path getOutputPath(HadoopShims.ConfigurationShim conf) {
     return new Path(getOutputDir(conf));
   }
 
@@ -122,7 +124,7 @@ public class HadoopUtils {
    * @param conf Configuration to use
    * @param path output directory
    */
-  public static void setOutputDir(Configuration conf, String path) {
+  public static void setOutputDir(HadoopShims.ConfigurationShim conf, String path) {
     conf.set(OUTPUT_DIR_KEY, path);
   }
 
@@ -131,7 +133,7 @@ public class HadoopUtils {
    * @param conf Configuration to use
    * @throws IOException I/O errors
    */
-  public static void deleteOutputDir(Configuration conf) throws IOException {
+  public static void deleteOutputDir(HadoopShims.ConfigurationShim conf) throws IOException {
     Path outputPath = getOutputPath(conf);
     outputPath.getFileSystem(conf).delete(outputPath, true);
   }
@@ -141,7 +143,7 @@ public class HadoopUtils {
    * @param conf Configuration
    * @param numAttempts number of attempts
    */
-  public static void setMapAttempts(Configuration conf, int numAttempts) {
+  public static void setMapAttempts(HadoopShims.ConfigurationShim conf, int numAttempts) {
     conf.setInt("mapred.map.max.attempts", numAttempts);
   }
 
@@ -159,7 +161,7 @@ public class HadoopUtils {
    * @param conf Configuration to use
    * @return true if success marker required
    */
-  public static boolean needSuccessMarker(Configuration conf) {
+  public static boolean needSuccessMarker(HadoopShims.ConfigurationShim conf) {
     return conf.getBoolean("mapreduce.fileoutputcommitter.marksuccessfuljobs",
         false);
   }
@@ -169,7 +171,7 @@ public class HadoopUtils {
    * @param conf Configuration to use
    * @param writableClass Class that is Writable
    */
-  public static void setOutputKeyWritableClass(Configuration conf,
+  public static void setOutputKeyWritableClass(HadoopShims.ConfigurationShim conf,
       Class<? extends Writable> writableClass) {
     conf.set("mapred.output.key.class", writableClass.getName());
   }
@@ -179,7 +181,7 @@ public class HadoopUtils {
    * @param conf Configuration to use
    * @param writableClass Class that is Writable
    */
-  public static void setOutputValueWritableClass(Configuration conf,
+  public static void setOutputValueWritableClass(HadoopShims.ConfigurationShim conf,
       Class<? extends Writable> writableClass) {
     conf.get("mapred.output.value.class", writableClass.getName());
   }
@@ -214,7 +216,7 @@ public class HadoopUtils {
    * @param conf Configuration to use
    * @param path path to set
    */
-  public static void setInputDir(Configuration conf, String path) {
+  public static void setInputDir(HadoopShims.ConfigurationShim conf, String path) {
     conf.set("mapred.input.dir", path);
   }
 }

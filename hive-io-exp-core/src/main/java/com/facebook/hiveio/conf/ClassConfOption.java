@@ -17,9 +17,10 @@
  */
 package com.facebook.hiveio.conf;
 
-import org.apache.hadoop.conf.Configuration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.facebook.hiveio.hadoop.shims.api.ConfigurationShim;
 
 /**
  * Class configuration option
@@ -91,7 +92,7 @@ public class ClassConfOption<C> extends AbstractConfOption {
    * @param conf Configuration
    * @return Class set for key, or defaultClass
    */
-  public Class<? extends C> get(Configuration conf) {
+  public Class<? extends C> get(ConfigurationShim conf) {
     return conf.getClass(getKey(), defaultClass, interfaceClass);
   }
 
@@ -100,7 +101,7 @@ public class ClassConfOption<C> extends AbstractConfOption {
    * @param conf Configuration
    * @return array of classes
    */
-  public Class<? extends C>[] getArray(Configuration conf) {
+  public Class<? extends C>[] getArray(ConfigurationShim conf) {
     return getClassesOfType(conf, getKey(), interfaceClass);
   }
 
@@ -114,7 +115,7 @@ public class ClassConfOption<C> extends AbstractConfOption {
    * @param <T> Generic type of interface class
    * @return array of Classes implementing interface specified.
    */
-  public static <T> Class<? extends T>[] getClassesOfType(Configuration conf,
+  public static <T> Class<? extends T>[] getClassesOfType(ConfigurationShim conf,
       String name, Class<T> xface, Class<? extends T> ... defaultValue) {
     Class<?>[] klasses = conf.getClasses(name, defaultValue);
     for (Class<?> klass : klasses) {
@@ -132,7 +133,7 @@ public class ClassConfOption<C> extends AbstractConfOption {
    * @param defaultValue default value
    * @return Class
    */
-  public Class<? extends C> getWithDefault(Configuration conf,
+  public Class<? extends C> getWithDefault(ConfigurationShim conf,
       Class<? extends C> defaultValue) {
     return conf.getClass(getKey(), defaultValue, interfaceClass);
   }
@@ -142,7 +143,7 @@ public class ClassConfOption<C> extends AbstractConfOption {
    * @param conf Configuration
    * @param klass Class to set
    */
-  public void set(Configuration conf, Class<? extends C> klass) {
+  public void set(ConfigurationShim conf, Class<? extends C> klass) {
     conf.setClass(getKey(), klass, interfaceClass);
   }
 
@@ -151,7 +152,7 @@ public class ClassConfOption<C> extends AbstractConfOption {
    * @param conf Configuration
    * @param klass Class to add
    */
-  public void add(Configuration conf, Class<? extends C> klass) {
+  public void add(ConfigurationShim conf, Class<? extends C> klass) {
     addToClasses(conf, getKey(), klass, interfaceClass);
   }
 
@@ -165,7 +166,7 @@ public class ClassConfOption<C> extends AbstractConfOption {
    * @param klass interface of the class being set.
    * @param xface Class to add to the list.
    */
-  public static <T> void addToClasses(Configuration conf, String name,
+  public static <T> void addToClasses(ConfigurationShim conf, String name,
       Class<? extends T> klass, Class<T> xface) {
     if (!xface.isAssignableFrom(klass)) {
       throw new RuntimeException(klass + " does not implement " +

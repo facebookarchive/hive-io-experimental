@@ -17,13 +17,11 @@
  */
 package com.facebook.hiveio.common;
 
-import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.hive.conf.HiveConf;
 import org.apache.hadoop.hive.metastore.api.ThriftHiveMetastore;
-import org.apache.hadoop.io.Writable;
-import org.apache.hadoop.io.WritableUtils;
 import org.apache.thrift.TException;
 
+import com.facebook.hiveio.hadoop.shims.api.ConfigurationShim;
 import com.facebook.hiveio.output.HiveOutputDescription;
 import com.google.common.base.CharMatcher;
 import com.google.common.base.Objects;
@@ -64,7 +62,7 @@ public class MetastoreDesc implements Writable {
    * @return Metastore client
    * @throws TException
    */
-  public ThriftHiveMetastore.Iface makeClient(Configuration conf)
+  public ThriftHiveMetastore.Iface makeClient(ConfigurationShim conf)
     throws TException
   {
     ThriftHiveMetastore.Iface client;

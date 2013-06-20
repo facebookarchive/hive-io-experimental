@@ -18,15 +18,15 @@
 
 package com.facebook.hiveio.input;
 
-import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.hive.metastore.api.ThriftHiveMetastore;
-import org.apache.hadoop.io.Writable;
-import org.apache.hadoop.io.WritableUtils;
 import org.apache.thrift.TException;
 
 import com.facebook.hiveio.common.HiveTableDesc;
 import com.facebook.hiveio.common.MetastoreDesc;
 import com.facebook.hiveio.common.Writables;
+import com.facebook.hiveio.hadoop.shims.api.ConfigurationShim;
+import com.facebook.hiveio.hadoop.shims.api.WritableHelper;
+import com.facebook.hiveio.hadoop.shims.api.WritableShim;
 import com.google.common.base.Objects;
 import com.google.common.collect.Lists;
 
@@ -38,7 +38,7 @@ import java.util.List;
 /**
  * Description of hive table to read from.
  */
-public class HiveInputDescription implements Writable {
+public class HiveInputDescription implements WritableShim {
   /** Metastore to use. Optional. */
   private MetastoreDesc metastoreDesc = new MetastoreDesc();
   /** Hive table */
@@ -158,25 +158,26 @@ public class HiveInputDescription implements Writable {
    * @return Thrift Metastore client
    * @throws TException
    */
-  public ThriftHiveMetastore.Iface metastoreClient(Configuration conf) throws TException {
+  public ThriftHiveMetastore.Iface metastoreClient(
+      ConfigurationShim conf) throws TException {
     return metastoreDesc.makeClient(conf);
   }
 
   @Override
-  public void write(DataOutput out) throws IOException {
+  public void write(DataOutput out, WritableHelper helper) throws IOException {
     metastoreDesc.write(out);
     tableDesc.write(out);
     Writables.writeStringList(out, columns);
-    WritableUtils.writeString(out, partitionFilter);
+    helper.writeString(out, partitionFilter);
     out.writeInt(numSplits);
   }
 
   @Override
-  public void readFields(DataInput in) throws IOException {
+  public void readFields(DataInput in, WritableHelper helper) throws IOException {
     metastoreDesc.readFields(in);
     tableDesc.readFields(in);
     Writables.readStringList(in, columns);
-    partitionFilter = WritableUtils.readString(in);
+    partitionFilter = helper.readString(in);
     numSplits = in.readInt();
   }
 

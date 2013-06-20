@@ -17,7 +17,7 @@
  */
 package com.facebook.hiveio.conf;
 
-import org.apache.hadoop.conf.Configuration;
+import com.facebook.hiveio.hadoop.shims.api.ConfigurationShim;
 
 /**
  * Long configuration option
@@ -54,7 +54,7 @@ public class LongConfOption extends AbstractConfOption {
    * @param conf Configuration
    * @return value set for key, or defaultValue
    */
-  public long get(Configuration conf) {
+  public long get(ConfigurationShim conf) {
     return conf.getLong(getKey(), defaultValue);
   }
 
@@ -63,7 +63,7 @@ public class LongConfOption extends AbstractConfOption {
    * @param conf Configuration
    * @param value to set
    */
-  public void set(Configuration conf, long value) {
+  public void set(ConfigurationShim conf, long value) {
     conf.setLong(getKey(), value);
   }
 
@@ -72,7 +72,7 @@ public class LongConfOption extends AbstractConfOption {
    * @param conf Configuration
    * @param value to set
    */
-  public void setIfUnset(Configuration conf, long value) {
+  public void setIfUnset(ConfigurationShim conf, long value) {
     if (conf.get(getKey()) == null) {
       conf.setLong(getKey(), value);
     }

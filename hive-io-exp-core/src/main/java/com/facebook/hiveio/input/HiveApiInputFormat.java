@@ -18,18 +18,10 @@
 
 package com.facebook.hiveio.input;
 
-import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.hive.metastore.api.Partition;
 import org.apache.hadoop.hive.metastore.api.Table;
 import org.apache.hadoop.hive.metastore.api.ThriftHiveMetastore;
 import org.apache.hadoop.hive.serde2.Deserializer;
-import org.apache.hadoop.io.Writable;
-import org.apache.hadoop.io.WritableComparable;
-import org.apache.hadoop.mapred.JobConf;
-import org.apache.hadoop.mapreduce.InputFormat;
-import org.apache.hadoop.mapreduce.InputSplit;
-import org.apache.hadoop.mapreduce.JobContext;
-import org.apache.hadoop.mapreduce.TaskAttemptContext;
 import org.apache.thrift.TException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -38,6 +30,9 @@ import com.facebook.hiveio.common.HadoopUtils;
 import com.facebook.hiveio.common.HiveTableDesc;
 import com.facebook.hiveio.common.HiveUtils;
 import com.facebook.hiveio.common.Writables;
+import com.facebook.hiveio.hadoop.shims.api.ConfigurationShim;
+import com.facebook.hiveio.hadoop.shims.api.HadoopShims;
+import com.facebook.hiveio.hadoop.shims.api.InputFormatShim;
 import com.facebook.hiveio.input.parser.Parsers;
 import com.facebook.hiveio.input.parser.RecordParser;
 import com.facebook.hiveio.record.HiveReadableRecord;
@@ -59,7 +54,7 @@ import static com.google.common.collect.Lists.transform;
  * InputFormat to read from Hive
  */
 public class HiveApiInputFormat
-    extends InputFormat<WritableComparable, HiveReadableRecord> {
+    implements InputFormatShim<Object, HiveReadableRecord> {
   /** Default profile ID if none given */
   public static final String DEFAULT_PROFILE_ID = "input-profile";
 
@@ -109,7 +104,7 @@ public class HiveApiInputFormat
    * @param conf Configuration to use
    * @return HiveTableSchema
    */
-  public HiveTableSchema getTableSchema(Configuration conf) {
+  public HiveTableSchema getTableSchema(ConfigurationShim conf) {
     return HiveTableSchemas.get(conf, myProfileId);
   }
 
@@ -130,7 +125,7 @@ public class HiveApiInputFormat
    * @param inputDesc Hive table input description
    * @param profileId profile ID
    */
-  public static void setProfileInputDesc(Configuration conf,
+  public static void setProfileInputDesc(ConfigurationShim conf,
     HiveInputDescription inputDesc, String profileId) {
     conf.set(profileConfKey(profileId), Writables.writeToEncodedStr(inputDesc));
   }
@@ -141,7 +136,7 @@ public class HiveApiInputFormat
    * @param conf Configuration
    * @return HiveInputDescription
    */
-  private HiveInputDescription readProfileInputDesc(Configuration conf)
+  private HiveInputDescription readProfileInputDesc(ConfigurationShim conf)
   {
     HiveInputDescription inputDesc = new HiveInputDescription();
     Writables.readFieldsFromEncodedStr(conf.get(profileConfKey(myProfileId)), inputDesc);
@@ -149,10 +144,9 @@ public class HiveApiInputFormat
   }
 
   @Override
-  public List<InputSplit> getSplits(JobContext jobContext)
+  public List<HadoopShims> getSplits(ConfigurationShim conf)
     throws IOException, InterruptedException
   {
-    Configuration conf = jobContext.getConfiguration();
     HiveInputDescription inputDesc = readProfileInputDesc(conf);
 
     ThriftHiveMetastore.Iface client;
@@ -174,7 +168,7 @@ public class HiveApiInputFormat
    * @return list of input splits
    * @throws IOException
    */
-  public List<InputSplit> getSplits(Configuration conf,
+  public List<HadoopShims> getSplits(ConfigurationShim conf,
     HiveInputDescription inputDesc, ThriftHiveMetastore.Iface client)
     throws IOException
   {
@@ -193,7 +187,7 @@ public class HiveApiInputFormat
 
     List<InputPartition> partitions = computePartitions(inputDesc, client, table);
 
-    List<InputSplit> splits = computeSplits(conf, inputDesc, tableSchema, partitions);
+    List<HadoopShims> splits = computeSplits(conf, inputDesc, tableSchema, partitions);
 
     return splits;
   }
@@ -208,11 +202,12 @@ public class HiveApiInputFormat
    * @return list of input splits
    * @throws IOException
    */
-  private List<InputSplit> computeSplits(Configuration conf, HiveInputDescription inputDesc,
-    HiveTableSchema tableSchema, List<InputPartition> partitions) throws IOException
+  private List<HadoopShims> computeSplits(ConfigurationShim conf,
+      HiveInputDescription inputDesc, HiveTableSchema tableSchema,
+      List<InputPartition> partitions) throws IOException
   {
     int partitionNum = 0;
-    List<InputSplit> splits = Lists.newArrayList();
+    List<HadoopShims> splits = Lists.newArrayList();
 
     int[] columnIds = computeColumnIds(inputDesc.getColumns(), tableSchema);
 
@@ -229,7 +224,7 @@ public class HiveApiInputFormat
           baseInputFormat.getClass().getCanonicalName());
 
       for (org.apache.hadoop.mapred.InputSplit baseSplit : baseSplits)  {
-        InputSplit split = new HInputSplit(baseInputFormat, baseSplit,
+        HadoopShims split = new HInputSplit(baseInputFormat, baseSplit,
             tableSchema, columnIds, inputPartition.getInputSplitData(), conf);
         splits.add(split);
       }
@@ -301,10 +296,10 @@ public class HiveApiInputFormat
 
   @Override
   public RecordReaderImpl
-  createRecordReader(InputSplit inputSplit, TaskAttemptContext context)
+  createRecordReader(HadoopShims inputSplit, TaskAttemptContext context)
     throws IOException, InterruptedException
   {
-    Configuration conf = context.getConfiguration();
+    ConfigurationShim conf = context.getConfiguration();
     JobConf jobConf = new JobConf(conf);
 
     HInputSplit split = (HInputSplit) inputSplit;
@@ -337,7 +332,7 @@ public class HiveApiInputFormat
    * @return RecordParser
    */
   private RecordParser<Writable> getParser(Writable exampleValue,
-    HInputSplit split, int[] columnIds, Configuration conf)
+    HInputSplit split, int[] columnIds, ConfigurationShim conf)
   {
     Deserializer deserializer = split.getDeserializer();
     String[] partitionValues = split.getPartitionValues();

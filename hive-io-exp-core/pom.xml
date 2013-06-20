@@ -82,6 +82,11 @@ under the License.
   <dependencies>
     <!-- Compile dependencies -->
     <dependency>
+      <groupId>com.facebook.hiveio</groupId>
+      <artifactId>hadoop-shims-api</artifactId>
+    </dependency>
+
+    <dependency>
       <groupId>com.esotericsoftware.reflectasm</groupId>
       <artifactId>reflectasm</artifactId>
     </dependency>
@@ -115,11 +120,6 @@ under the License.
     </dependency>
 
     <!-- Provided dependencies -->
-    <dependency>
-      <groupId>com.facebook.hadoop</groupId>
-      <artifactId>hadoop-core</artifactId>
-      <scope>provided</scope>
-    </dependency>
     <dependency>
       <groupId>org.apache.hive</groupId>
       <artifactId>hive-exec</artifactId>

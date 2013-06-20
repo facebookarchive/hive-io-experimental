@@ -18,7 +18,6 @@
 
 package com.facebook.hiveio.common;
 
-import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.hive.conf.HiveConf;
 import org.apache.hadoop.hive.metastore.Warehouse;
 import org.apache.hadoop.hive.metastore.api.FieldSchema;
@@ -36,6 +35,7 @@ import org.apache.thrift.TException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.facebook.hiveio.hadoop.shims.api.HadoopShims;
 import com.facebook.hiveio.input.HiveInputDescription;
 import com.google.common.base.Function;
 import com.google.common.collect.Lists;
@@ -96,8 +96,8 @@ public class HiveUtils {
    * @param klass Class
    * @return HiveConf
    */
-  public static HiveConf newHiveConf(Configuration conf, Class<?> klass) {
-    return alterHiveConf(new HiveConf(conf, klass));
+  public static HiveConf newHiveConf(HadoopShims.ConfigurationShim conf, Class<?> klass) {
+    return alterHiveConf(conf.makeHiveConf(klass));
   }
 
   /**
@@ -174,7 +174,8 @@ public class HiveUtils {
    * @return array of HiveType
    * @throws SerDeException
    */
-  public static HiveType[] columnTypes(Configuration conf, StorageDescriptor storageDescriptor)
+  public static HiveType[] columnTypes(HadoopShims.ConfigurationShim conf,
+      StorageDescriptor storageDescriptor)
   {
     SerDeInfo serDeInfo = storageDescriptor.getSerdeInfo();
     SerDe serDe = SerDes.createSerDe(serDeInfo);
@@ -229,7 +230,7 @@ public class HiveUtils {
    * @param conf Configuration to use
    * @param columnIds list of column ids
    */
-  public static void setReadColumnIds(Configuration conf,
+  public static void setReadColumnIds(HadoopShims.ConfigurationShim conf,
                                       List<Integer> columnIds) {
     if (columnIds.isEmpty()) {
       ColumnProjectionUtils.setFullyReadColumns(conf);
@@ -244,7 +245,7 @@ public class HiveUtils {
    * @param conf Configuration to use
    * @param columnIds array of column ids
    */
-  public static void setReadColumnIds(Configuration conf,
+  public static void setReadColumnIds(HadoopShims.ConfigurationShim conf,
                                       int[] columnIds) {
     setReadColumnIds(conf, Ints.asList(columnIds));
   }
@@ -254,7 +255,7 @@ public class HiveUtils {
    * @param conf Configuration to use
    * @param numColumns integer number of columns writing
    */
-  public static void setRCileNumColumns(Configuration conf, int numColumns) {
+  public static void setRCileNumColumns(HadoopShims.ConfigurationShim conf, int numColumns) {
     conf.set("hive.io.rcfile.column.number.conf",
         Integer.toOctalString(numColumns));
   }

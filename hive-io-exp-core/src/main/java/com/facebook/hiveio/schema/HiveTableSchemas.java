@@ -18,7 +18,6 @@
 
 package com.facebook.hiveio.schema;
 
-import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.hive.conf.HiveConf;
 import org.apache.hadoop.hive.metastore.api.Table;
 import org.apache.hadoop.hive.metastore.api.ThriftHiveMetastore;
@@ -29,6 +28,7 @@ import com.facebook.hiveio.common.HiveMetastores;
 import com.facebook.hiveio.common.HiveTableDesc;
 import com.facebook.hiveio.common.HiveUtils;
 import com.facebook.hiveio.common.Writables;
+import com.facebook.hiveio.hadoop.shims.api.ConfigurationShim;
 import com.google.common.base.Function;
 
 /**
@@ -79,7 +79,7 @@ public class HiveTableSchemas {
    * @param profile Profile ID
    * @return schema
    */
-  public static HiveTableSchema get(Configuration conf, String profile)
+  public static HiveTableSchema get(ConfigurationShim conf, String profile)
   {
     String key = profileKey(profile);
     String value = conf.get(key);
@@ -98,7 +98,7 @@ public class HiveTableSchemas {
    * @param profile Profile ID
    * @param hiveTableSchema schema
    */
-  public static void put(Configuration conf, String profile,
+  public static void put(ConfigurationShim conf, String profile,
                          HiveTableSchema hiveTableSchema) {
     conf.set(profileKey(profile), Writables.writeToEncodedStr(hiveTableSchema));
   }
@@ -110,7 +110,7 @@ public class HiveTableSchemas {
    * @param tableName Hive table name
    * @return Hive table schema
    */
-  public static HiveTableSchema lookup(Configuration conf, HiveTableDesc tableName)
+  public static HiveTableSchema lookup(ConfigurationShim conf, HiveTableDesc tableName)
   {
     HiveConf hiveConf = HiveUtils.newHiveConf(conf, HiveTableSchemas.class);
     ThriftHiveMetastore.Iface client;
@@ -136,7 +136,7 @@ public class HiveTableSchemas {
    * @return Hive table schema
    */
   public static HiveTableSchema lookup(ThriftHiveMetastore.Iface client,
-      Configuration conf, HiveTableDesc tableName)
+      ConfigurationShim conf, HiveTableDesc tableName)
   {
     Table table;
     try {

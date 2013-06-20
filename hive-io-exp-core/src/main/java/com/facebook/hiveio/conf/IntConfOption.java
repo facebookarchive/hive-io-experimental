@@ -17,7 +17,7 @@
  */
 package com.facebook.hiveio.conf;
 
-import org.apache.hadoop.conf.Configuration;
+import com.facebook.hiveio.hadoop.shims.api.ConfigurationShim;
 
 /**
  * Integer configuration option
@@ -65,7 +65,7 @@ public class IntConfOption extends AbstractConfOption {
    * @param conf Configuration
    * @return value for key, or default value if not set
    */
-  public int get(Configuration conf) {
+  public int get(ConfigurationShim conf) {
     return conf.getInt(getKey(), defaultValue);
   }
 
@@ -74,7 +74,7 @@ public class IntConfOption extends AbstractConfOption {
    * @param conf Configuration
    * @param value to set
    */
-  public void set(Configuration conf, int value) {
+  public void set(ConfigurationShim conf, int value) {
     conf.setInt(getKey(), value);
   }
 
@@ -83,9 +83,7 @@ public class IntConfOption extends AbstractConfOption {
    * @param conf Configuration
    * @param value to set
    */
-  public void setIfUnset(Configuration conf, int value) {
-    if (conf.get(getKey()) == null) {
-      conf.setInt(getKey(), value);
-    }
+  public void setIfUnset(ConfigurationShim conf, int value) {
+    conf.setIntIfUnset(getKey(), value);
   }
 }

@@ -85,6 +85,7 @@ under the License.
       <groupId>com.facebook.hiveio</groupId>
       <artifactId>hive-io-exp-core</artifactId>
     </dependency>
+
     <dependency>
       <groupId>org.apache.hive</groupId>
       <artifactId>hive-builtins</artifactId>

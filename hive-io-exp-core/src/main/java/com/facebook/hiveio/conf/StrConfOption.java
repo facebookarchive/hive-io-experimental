@@ -17,8 +17,7 @@
  */
 package com.facebook.hiveio.conf;
 
-import org.apache.hadoop.conf.Configuration;
-
+import com.facebook.hiveio.hadoop.shims.api.ConfigurationShim;
 import com.google.common.collect.Lists;
 
 import java.util.List;
@@ -58,7 +57,7 @@ public class StrConfOption extends AbstractConfOption {
    * @param conf Configuration
    * @return value for key, or defaultValue
    */
-  public String get(Configuration conf) {
+  public String get(ConfigurationShim conf) {
     return conf.get(getKey(), defaultValue);
   }
 
@@ -68,7 +67,7 @@ public class StrConfOption extends AbstractConfOption {
    * @param defaultVal default value to use
    * @return value for key, or defaultVal passed in
    */
-  public String getWithDefault(Configuration conf, String defaultVal) {
+  public String getWithDefault(ConfigurationShim conf, String defaultVal) {
     return conf.get(getKey(), defaultVal);
   }
 
@@ -77,7 +76,7 @@ public class StrConfOption extends AbstractConfOption {
    * @param conf Configuration
    * @return array of values for key
    */
-  public String[] getArray(Configuration conf) {
+  public String[] getArray(ConfigurationShim conf) {
     return conf.getStrings(getKey(), defaultValue);
   }
 
@@ -86,7 +85,7 @@ public class StrConfOption extends AbstractConfOption {
    * @param conf Configuration
    * @return list of values for key
    */
-  public List<String> getList(Configuration conf) {
+  public List<String> getList(ConfigurationShim conf) {
     return Lists.newArrayList(getArray(conf));
   }
 
@@ -95,7 +94,7 @@ public class StrConfOption extends AbstractConfOption {
    * @param conf Configuration
    * @param value to set
    */
-  public void set(Configuration conf, String value) {
+  public void set(ConfigurationShim conf, String value) {
     conf.set(getKey(), value);
   }
 
@@ -104,7 +103,7 @@ public class StrConfOption extends AbstractConfOption {
    * @param conf Configuration
    * @param value to set
    */
-  public void setIfUnset(Configuration conf, String value) {
+  public void setIfUnset(ConfigurationShim conf, String value) {
     conf.setIfUnset(getKey(), value);
   }
 }

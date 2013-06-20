@@ -18,11 +18,10 @@
 
 package com.facebook.hiveio.output;
 
-import org.apache.hadoop.conf.Configuration;
-
 import com.facebook.hiveio.common.Writables;
 import com.facebook.hiveio.conf.BooleanConfOption;
 import com.facebook.hiveio.conf.LongConfOption;
+import com.facebook.hiveio.hadoop.shims.api.ConfigurationShim;
 import com.google.common.base.Objects;
 
 import java.util.concurrent.TimeUnit;
@@ -52,7 +51,7 @@ public class OutputConf {
       new LongConfOption(PREFIX_KEY + ".write_reset_timeout", TimeUnit.SECONDS.toMillis(10));
 
   /** Hadoop Configuration */
-  private final Configuration conf;
+  private final ConfigurationShim conf;
   /** Profile ID */
   private final String profileId;
 
@@ -62,12 +61,12 @@ public class OutputConf {
    * @param conf Hadoop Configuration
    * @param profileId Profile ID
    */
-  public OutputConf(Configuration conf, String profileId) {
+  public OutputConf(ConfigurationShim conf, String profileId) {
     this.conf = conf;
     this.profileId = profileId;
   }
 
-  public Configuration getConf() {
+  public ConfigurationShim getConf() {
     return conf;
   }
 

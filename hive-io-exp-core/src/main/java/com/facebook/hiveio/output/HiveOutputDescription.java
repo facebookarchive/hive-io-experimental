@@ -18,14 +18,15 @@
 
 package com.facebook.hiveio.output;
 
-import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.hive.metastore.api.ThriftHiveMetastore;
-import org.apache.hadoop.io.Writable;
 import org.apache.thrift.TException;
 
 import com.facebook.hiveio.common.HiveTableDesc;
 import com.facebook.hiveio.common.MetastoreDesc;
 import com.facebook.hiveio.common.Writables;
+import com.facebook.hiveio.hadoop.shims.api.ConfigurationShim;
+import com.facebook.hiveio.hadoop.shims.api.WritableHelper;
+import com.facebook.hiveio.hadoop.shims.api.WritableShim;
 import com.google.common.base.Objects;
 import com.google.common.collect.Maps;
 
@@ -37,7 +38,7 @@ import java.util.Map;
 /**
  * Description of Hive table to write to
  */
-public class HiveOutputDescription implements Writable {
+public class HiveOutputDescription implements WritableShim {
   /** Metastore to use. Optional. */
   private MetastoreDesc metastoreDesc = new MetastoreDesc();
   /** Hive table */
@@ -107,19 +108,19 @@ public class HiveOutputDescription implements Writable {
    * @return Thrift metastore client
    * @throws TException
    */
-  public ThriftHiveMetastore.Iface metastoreClient(Configuration conf) throws TException {
+  public ThriftHiveMetastore.Iface metastoreClient(ConfigurationShim conf) throws TException {
     return metastoreDesc.makeClient(conf);
   }
 
   @Override
-  public void write(DataOutput out) throws IOException {
+  public void write(DataOutput out, WritableHelper helper) throws IOException {
     metastoreDesc.write(out);
     tableDesc.write(out);
     Writables.writeStrStrMap(out, partitionValues);
   }
 
   @Override
-  public void readFields(DataInput in) throws IOException {
+  public void readFields(DataInput in, WritableHelper helper) throws IOException {
     metastoreDesc.readFields(in);
     tableDesc.readFields(in);
     Writables.readStrStrMap(in, partitionValues);

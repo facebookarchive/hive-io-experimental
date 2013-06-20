@@ -17,7 +17,7 @@
  */
 package com.facebook.hiveio.conf;
 
-import org.apache.hadoop.conf.Configuration;
+import com.facebook.hiveio.hadoop.shims.api.ConfigurationShim;
 
 /**
  * Float Configuration option
@@ -54,7 +54,7 @@ public class FloatConfOption extends AbstractConfOption {
    * @param conf Configuration
    * @return value for key, or defaultValue if not present
    */
-  public float get(Configuration conf) {
+  public float get(ConfigurationShim conf) {
     return conf.getFloat(getKey(), defaultValue);
   }
 
@@ -63,7 +63,7 @@ public class FloatConfOption extends AbstractConfOption {
    * @param conf Configuration
    * @param value to set
    */
-  public void set(Configuration conf, float value) {
+  public void set(ConfigurationShim conf, float value) {
     conf.setFloat(getKey(), value);
   }
 
@@ -72,9 +72,7 @@ public class FloatConfOption extends AbstractConfOption {
    * @param conf Configuration
    * @param value to set
    */
-  public void setIfUnset(Configuration conf, float value) {
-    if (conf.get(getKey()) == null) {
-      conf.setFloat(getKey(), value);
-    }
+  public void setIfUnset(ConfigurationShim conf, float value) {
+    conf.setFloatIfUnset(getKey(), value);
   }
 }

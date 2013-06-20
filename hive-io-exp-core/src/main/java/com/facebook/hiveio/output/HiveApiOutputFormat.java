@@ -18,27 +18,14 @@
 
 package com.facebook.hiveio.output;
 
-import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.fs.FileSystem;
-import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.hive.metastore.api.FieldSchema;
 import org.apache.hadoop.hive.metastore.api.StorageDescriptor;
 import org.apache.hadoop.hive.metastore.api.Table;
 import org.apache.hadoop.hive.metastore.api.ThriftHiveMetastore;
 import org.apache.hadoop.hive.serde2.Serializer;
 import org.apache.hadoop.hive.serde2.objectinspector.StructObjectInspector;
-import org.apache.hadoop.io.NullWritable;
-import org.apache.hadoop.io.Writable;
-import org.apache.hadoop.io.WritableComparable;
-import org.apache.hadoop.mapred.FileOutputFormat;
-import org.apache.hadoop.mapred.JobConf;
-import org.apache.hadoop.mapred.Reporter;
-import org.apache.hadoop.mapreduce.JobContext;
-import org.apache.hadoop.mapreduce.OutputCommitter;
-import org.apache.hadoop.mapreduce.OutputFormat;
-import org.apache.hadoop.mapreduce.TaskAttemptContext;
-import org.apache.hadoop.util.ReflectionUtils;
 import org.apache.thrift.TException;
+import org.mockito.exceptions.Reporter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -47,13 +34,16 @@ import com.facebook.hiveio.common.HadoopUtils;
 import com.facebook.hiveio.common.HiveUtils;
 import com.facebook.hiveio.common.Inspectors;
 import com.facebook.hiveio.common.ProgressReporter;
+import com.facebook.hiveio.hadoop.shims.api.HadoopShims;
 import com.facebook.hiveio.record.HiveWritableRecord;
 import com.facebook.hiveio.schema.HiveTableSchema;
 import com.facebook.hiveio.schema.HiveTableSchemaImpl;
 import com.facebook.hiveio.schema.HiveTableSchemas;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
+import com.sun.org.apache.xml.internal.serialize.OutputFormat;
 
+import javax.validation.Path;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.List;
@@ -64,7 +54,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  * Hadoop compatible OutputFormat for writing to Hive.
  */
 public class HiveApiOutputFormat
-    extends OutputFormat<WritableComparable, HiveWritableRecord> {
+    implements HadoopShims.OutputFormatShim<Object, HiveWritableRecord> {
   /** Default profile if none given */
   public static final String DEFAULT_PROFILE_ID = "output-profile";
 
@@ -90,7 +80,7 @@ public class HiveApiOutputFormat
    * @param conf Configuration to lookup in
    * @return HiveTableSchema
    */
-  public HiveTableSchema getTableSchema(Configuration conf) {
+  public HiveTableSchema getTableSchema(HadoopShims.ConfigurationShim conf) {
     return HiveTableSchemas.get(conf, myProfileId);
   }
 
@@ -101,7 +91,7 @@ public class HiveApiOutputFormat
    * @param outputDesc HiveOutputDescription
    * @throws TException Hive Metastore issues
    */
-  public void init(Configuration conf, HiveOutputDescription outputDesc)
+  public void init(HadoopShims.ConfigurationShim conf, HiveOutputDescription outputDesc)
     throws TException {
     initProfile(conf, outputDesc, myProfileId);
   }
@@ -113,7 +103,7 @@ public class HiveApiOutputFormat
    * @param outputDesc HiveOutputDescription
    * @throws TException Hive Metastore issues
    */
-  public static void initDefaultProfile(Configuration conf,
+  public static void initDefaultProfile(HadoopShims.ConfigurationShim conf,
     HiveOutputDescription outputDesc) throws TException {
     initProfile(conf, outputDesc, DEFAULT_PROFILE_ID);
   }
@@ -126,7 +116,7 @@ public class HiveApiOutputFormat
    * @param profileId Profile to use
    * @throws TException Hive Metastore issues
    */
-  public static void initProfile(Configuration conf,
+  public static void initProfile(HadoopShims.ConfigurationShim conf,
                                  HiveOutputDescription outputDesc,
                                  String profileId)
     throws TException {
@@ -211,10 +201,9 @@ public class HiveApiOutputFormat
   }
 
   @Override
-  public void checkOutputSpecs(JobContext jobContext)
+  public void checkOutputSpecs(HadoopShims.ConfigurationShim conf)
     throws IOException, InterruptedException
   {
-    Configuration conf = jobContext.getConfiguration();
     OutputConf outputConf = new OutputConf(conf, myProfileId);
 
     HiveOutputDescription description = outputConf.readOutputDescription();
@@ -240,7 +229,7 @@ public class HiveApiOutputFormat
    * @param description HiveOutputDescription
    * @throws IOException
    */
-  private void checkTableExists(Configuration conf, HiveOutputDescription description)
+  private void checkTableExists(HadoopShims.ConfigurationShim conf, HiveOutputDescription description)
     throws IOException
   {
     ThriftHiveMetastore.Iface client;
@@ -261,7 +250,7 @@ public class HiveApiOutputFormat
    * @param oti OutputInfo
    * @throws IOException
    */
-  private void checkPartitionInfo(Configuration conf,
+  private void checkPartitionInfo(HadoopShims.ConfigurationShim conf,
       HiveOutputDescription description, OutputInfo oti) throws IOException {
     if (oti.hasPartitionInfo()) {
       if (!description.hasPartitionValues()) {
@@ -284,7 +273,7 @@ public class HiveApiOutputFormat
    * @param oti OutputInfo
    * @throws IOException Hadoop Filesystem issues
    */
-  private void checkTableIsEmpty(Configuration conf,
+  private void checkTableIsEmpty(HadoopShims.ConfigurationShim conf,
     HiveOutputDescription description, OutputInfo oti)
     throws IOException {
     Path tablePath = new Path(oti.getTableRoot());
@@ -303,7 +292,7 @@ public class HiveApiOutputFormat
    * @param oti OutputInfo
    * @throws IOException Hadoop Filesystem issues
    */
-  private void checkPartitionDoesntExist(Configuration conf,
+  private void checkPartitionDoesntExist(HadoopShims.ConfigurationShim conf,
     HiveOutputDescription description, OutputInfo oti)
     throws IOException
   {
@@ -370,7 +359,7 @@ public class HiveApiOutputFormat
     HadoopUtils.setOutputValueWritableClass(conf,
         serializer.getSerializedClass());
 
-    org.apache.hadoop.mapred.OutputFormat baseOutputFormat =
+    OutputFormat baseOutputFormat =
         ReflectionUtils.newInstance(oti.getOutputFormatClass(), conf);
     // CHECKSTYLE: stop LineLength
     org.apache.hadoop.mapred.RecordWriter<WritableComparable, Writable> baseWriter =
@@ -398,7 +387,7 @@ public class HiveApiOutputFormat
   // CHECKSTYLE: stop LineLengthCheck
   protected static org.apache.hadoop.mapred.RecordWriter<WritableComparable, Writable> getBaseRecordWriter(
     TaskAttemptContext taskAttemptContext,
-    org.apache.hadoop.mapred.OutputFormat baseOutputFormat) throws IOException
+    OutputFormat baseOutputFormat) throws IOException
   {
     // CHECKSTYLE: resume LineLengthCheck
     HadoopUtils.setWorkOutputDir(taskAttemptContext);
