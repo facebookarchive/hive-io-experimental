@@ -117,7 +117,6 @@ public class InputTest {
     Configuration conf = new Configuration();
     Parsers.FORCE_PARSER.set(conf, parserClass);
     Iterator<HiveReadableRecord> records = HiveInput.readTable(inputDesc, conf).iterator();
-    Parsers.FORCE_PARSER.unset(conf);
 
     assertTrue(records.hasNext());
 

@@ -17,7 +17,6 @@
  */
 package com.facebook.hiveio.conf;
 
-import org.apache.hadoop.conf.Configuration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -45,15 +44,6 @@ public abstract class AbstractConfOption
 
   public String getKey() {
     return key;
-  }
-
-  /**
-   * Unset key for this option
-   *
-   * @param conf Configuration
-   */
-  public void unset(Configuration conf) {
-    conf.unset(key);
   }
 
   @Override public int compareTo(AbstractConfOption o) {
