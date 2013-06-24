@@ -145,6 +145,18 @@ public enum HiveType {
    */
   public abstract Object checkAndUpgrade(Object data);
 
+  public boolean isIntegerType() {
+    return nativeType == NativeType.LONG;
+  }
+
+  public boolean isFloatingPoint() {
+    return nativeType == NativeType.DOUBLE;
+  }
+
+  public boolean isMapLike() {
+    return this == MAP || this == STRUCT;
+  }
+
   public boolean isCollection() {
     return nativeType == null;
   }

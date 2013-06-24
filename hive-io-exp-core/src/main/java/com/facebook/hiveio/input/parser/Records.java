@@ -106,7 +106,7 @@ public class Records {
    * @param actualType HiveType
    */
   public static void verifyMapLike(int index, HiveType actualType) {
-    if (actualType != HiveType.MAP && actualType != HiveType.STRUCT) {
+    if (!actualType.isMapLike()) {
       throw new IllegalArgumentException("Expected column " + index +
           " to be MAP or STRUCT, but is actually " + actualType);
     }
