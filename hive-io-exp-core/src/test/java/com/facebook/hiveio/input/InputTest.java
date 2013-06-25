@@ -21,6 +21,7 @@ import org.apache.hadoop.conf.Configuration;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
+import com.facebook.hiveio.common.HiveIOTestBase;
 import com.facebook.hiveio.common.HiveMetastores;
 import com.facebook.hiveio.common.HiveTableDesc;
 import com.facebook.hiveio.common.HiveType;
@@ -44,7 +45,7 @@ import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertTrue;
 import static org.testng.Assert.fail;
 
-public class InputTest {
+public class InputTest extends HiveIOTestBase {
   private static final double DELTA = 0.000001;
   private static final LocalHiveServer hiveServer = new LocalHiveServer("hiveio-test");
   private static final HiveTableDesc hiveTableDesc = new HiveTableDesc("test1");

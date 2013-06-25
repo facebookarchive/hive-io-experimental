@@ -22,6 +22,7 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import com.beust.jcommander.internal.Lists;
+import com.facebook.hiveio.common.HiveIOTestBase;
 import com.facebook.hiveio.common.HiveMetastores;
 import com.facebook.hiveio.common.HiveTableDesc;
 import com.facebook.hiveio.input.HiveInput;
@@ -41,7 +42,7 @@ import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertTrue;
 
-public class OutputTest {
+public class OutputTest extends HiveIOTestBase {
   private final LocalHiveServer hiveServer = new LocalHiveServer("hiveio-test");
   private final HiveTableDesc hiveTableDesc = new HiveTableDesc("default",
       OutputTest.class.getSimpleName());

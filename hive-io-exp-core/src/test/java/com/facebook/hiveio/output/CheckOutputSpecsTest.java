@@ -27,6 +27,7 @@ import org.apache.hadoop.mapreduce.TaskAttemptContext;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
+import com.facebook.hiveio.common.HiveIOTestBase;
 import com.facebook.hiveio.common.HiveMetastores;
 import com.facebook.hiveio.testing.LocalHiveServer;
 
@@ -34,7 +35,7 @@ import java.io.IOException;
 
 import static org.testng.Assert.fail;
 
-public class CheckOutputSpecsTest {
+public class CheckOutputSpecsTest extends HiveIOTestBase {
   private final String PROFILE_ID = "x";
   private final LocalHiveServer hiveServer = new LocalHiveServer("hiveio-test");
 
