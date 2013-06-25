@@ -21,6 +21,7 @@ import org.apache.thrift.TException;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
+import com.facebook.hiveio.common.HiveIOTestBase;
 import com.facebook.hiveio.common.HiveMetastores;
 import com.facebook.hiveio.common.HiveTableDesc;
 import com.facebook.hiveio.input.HiveInput;
@@ -42,7 +43,7 @@ import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertTrue;
 import static org.testng.Assert.fail;
 
-public class TypeUpgradeTest {
+public class TypeUpgradeTest extends HiveIOTestBase {
   private static final double DELTA = 0.00001;
 
   private final LocalHiveServer hiveServer = new LocalHiveServer("hiveio-test");

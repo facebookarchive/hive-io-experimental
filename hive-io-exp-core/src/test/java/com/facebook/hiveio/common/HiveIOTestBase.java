@@ -17,21 +17,13 @@
  */
 package com.facebook.hiveio.common;
 
-import org.testng.annotations.Test;
+import org.testng.annotations.BeforeClass;
 
-import static org.testng.Assert.assertFalse;
-import static org.testng.Assert.assertTrue;
+import com.facebook.hiveio.testing.Helpers;
 
-public class MetastoreDescTest extends HiveIOTestBase {
-  @Test
-  public void testHostCheck() {
-    MetastoreDesc metastoreDesc = new MetastoreDesc();
-    assertFalse(metastoreDesc.hasHost());
-    metastoreDesc.setHost("");
-    assertFalse(metastoreDesc.hasHost());
-    metastoreDesc.setHost("  \t  \n  ");
-    assertFalse(metastoreDesc.hasHost());
-    metastoreDesc.setHost("foobar");
-    assertTrue(metastoreDesc.hasHost());
+public class HiveIOTestBase {
+  @BeforeClass
+  public void silenceLoggers() {
+    Helpers.silenceLoggers();
   }
 }

@@ -67,14 +67,12 @@ class HiveApiOutputCommitter extends OutputCommitter {
   @Override
   public void setupJob(JobContext jobContext) throws IOException
   {
-    LOG.info("OutputCommitter::setupJob");
     baseCommitter.setupJob(jobContext);
   }
 
   @Override
   public void commitJob(JobContext jobContext) throws IOException
   {
-    LOG.info("OutputCommitter::commitJob");
     baseCommitter.commitJob(jobContext);
 
     Configuration conf = jobContext.getConfiguration();
@@ -191,7 +189,6 @@ class HiveApiOutputCommitter extends OutputCommitter {
   @Override @Deprecated
   public void cleanupJob(JobContext jobContext) throws IOException
   {
-    LOG.info("OutputCommitter::cleanupJob");
     baseCommitter.cleanupJob(jobContext);
   }
 
@@ -199,7 +196,6 @@ class HiveApiOutputCommitter extends OutputCommitter {
   public void abortJob(JobContext jobContext, JobStatus.State state)
     throws IOException
   {
-    LOG.info("OutputCommitter::abortJob");
     baseCommitter.abortJob(jobContext, state);
     HadoopUtils.deleteOutputDir(jobContext.getConfiguration());
   }
@@ -207,7 +203,6 @@ class HiveApiOutputCommitter extends OutputCommitter {
   @Override
   public void setupTask(TaskAttemptContext taskContext) throws IOException
   {
-    LOG.info("OutputCommitter::setupTask");
     baseCommitter.setupTask(taskContext);
   }
 
@@ -215,14 +210,12 @@ class HiveApiOutputCommitter extends OutputCommitter {
   public boolean needsTaskCommit(TaskAttemptContext taskContext)
     throws IOException
   {
-    LOG.info("OutputCommitter::needsTaskCommit");
     return baseCommitter.needsTaskCommit(taskContext);
   }
 
   @Override
   public void commitTask(TaskAttemptContext taskContext) throws IOException
   {
-    LOG.info("OutputCommitter::commitTask");
     HadoopUtils.setWorkOutputDir(taskContext);
     baseCommitter.commitTask(taskContext);
   }
@@ -230,7 +223,6 @@ class HiveApiOutputCommitter extends OutputCommitter {
   @Override
   public void abortTask(TaskAttemptContext taskContext) throws IOException
   {
-    LOG.info("OutputCommitter::abortTask");
     baseCommitter.abortTask(taskContext);
   }
 }
