@@ -21,7 +21,6 @@ package com.facebook.hiveio.schema;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.hive.metastore.api.StorageDescriptor;
 import org.apache.hadoop.hive.metastore.api.Table;
-import org.apache.hadoop.io.WritableUtils;
 
 import com.facebook.hiveio.common.HiveTableDesc;
 import com.facebook.hiveio.common.HiveType;
@@ -46,7 +45,7 @@ import static com.google.common.collect.Lists.transform;
  */
 public class HiveTableSchemaImpl implements HiveTableSchema {
   /** Hive table name */
-  private HiveTableDesc tableName;
+  private final HiveTableDesc tableName;
 
   /** Partition keys */
   private final Map<String, Integer> partitionPositions;
@@ -65,7 +64,7 @@ public class HiveTableSchemaImpl implements HiveTableSchema {
    * Constructor
    */
   public HiveTableSchemaImpl() {
-    tableName = new HiveTableDesc("_unknown_", "_unknown_");
+    tableName = new HiveTableDesc("_unknown_");
     partitionPositions = Maps.newHashMap();
     columnPositions = Maps.newHashMap();
     hiveTypes = new HiveType[0];
@@ -168,8 +167,7 @@ public class HiveTableSchemaImpl implements HiveTableSchema {
   public void write(DataOutput out) throws IOException {
     Writables.writeStrIntMap(out, partitionPositions);
     Writables.writeStrIntMap(out, columnPositions);
-    WritableUtils.writeString(out, tableName.getDatabaseName());
-    WritableUtils.writeString(out, tableName.getTableName());
+    tableName.write(out);
     Writables.writeEnumArray(out, hiveTypes);
   }
 
@@ -178,9 +176,7 @@ public class HiveTableSchemaImpl implements HiveTableSchema {
     Writables.readStrIntMap(in, partitionPositions);
     Writables.readStrIntMap(in, columnPositions);
     numColumns = sizeFromIndexes(columnPositions);
-    String dbName = WritableUtils.readString(in);
-    String tblName = WritableUtils.readString(in);
-    tableName = new HiveTableDesc(dbName, tblName);
+    tableName.readFields(in);
     hiveTypes = Writables.readEnumArray(in, HiveType.class);
   }
 

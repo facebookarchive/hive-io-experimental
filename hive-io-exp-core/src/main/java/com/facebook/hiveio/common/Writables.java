@@ -22,6 +22,8 @@ import org.apache.hadoop.hive.metastore.api.FieldSchema;
 import org.apache.hadoop.io.Writable;
 import org.apache.hadoop.io.WritableUtils;
 
+import com.google.common.base.Preconditions;
+
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.DataInput;
@@ -29,6 +31,7 @@ import java.io.DataInputStream;
 import java.io.DataOutput;
 import java.io.DataOutputStream;
 import java.io.IOException;
+import java.lang.reflect.Array;
 import java.lang.reflect.Constructor;
 import java.util.Collection;
 import java.util.List;
@@ -95,11 +98,17 @@ public class Writables {
     throws IOException
   {
     int length = in.readInt();
-    E[] enums = (E[]) new Enum[length];
+    if (length > 0) {
+      String readClassName = WritableUtils.readString(in);
+      Class<?> readClass = Classes.classForName(readClassName);
+      Preconditions.checkArgument(klass.equals(readClass),
+          "Expected Enum class %s, read %s", klass.getName(), readClassName);
+    }
+    E[] enums = (E[]) Array.newInstance(klass, length);
     for (int i = 0; i < length; ++i) {
       enums[i] = WritableUtils.readEnum(in, klass);
     }
-    return (E[]) enums;
+    return enums;
   }
 
   /**
@@ -114,6 +123,9 @@ public class Writables {
     throws IOException
   {
     out.writeInt(enums.length);
+    if (enums.length > 0) {
+      WritableUtils.writeString(out, enums[0].getDeclaringClass().getName());
+    }
     for (Enum<E> val : enums) {
       WritableUtils.writeEnum(out, val);
     }
