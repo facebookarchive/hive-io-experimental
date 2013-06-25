@@ -15,23 +15,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.facebook.hiveio.common;
+package com.facebook.hiveio.testing;
 
-import org.testng.annotations.Test;
+import org.apache.log4j.Level;
+import org.slf4j.LoggerFactory;
 
-import static org.testng.Assert.assertFalse;
-import static org.testng.Assert.assertTrue;
+public class Helpers {
+  private static final org.slf4j.Logger LOG = LoggerFactory.getLogger(Helpers.class);
 
-public class MetastoreDescTest extends HiveIOTestBase {
-  @Test
-  public void testHostCheck() {
-    MetastoreDesc metastoreDesc = new MetastoreDesc();
-    assertFalse(metastoreDesc.hasHost());
-    metastoreDesc.setHost("");
-    assertFalse(metastoreDesc.hasHost());
-    metastoreDesc.setHost("  \t  \n  ");
-    assertFalse(metastoreDesc.hasHost());
-    metastoreDesc.setHost("foobar");
-    assertTrue(metastoreDesc.hasHost());
+  private Helpers() { }
+
+  public static void silenceLoggers() {
+    DataNucleusLogHelpers.setDatanucleusLogLevel(Level.ERROR);
+    HiveLogHelpers.setHiveLogLevel(Level.ERROR);
   }
 }

@@ -20,6 +20,7 @@ package com.facebook.hiveio.input;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
+import com.facebook.hiveio.common.HiveIOTestBase;
 import com.facebook.hiveio.common.HiveMetastores;
 import com.facebook.hiveio.testing.LocalHiveServer;
 import com.google.common.base.Objects;
@@ -30,7 +31,7 @@ import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertTrue;
 
-public class BeanInputTest {
+public class BeanInputTest extends HiveIOTestBase {
   private LocalHiveServer hiveServer = new LocalHiveServer("hiveio-test");
 
   @BeforeMethod

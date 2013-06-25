@@ -19,6 +19,7 @@ package com.facebook.hiveio.input;
 
 import org.testng.annotations.Test;
 
+import com.facebook.hiveio.common.HiveIOTestBase;
 import com.facebook.hiveio.input.parser.array.BytesParser;
 import com.google.common.base.Charsets;
 
@@ -30,7 +31,7 @@ import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertNull;
 import static org.testng.Assert.assertTrue;
 
-public class BytesParserTest {
+public class BytesParserTest extends HiveIOTestBase {
   @Test
   public void testParseString() {
     String str = "abcdefghijklmn";

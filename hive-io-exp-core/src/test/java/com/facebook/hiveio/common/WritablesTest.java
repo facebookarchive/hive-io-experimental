@@ -29,7 +29,7 @@ import java.io.IOException;
 
 import static org.testng.Assert.assertEquals;
 
-public class WritablesTest {
+public class WritablesTest extends HiveIOTestBase {
   @Test
   public void testEnumArray() throws IOException {
     HiveType[] types = { HiveType.INT, HiveType.BOOLEAN, HiveType.DOUBLE };
