@@ -39,12 +39,18 @@ public enum HiveType {
       Preconditions.checkArgument(data instanceof Boolean);
       return data;
     }
+    @Override public Class<?> javaClass() {
+      return Boolean.class;
+    }
   },
   /** byte */
   BYTE(NativeType.LONG) {
     @Override public Object checkAndUpgrade(Object data) {
       Preconditions.checkArgument(data instanceof Byte);
       return data;
+    }
+    @Override public Class<?> javaClass() {
+      return Byte.class;
     }
   },
   /** short */
@@ -54,6 +60,9 @@ public enum HiveType {
         data instanceof Byte);
       return ((Number) data).shortValue();
     }
+    @Override public Class<?> javaClass() {
+      return Short.class;
+    }
   },
   /** int */
   INT(NativeType.LONG) {
@@ -61,6 +70,9 @@ public enum HiveType {
       Preconditions.checkArgument(data instanceof Integer ||
         data instanceof Short || data instanceof Byte);
       return ((Number) data).intValue();
+    }
+    @Override public Class<?> javaClass() {
+      return Integer.class;
     }
   },
   /** long */
@@ -71,6 +83,9 @@ public enum HiveType {
         data instanceof Byte);
       return ((Number) data).longValue();
     }
+    @Override public Class<?> javaClass() {
+      return Long.class;
+    }
   },
   /** float */
   FLOAT(NativeType.DOUBLE) {
@@ -80,12 +95,18 @@ public enum HiveType {
           data instanceof Short || data instanceof Byte);
       return ((Number) data).floatValue();
     }
+    @Override public Class<?> javaClass() {
+      return Float.class;
+    }
   },
   /** double */
   DOUBLE(NativeType.DOUBLE) {
     @Override public Object checkAndUpgrade(Object data) {
       Preconditions.checkArgument(data instanceof Number);
       return ((Number) data).doubleValue();
+    }
+    @Override public Class<?> javaClass() {
+      return Double.class;
     }
   },
   /** string */
@@ -94,12 +115,18 @@ public enum HiveType {
       Preconditions.checkArgument(data instanceof String);
       return data;
     }
+    @Override public Class<?> javaClass() {
+      return String.class;
+    }
   },
   /** list */
   LIST(null) {
     @Override public Object checkAndUpgrade(Object data) {
       Preconditions.checkArgument(data instanceof List);
       return data;
+    }
+    @Override public Class<?> javaClass() {
+      return List.class;
     }
   },
   /** map */
@@ -108,6 +135,9 @@ public enum HiveType {
       Preconditions.checkArgument(data instanceof Map);
       return data;
     }
+    @Override public Class<?> javaClass() {
+      return Map.class;
+    }
   },
   /** struct */
   STRUCT(null) {
@@ -115,12 +145,18 @@ public enum HiveType {
       Preconditions.checkArgument(data instanceof Map);
       return data;
     }
+    @Override public Class<?> javaClass() {
+      return Map.class;
+    }
   },
   /** union */
   UNION(null) {
     @Override public Object checkAndUpgrade(Object data) {
       Preconditions.checkArgument(data instanceof Map);
       return data;
+    }
+    @Override public Class<?> javaClass() {
+      return Map.class;
     }
   };
 
@@ -135,6 +171,13 @@ public enum HiveType {
   HiveType(NativeType nativeType) {
     this.nativeType = nativeType;
   }
+
+  /**
+   * Java Class representing this enum
+   *
+   * @return Class
+   */
+  public abstract Class<?> javaClass();
 
   /**
    * Check if data is valid for this column. Upgrade it if necessary (for example
