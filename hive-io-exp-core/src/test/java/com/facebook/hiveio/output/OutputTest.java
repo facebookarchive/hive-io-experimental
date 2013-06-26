@@ -21,7 +21,6 @@ import org.apache.thrift.TException;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-import com.beust.jcommander.internal.Lists;
 import com.facebook.hiveio.common.HiveIOTestBase;
 import com.facebook.hiveio.common.HiveMetastores;
 import com.facebook.hiveio.common.HiveTableDesc;
@@ -33,6 +32,7 @@ import com.facebook.hiveio.record.HiveWritableRecord;
 import com.facebook.hiveio.schema.HiveTableSchema;
 import com.facebook.hiveio.schema.HiveTableSchemas;
 import com.facebook.hiveio.testing.LocalHiveServer;
+import com.google.common.collect.Lists;
 
 import java.io.IOException;
 import java.util.Iterator;
