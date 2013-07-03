@@ -178,6 +178,8 @@ public class HiveApiInputFormat
     HiveInputDescription inputDesc, ThriftHiveMetastore.Iface client)
     throws IOException
   {
+    LOG.info("getSplits of " + inputDesc);
+
     HiveTableDesc tableDesc = inputDesc.getTableDesc();
     Table table;
     try {

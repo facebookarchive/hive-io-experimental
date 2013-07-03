@@ -20,6 +20,7 @@ package com.facebook.hiveio.testing;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.impl.Log4JLogger;
 import org.apache.hadoop.hive.metastore.HiveMetaStore;
+import org.apache.hadoop.hive.metastore.ObjectStore;
 import org.apache.hadoop.hive.ql.Driver;
 import org.apache.hadoop.hive.ql.parse.ParseDriver;
 import org.apache.log4j.Level;
@@ -41,6 +42,7 @@ public class HiveLogHelpers {
     logs.add(HiveMetaStore.LOG);
     addPrivateStaticLog(logs, Driver.class);
     addPrivateStaticLog(logs, ParseDriver.class);
+    addPrivateStaticLog(logs, ObjectStore.class);
 
     for (Log log : logs) {
       setHiveLoggerLevel(log, level);

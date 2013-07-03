@@ -219,6 +219,7 @@ public class HiveApiOutputFormat
 
     HiveOutputDescription description = outputConf.readOutputDescription();
     OutputInfo oti = outputConf.readOutputTableInfo();
+    LOG.info("Check output specs of " + description);
 
     if (description == null) {
       LOG.error("HiveOutputDescription is null in Configuration, nothing to check");
