@@ -25,6 +25,7 @@ import com.google.common.base.Charsets;
 
 import static com.facebook.hiveio.input.parser.array.BytesParser.parseDouble;
 import static com.facebook.hiveio.input.parser.array.BytesParser.parseLong;
+import static com.facebook.hiveio.input.parser.array.BytesParser.parseShort;
 import static com.facebook.hiveio.input.parser.array.BytesParser.parseString;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertFalse;
@@ -67,6 +68,35 @@ public class BytesParserTest extends HiveIOTestBase {
   }
 
   @Test
+  public void testShort() throws Exception {
+    assertParseShort("1", 1);
+    assertParseShort("12", 12);
+    assertParseShort("123", 123);
+    assertParseShort("-1", -1);
+    assertParseShort("-12", -12);
+    assertParseShort("-123", -123);
+    assertParseShort("+1", 1);
+    assertParseShort("+12", 12);
+    assertParseShort("+123", 123);
+    assertParseShort("0", 0);
+    assertParseShort("-0", 0);
+    assertParseShort("+0", 0);
+    assertParseShort(Short.toString(Short.MAX_VALUE), Short.MAX_VALUE);
+    assertParseShort(Short.toString(Short.MIN_VALUE), Short.MIN_VALUE);
+  }
+
+  private void assertParseShort(String string, int expectedValue) {
+    assertEquals(parseShort(string.getBytes(Charsets.US_ASCII), 0,
+        string.length()), expectedValue);
+
+    // verify we can parse using a non-zero offset
+    String padding = "9999";
+    String padded = padding + string + padding;
+    assertEquals(parseShort(padded.getBytes(Charsets.US_ASCII),
+        padding.length(), string.length()), (short) expectedValue);
+  }
+
+  @Test
   public void testLong() throws Exception {
     assertParseLong("1", 1);
     assertParseLong("12", 12);
@@ -82,6 +112,17 @@ public class BytesParserTest extends HiveIOTestBase {
     assertParseLong("+0", 0);
     assertParseLong(Long.toString(Long.MAX_VALUE), Long.MAX_VALUE);
     assertParseLong(Long.toString(Long.MIN_VALUE), Long.MIN_VALUE);
+  }
+
+  private void assertParseLong(String string, long expectedValue) {
+    assertEquals(parseLong(string.getBytes(Charsets.US_ASCII), 0, string.length()),
+        expectedValue);
+
+    // verify we can parse using a non-zero offset
+    String padding = "9999";
+    String padded = padding + string + padding;
+    assertEquals(parseLong(padded.getBytes(Charsets.US_ASCII), padding.length(),
+        string.length()), expectedValue);
   }
 
   @Test
@@ -126,17 +167,6 @@ public class BytesParserTest extends HiveIOTestBase {
     assertParseDouble(Double.toString(-Double.MAX_VALUE));
     assertParseDouble(Double.toString(Double.MIN_VALUE));
     assertParseDouble(Double.toString(-Double.MIN_VALUE));
-  }
-
-  private void assertParseLong(String string, long expectedValue) {
-    assertEquals(parseLong(string.getBytes(Charsets.US_ASCII), 0, string.length()),
-        expectedValue);
-
-    // verify we can parse using a non-zero offset
-    String padding = "9999";
-    String padded = padding + string + padding;
-    assertEquals(parseLong(padded.getBytes(Charsets.US_ASCII), padding.length(),
-        string.length()), expectedValue);
   }
 
   private void assertParseDouble(String string) {

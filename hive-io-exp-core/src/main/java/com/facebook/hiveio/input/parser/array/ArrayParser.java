@@ -24,7 +24,7 @@ import org.apache.hadoop.hive.serde2.objectinspector.PrimitiveObjectInspector;
 import org.apache.hadoop.hive.serde2.objectinspector.StructField;
 import org.apache.hadoop.io.Writable;
 
-import com.facebook.hiveio.common.NativeType;
+import com.facebook.hiveio.common.HiveType;
 import com.facebook.hiveio.input.parser.RecordParser;
 import com.facebook.hiveio.record.HiveReadableRecord;
 
@@ -103,22 +103,34 @@ public class ArrayParser implements RecordParser {
     PrimitiveObjectInspector fieldInspector = parserData.primitiveInspectors[columnIndex];
     Object primitiveData = fieldInspector.getPrimitiveJavaObject(fieldData);
 
-    NativeType nativeType = arrayRecord.getNativeType(columnIndex);
-    switch (nativeType) {
+    HiveType hiveType = arrayRecord.getHiveType(columnIndex);
+    switch (hiveType) {
       case BOOLEAN:
         arrayRecord.setBoolean(columnIndex, (Boolean) primitiveData);
         break;
+      case BYTE:
+        arrayRecord.setByte(columnIndex, (Byte) primitiveData);
+        break;
+      case SHORT:
+        arrayRecord.setShort(columnIndex, (Short) primitiveData);
+        break;
+      case INT:
+        arrayRecord.setInt(columnIndex, (Integer) primitiveData);
+        break;
       case LONG:
-        arrayRecord.setLong(columnIndex, ((Number) primitiveData).longValue());
+        arrayRecord.setLong(columnIndex, (Long) primitiveData);
+        break;
+      case FLOAT:
+        arrayRecord.setFloat(columnIndex, (Float) primitiveData);
         break;
       case DOUBLE:
-        arrayRecord.setDouble(columnIndex, ((Number) primitiveData).doubleValue());
+        arrayRecord.setDouble(columnIndex, (Double) primitiveData);
         break;
       case STRING:
         arrayRecord.setString(columnIndex, (String) primitiveData);
         break;
       default:
-        throw new IllegalArgumentException("Unexpected native type " + nativeType);
+        throw new IllegalArgumentException("Unexpected HiveType " + hiveType);
     }
   }
 }
