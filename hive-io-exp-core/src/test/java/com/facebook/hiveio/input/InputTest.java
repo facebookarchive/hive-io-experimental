@@ -195,7 +195,7 @@ public class InputTest extends HiveIOTestBase {
     assertTrue(records.hasNext());
 
     HiveReadableRecord record = records.next();
-    assertEquals(Long.class, record.get(0).getClass());
+    assertEquals(Integer.class, record.get(0).getClass());
     assertEquals(Double.class, record.get(1).getClass());
     assertEquals(1, record.getInt(0));
     assertEquals(1.1, record.getDouble(1));

@@ -88,7 +88,7 @@ public class BytesParser implements RecordParser {
    * @param length size of data
    */
   private void parsePrimitiveColumn(int column, byte[] bytes, int start, int length) {
-    switch (record.getNativeType(column)) {
+    switch (record.getHiveType(column)) {
       case BOOLEAN:
         Boolean bool = parseBoolean(bytes, start, length);
         if (bool == null) {
@@ -97,11 +97,39 @@ public class BytesParser implements RecordParser {
           record.setBoolean(column, bool);
         }
         break;
+      case BYTE:
+        if (length == 0) {
+          record.setNull(column, true);
+        } else {
+          record.setByte(column, bytes[start]);
+        }
+        break;
+      case SHORT:
+        if (length == 0) {
+          record.setNull(column, true);
+        } else {
+          record.setShort(column, parseShort(bytes, start, length));
+        }
+        break;
+      case INT:
+        if (length == 0) {
+          record.setNull(column, true);
+        } else {
+          record.setInt(column, parseInt(bytes, start, length));
+        }
+        break;
       case LONG:
         if (length == 0) {
           record.setNull(column, true);
         } else {
           record.setLong(column, parseLong(bytes, start, length));
+        }
+        break;
+      case FLOAT:
+        if (length == 0) {
+          record.setNull(column, true);
+        } else {
+          record.setFloat(column, parseFloat(bytes, start, length));
         }
         break;
       case DOUBLE:
@@ -115,7 +143,8 @@ public class BytesParser implements RecordParser {
         record.setString(column, parseString(bytes, start, length));
         break;
       default:
-        break;
+        throw new IllegalArgumentException("Unexpected HiveType " +
+            record.getHiveType(column));
     }
   }
 
@@ -179,6 +208,31 @@ public class BytesParser implements RecordParser {
   }
 
   /**
+   * Parse short
+   *
+   * @param bytes byte[]
+   * @param start offset to start
+   * @param length size of data
+   * @return short value
+   */
+  public static short parseShort(byte[] bytes, int start, int length) {
+    return (short) parseLong(bytes, start, length);
+  }
+
+
+  /**
+   * Parse int
+   *
+   * @param bytes byte[]
+   * @param start offset to start
+   * @param length size of data
+   * @return int value
+   */
+  public static int parseInt(byte[] bytes, int start, int length) {
+    return (int) parseLong(bytes, start, length);
+  }
+
+  /**
    * Parse long
    *
    * @param bytes byte[]
@@ -202,6 +256,23 @@ public class BytesParser implements RecordParser {
     }
 
     return value * sign;
+  }
+
+  /**
+   * Parse float
+   *
+   * @param bytes byte[]
+   * @param start offset to start
+   * @param length size of data
+   * @return float value
+   */
+  public static float parseFloat(byte[] bytes, int start, int length) {
+    char[] chars = new char[length];
+    for (int pos = 0; pos < length; pos++) {
+      chars[pos] = (char) bytes[start + pos];
+    }
+    String string = new String(chars);
+    return Float.parseFloat(string);
   }
 
   /**

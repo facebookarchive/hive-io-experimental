@@ -18,10 +18,10 @@
 package com.facebook.hiveio.input.parser.array;
 
 import com.facebook.hiveio.common.HiveType;
-import com.facebook.hiveio.common.NativeType;
 import com.facebook.hiveio.input.parser.Records;
-import com.facebook.hiveio.record.HiveReadableRecord;
+import com.facebook.hiveio.record.HiveRecord;
 import com.google.common.base.Objects;
+import com.google.common.collect.Lists;
 
 import java.util.Arrays;
 import java.util.List;
@@ -30,7 +30,7 @@ import java.util.Map;
 /**
  * Record backed by arrays
  */
-public class ArrayRecord implements HiveReadableRecord {
+public class ArrayRecord implements HiveRecord {
   /** Number of columns */
   private final int numColumns;
 
@@ -40,8 +40,16 @@ public class ArrayRecord implements HiveReadableRecord {
   private final HiveType[] hiveTypes;
   /** booleans */
   private final boolean[] booleans;
+  /** bytes */
+  private final byte[] bytes;
+  /** shorts */
+  private final short[] shorts;
+  /** ints */
+  private final int[] ints;
   /** longs */
   private final long[] longs;
+  /** doubles */
+  private final float[] floats;
   /** doubles */
   private final double[] doubles;
   /** strings */
@@ -64,7 +72,11 @@ public class ArrayRecord implements HiveReadableRecord {
 
     final int size = numColumns + partitionValues.length;
     this.booleans = new boolean[size];
+    this.bytes = new byte[size];
+    this.shorts = new short[size];
+    this.ints = new int[size];
     this.longs = new long[size];
+    this.floats = new float[size];
     this.doubles = new double[size];
     this.strings = new String[size];
     this.objects = new Object[size];
@@ -104,54 +116,64 @@ public class ArrayRecord implements HiveReadableRecord {
     return hiveTypes[index];
   }
 
-  /**
-   * Get Hive NativeType for column
-   *
-   * @param index column index
-   * @return NativeType
-   */
-  public NativeType getNativeType(int index) {
-    return hiveTypes[index].getNativeType();
-  }
-
-  /**
-   * Set boolean value for column
-   *
-   * @param index column index
-   * @param value data
-   */
+  @Override
   public void setBoolean(int index, boolean value) {
     booleans[index] = value;
   }
 
-  /**
-   * Set long value for column
-   *
-   * @param index column index
-   * @param value data
-   */
+  @Override
   public void setLong(int index, long value) {
     longs[index] = value;
   }
 
-  /**
-   * Set double value for column
-   *
-   * @param index column index
-   * @param value data
-   */
+  @Override
   public void setDouble(int index, double value) {
     doubles[index] = value;
   }
 
-  /**
-   * Set String value for column
-   *
-   * @param index column index
-   * @param value data
-   */
+  @Override
   public void setString(int index, String value) {
     strings[index] = value;
+  }
+
+  @Override
+  public void set(int index, Object value) {
+    set(index, value, hiveTypes[index]);
+  }
+
+  @Override
+  public void set(int index, Object value, HiveType hiveType) {
+    Records.verifyType(index, hiveType, hiveTypes[index]);
+  }
+
+  @Override
+  public void setByte(int index, byte value) {
+    bytes[index] = value;
+  }
+
+  @Override
+  public void setShort(int index, short value) {
+    shorts[index] = value;
+  }
+
+  @Override
+  public void setInt(int index, int value) {
+    ints[index] = value;
+  }
+
+  @Override
+  public void setFloat(int index, float value) {
+    floats[index] = value;
+  }
+
+  @Override
+  public void setMap(int index, Map data) {
+    objects[index] = data;
+  }
+
+  @Override
+  public void setList(int index, List data) {
+    objects[index] = data;
   }
 
   /**
@@ -175,42 +197,25 @@ public class ArrayRecord implements HiveReadableRecord {
   }
 
   @Override
+  public List<Object> getAllColumns() {
+    List result = Lists.newArrayListWithCapacity(numColumns);
+    for (int i = 0; i < numColumns(); ++i) {
+      result.set(i, get(i));
+    }
+    return result;
+  }
+
+  @Override
   public Object get(int index) {
     if (nulls[index]) {
       return null;
     }
-    if (hiveTypes[index].isCollection()) {
-      return objects[index];
-    } else {
-      return getPrimitive(index);
-    }
+    return get(index, hiveTypes[index]);
   }
 
   @Override
   public Object get(int index, HiveType hiveType) {
     return Records.get(this, index, hiveType);
-  }
-
-  /**
-   * Get primitive column value
-   *
-   * @param index column index
-   * @return Object
-   */
-  private Object getPrimitive(int index) {
-    NativeType nativeType = hiveTypes[index].getNativeType();
-    switch (nativeType) {
-      case BOOLEAN:
-        return booleans[index];
-      case LONG:
-        return longs[index];
-      case DOUBLE:
-        return doubles[index];
-      case STRING:
-        return strings[index];
-      default:
-        throw new IllegalArgumentException("Don't know how to handle native type " + nativeType);
-    }
   }
 
   @Override
@@ -222,19 +227,19 @@ public class ArrayRecord implements HiveReadableRecord {
   @Override
   public byte getByte(int index) {
     Records.verifyType(index, HiveType.BYTE, hiveTypes[index]);
-    return (byte) longs[index];
+    return bytes[index];
   }
 
   @Override
   public short getShort(int index) {
     Records.verifyType(index, HiveType.SHORT, hiveTypes[index]);
-    return (short) longs[index];
+    return shorts[index];
   }
 
   @Override
   public int getInt(int index) {
     Records.verifyType(index, HiveType.INT, hiveTypes[index]);
-    return (int) longs[index];
+    return ints[index];
   }
 
   @Override
@@ -246,7 +251,7 @@ public class ArrayRecord implements HiveReadableRecord {
   @Override
   public float getFloat(int index) {
     Records.verifyType(index, HiveType.FLOAT, hiveTypes[index]);
-    return (float) doubles[index];
+    return floats[index];
   }
 
   @Override

@@ -34,7 +34,7 @@ import static org.apache.hadoop.hive.serde2.objectinspector.PrimitiveObjectInspe
  */
 public enum HiveType {
   /** boolean */
-  BOOLEAN(NativeType.BOOLEAN) {
+  BOOLEAN {
     @Override public Object checkAndUpgrade(Object data) {
       Preconditions.checkArgument(data instanceof Boolean);
       return data;
@@ -42,9 +42,15 @@ public enum HiveType {
     @Override public Class<?> javaClass() {
       return Boolean.class;
     }
+    @Override public boolean isCollection() {
+      return false;
+    }
+    @Override public boolean isIntegerType() {
+      return false;
+    }
   },
   /** byte */
-  BYTE(NativeType.LONG) {
+  BYTE {
     @Override public Object checkAndUpgrade(Object data) {
       Preconditions.checkArgument(data instanceof Byte);
       return data;
@@ -52,9 +58,15 @@ public enum HiveType {
     @Override public Class<?> javaClass() {
       return Byte.class;
     }
+    @Override public boolean isCollection() {
+      return false;
+    }
+    @Override public boolean isIntegerType() {
+      return true;
+    }
   },
   /** short */
-  SHORT(NativeType.LONG) {
+  SHORT {
     @Override public Object checkAndUpgrade(Object data) {
       Preconditions.checkArgument(data instanceof Short ||
         data instanceof Byte);
@@ -63,9 +75,15 @@ public enum HiveType {
     @Override public Class<?> javaClass() {
       return Short.class;
     }
+    @Override public boolean isCollection() {
+      return false;
+    }
+    @Override public boolean isIntegerType() {
+      return true;
+    }
   },
   /** int */
-  INT(NativeType.LONG) {
+  INT {
     @Override public Object checkAndUpgrade(Object data) {
       Preconditions.checkArgument(data instanceof Integer ||
         data instanceof Short || data instanceof Byte);
@@ -74,9 +92,15 @@ public enum HiveType {
     @Override public Class<?> javaClass() {
       return Integer.class;
     }
+    @Override public boolean isCollection() {
+      return false;
+    }
+    @Override public boolean isIntegerType() {
+      return true;
+    }
   },
   /** long */
-  LONG(NativeType.LONG) {
+  LONG {
     @Override public Object checkAndUpgrade(Object data) {
       Preconditions.checkArgument(data instanceof Long ||
         data instanceof Integer || data instanceof Short ||
@@ -86,9 +110,15 @@ public enum HiveType {
     @Override public Class<?> javaClass() {
       return Long.class;
     }
+    @Override public boolean isCollection() {
+      return false;
+    }
+    @Override public boolean isIntegerType() {
+      return true;
+    }
   },
   /** float */
-  FLOAT(NativeType.DOUBLE) {
+  FLOAT {
     @Override public Object checkAndUpgrade(Object data) {
       Preconditions.checkArgument(data instanceof Float ||
           data instanceof Long || data instanceof Integer ||
@@ -98,9 +128,15 @@ public enum HiveType {
     @Override public Class<?> javaClass() {
       return Float.class;
     }
+    @Override public boolean isCollection() {
+      return false;
+    }
+    @Override public boolean isIntegerType() {
+      return false;
+    }
   },
   /** double */
-  DOUBLE(NativeType.DOUBLE) {
+  DOUBLE {
     @Override public Object checkAndUpgrade(Object data) {
       Preconditions.checkArgument(data instanceof Number);
       return ((Number) data).doubleValue();
@@ -108,9 +144,15 @@ public enum HiveType {
     @Override public Class<?> javaClass() {
       return Double.class;
     }
+    @Override public boolean isCollection() {
+      return false;
+    }
+    @Override public boolean isIntegerType() {
+      return false;
+    }
   },
   /** string */
-  STRING(NativeType.STRING) {
+  STRING {
     @Override public Object checkAndUpgrade(Object data) {
       Preconditions.checkArgument(data instanceof String);
       return data;
@@ -118,9 +160,15 @@ public enum HiveType {
     @Override public Class<?> javaClass() {
       return String.class;
     }
+    @Override public boolean isCollection() {
+      return false;
+    }
+    @Override public boolean isIntegerType() {
+      return false;
+    }
   },
   /** list */
-  LIST(null) {
+  LIST {
     @Override public Object checkAndUpgrade(Object data) {
       Preconditions.checkArgument(data instanceof List);
       return data;
@@ -128,29 +176,47 @@ public enum HiveType {
     @Override public Class<?> javaClass() {
       return List.class;
     }
+    @Override public boolean isCollection() {
+      return true;
+    }
+    @Override public boolean isIntegerType() {
+      return false;
+    }
   },
   /** map */
-  MAP(null) {
+  MAP {
     @Override public Object checkAndUpgrade(Object data) {
       Preconditions.checkArgument(data instanceof Map);
       return data;
     }
     @Override public Class<?> javaClass() {
       return Map.class;
+    }
+    @Override public boolean isCollection() {
+      return true;
+    }
+    @Override public boolean isIntegerType() {
+      return false;
     }
   },
   /** struct */
-  STRUCT(null) {
+  STRUCT {
     @Override public Object checkAndUpgrade(Object data) {
       Preconditions.checkArgument(data instanceof Map);
       return data;
     }
     @Override public Class<?> javaClass() {
       return Map.class;
+    }
+    @Override public boolean isCollection() {
+      return true;
+    }
+    @Override public boolean isIntegerType() {
+      return false;
     }
   },
   /** union */
-  UNION(null) {
+  UNION {
     @Override public Object checkAndUpgrade(Object data) {
       Preconditions.checkArgument(data instanceof Map);
       return data;
@@ -158,19 +224,13 @@ public enum HiveType {
     @Override public Class<?> javaClass() {
       return Map.class;
     }
+    @Override public boolean isCollection() {
+      return true;
+    }
+    @Override public boolean isIntegerType() {
+      return false;
+    }
   };
-
-  /** Java native type representing this Hive column type */
-  private final NativeType nativeType;
-
-  /**
-   * Constructor
-   *
-   * @param nativeType the native type
-   */
-  HiveType(NativeType nativeType) {
-    this.nativeType = nativeType;
-  }
 
   /**
    * Java Class representing this enum
@@ -188,28 +248,30 @@ public enum HiveType {
    */
   public abstract Object checkAndUpgrade(Object data);
 
-  public boolean isIntegerType() {
-    return nativeType == NativeType.LONG;
-  }
+  /**
+   * Check if type represents an integral value
+   *
+   * @return true if integral value, false otherwise
+   */
+  public abstract boolean isIntegerType();
 
   public boolean isFloatingPoint() {
-    return nativeType == NativeType.DOUBLE;
+    return this == FLOAT || this == DOUBLE;
   }
 
   public boolean isMapLike() {
     return this == MAP || this == STRUCT;
   }
 
-  public boolean isCollection() {
-    return nativeType == null;
-  }
+  /**
+   * Check if type represents a collection
+   *
+   * @return true if collection, false otherwise
+   */
+  public abstract boolean isCollection();
 
   public boolean isPrimitive() {
-    return nativeType != null;
-  }
-
-  public NativeType getNativeType() {
-    return nativeType;
+    return !isCollection();
   }
 
   /**
