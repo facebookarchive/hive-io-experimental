@@ -31,10 +31,11 @@ import org.apache.hadoop.io.NullWritable;
 import org.apache.hadoop.io.Writable;
 import org.apache.hadoop.io.WritableComparable;
 import org.apache.hadoop.mapred.FileOutputFormat;
+import org.apache.hadoop.mapred.HackOutputCommitter;
 import org.apache.hadoop.mapred.JobConf;
+import org.apache.hadoop.mapred.OutputCommitter;
 import org.apache.hadoop.mapred.Reporter;
 import org.apache.hadoop.mapreduce.JobContext;
-import org.apache.hadoop.mapreduce.OutputCommitter;
 import org.apache.hadoop.mapreduce.OutputFormat;
 import org.apache.hadoop.mapreduce.TaskAttemptContext;
 import org.apache.hadoop.util.ReflectionUtils;
@@ -424,6 +425,6 @@ public class HiveApiOutputFormat
     OutputCommitter baseCommitter = jobConf.getOutputCommitter();
     LOG.info("Getting output committer with base output committer {}",
         baseCommitter.getClass().getSimpleName());
-    return new HiveApiOutputCommitter(baseCommitter, myProfileId);
+    return new HiveApiOutputCommitter(new HackOutputCommitter(baseCommitter, jobConf), myProfileId);
   }
 }
