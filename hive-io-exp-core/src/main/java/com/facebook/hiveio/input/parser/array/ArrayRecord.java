@@ -97,6 +97,11 @@ public class ArrayRecord implements HiveRecord {
     return booleans.length - numColumns;
   }
 
+  @Override
+  public HiveType columnType(int index) {
+    return hiveTypes[index];
+  }
+
   public int getSize() {
     return booleans.length;
   }
