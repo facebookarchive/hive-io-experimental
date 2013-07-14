@@ -123,6 +123,7 @@ under the License.
     <dep.plugin.surefire.version>2.15</dep.plugin.surefire.version>
     <dep.plugin.source.version>2.2.1</dep.plugin.source.version>
 
+    <jvmsize>2048m</jvmsize>
     <repo.name>hive-io-experimental</repo.name>
     <root.dir>.</root.dir>
   </properties>
@@ -265,6 +266,7 @@ under the License.
             <source>1.6</source>
             <target>1.6</target>
             <showWarnings>false</showWarnings>
+            <maxmem>${jvmsize}</maxmem>
           </configuration>
         </plugin>
         <plugin>
@@ -310,6 +312,9 @@ under the License.
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-javadoc-plugin</artifactId>
           <version>${dep.plugin.javadoc.version}</version>
+          <configuration>
+            <maxmemory>${jvmsize}</maxmemory>
+          </configuration>
           <executions>
             <execution>
               <id>attach-javadocs</id>
@@ -451,6 +456,9 @@ under the License.
         <groupId>org.codehaus.mojo</groupId>
         <artifactId>findbugs-maven-plugin</artifactId>
         <version>${dep.plugin.findbugs.version}</version>
+        <configuration>
+          <jvmargs>-Xmx${jvmsize}</jvmargs>
+        </configuration>
       </plugin>
    </plugins>
   </reporting>
