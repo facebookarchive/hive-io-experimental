@@ -42,6 +42,14 @@ public interface HiveReadableRecord {
   int numPartitionValues();
 
   /**
+   * Get type of column
+   *
+   * @param index column index
+   * @return {@link HiveType}
+   */
+  HiveType columnType(int index);
+
+  /**
    * Get column at given index.
    *
    * Regular data columns from the tables should always be placed first, and then

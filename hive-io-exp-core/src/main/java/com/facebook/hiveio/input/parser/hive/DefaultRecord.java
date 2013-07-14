@@ -274,6 +274,11 @@ public class DefaultRecord implements HiveRecord {
   }
 
   @Override
+  public HiveType columnType(int index) {
+    return schema.columnType(index);
+  }
+
+  @Override
   public String toString() {
     return Objects.toStringHelper(this)
         .add("numColumns", numColumns())
