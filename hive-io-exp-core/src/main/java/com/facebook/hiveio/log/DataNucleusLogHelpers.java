@@ -15,7 +15,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.facebook.hiveio.testing;
+package com.facebook.hiveio.log;
 
 import org.apache.log4j.Level;
 import org.datanucleus.util.Log4JLogger;
@@ -24,12 +24,22 @@ import org.slf4j.LoggerFactory;
 
 import java.lang.reflect.Field;
 
+/**
+ * Helper methods for DataNucleus loggers
+ */
 public class DataNucleusLogHelpers {
+  /** Class logger */
   private static final org.slf4j.Logger LOG = LoggerFactory.getLogger(DataNucleusLogHelpers.class);
 
+  /** Do not instantiate */
   private DataNucleusLogHelpers() { }
 
-  public static void setDatanucleusLogLevel(Level level) {
+  /**
+   * Set the log level for DataNucleus logs
+   *
+   * @param level Log level to set
+   */
+  public static void setDataNucleusLogLevel(Level level) {
     Field log4jLoggerField;
     try {
       log4jLoggerField = Log4JLogger.class.getDeclaredField("logger");
@@ -39,14 +49,14 @@ public class DataNucleusLogHelpers {
     }
     log4jLoggerField.setAccessible(true);
 
-    NucleusLogger nucleusLoggers[] = {
-        NucleusLogger.DATASTORE,
-        NucleusLogger.DATASTORE_PERSIST,
-        NucleusLogger.DATASTORE_RETRIEVE,
-        NucleusLogger.DATASTORE_SCHEMA,
-        NucleusLogger.DATASTORE_NATIVE,
-        NucleusLogger.METADATA,
-        NucleusLogger.PERSISTENCE,
+    NucleusLogger[] nucleusLoggers = {
+      NucleusLogger.DATASTORE,
+      NucleusLogger.DATASTORE_PERSIST,
+      NucleusLogger.DATASTORE_RETRIEVE,
+      NucleusLogger.DATASTORE_SCHEMA,
+      NucleusLogger.DATASTORE_NATIVE,
+      NucleusLogger.METADATA,
+      NucleusLogger.PERSISTENCE,
     };
     for (NucleusLogger nucleusLogger : nucleusLoggers) {
       setDatanucleusLoggerLevel(nucleusLogger, log4jLoggerField, level);
@@ -55,10 +65,16 @@ public class DataNucleusLogHelpers {
     LOG.info("Done setting nucleus logger levels");
   }
 
+  /**
+   * Set the log level for Nucleus logger
+   *
+   * @param nucleusLogger Nucleus logger
+   * @param log4jLoggerField Field which contains the logger
+   * @param level Log level
+   */
   public static void setDatanucleusLoggerLevel(NucleusLogger nucleusLogger,
       Field log4jLoggerField, Level level) {
     if (nucleusLogger instanceof Log4JLogger) {
-      Log4JLogger log4jLogger = (Log4JLogger) nucleusLogger;
       org.apache.log4j.Logger logger;
       try {
         logger = (org.apache.log4j.Logger) log4jLoggerField.get(nucleusLogger);
