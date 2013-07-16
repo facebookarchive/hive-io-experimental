@@ -15,7 +15,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.facebook.hiveio.testing;
+package com.facebook.hiveio.log;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.impl.Log4JLogger;
@@ -32,11 +32,21 @@ import com.google.common.collect.Lists;
 import java.lang.reflect.Field;
 import java.util.List;
 
+/**
+ * Helper methods for Hive loggers
+ */
 public class HiveLogHelpers {
+  /** Class logger */
   private static final Logger LOG = LoggerFactory.getLogger(HiveLogHelpers.class);
 
+  /** Do not instantiate */
   private HiveLogHelpers() { }
 
+  /**
+   * Set the log level for Hive logs
+   *
+   * @param level Log level to set
+   */
   public static void setHiveLogLevel(Level level) {
     List<Log> logs = Lists.newArrayList();
     logs.add(HiveMetaStore.LOG);
@@ -49,6 +59,12 @@ public class HiveLogHelpers {
     }
   }
 
+  /**
+   * Set the log level for Hive logger
+   *
+   * @param log Hive logger
+   * @param level Log level
+   */
   public static void setHiveLoggerLevel(Log log, Level level) {
     if (log instanceof Log4JLogger) {
       Log4JLogger log4JLogger = (Log4JLogger) log;
@@ -58,6 +74,12 @@ public class HiveLogHelpers {
     }
   }
 
+  /**
+   * Add class logger to the list of logs
+   *
+   * @param logs List of logs
+   * @param klass Class whose logger we want to add
+   */
   private static void addPrivateStaticLog(List<Log> logs, Class<?> klass) {
     try {
       Field logField = klass.getDeclaredField("LOG");
