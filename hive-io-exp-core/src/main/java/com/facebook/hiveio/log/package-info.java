@@ -15,15 +15,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.facebook.hiveio.common;
-
-import org.testng.annotations.BeforeClass;
-
-import com.facebook.hiveio.log.LogHelpers;
-
-public class HiveIOTestBase {
-  @BeforeClass
-  public void silenceLoggers() {
-    LogHelpers.silenceLoggers();
-  }
-}
+/**
+ * Log helpers.
+ */
+package com.facebook.hiveio.log;

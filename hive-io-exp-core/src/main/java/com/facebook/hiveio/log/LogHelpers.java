@@ -15,18 +15,26 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.facebook.hiveio.testing;
+package com.facebook.hiveio.log;
 
 import org.apache.log4j.Level;
 import org.slf4j.LoggerFactory;
 
-public class Helpers {
-  private static final org.slf4j.Logger LOG = LoggerFactory.getLogger(Helpers.class);
+/**
+ * Helper methods for logging
+ */
+public class LogHelpers {
+  /** Class logger */
+  private static final org.slf4j.Logger LOG = LoggerFactory.getLogger(LogHelpers.class);
 
-  private Helpers() { }
+  /** Do not instantiate */
+  private LogHelpers() { }
 
+  /**
+   * Silence DataNucleus and Hive loggers
+   */
   public static void silenceLoggers() {
-    DataNucleusLogHelpers.setDatanucleusLogLevel(Level.ERROR);
+    DataNucleusLogHelpers.setDataNucleusLogLevel(Level.ERROR);
     HiveLogHelpers.setHiveLogLevel(Level.ERROR);
   }
 }
