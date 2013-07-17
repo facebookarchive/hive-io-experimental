@@ -189,8 +189,7 @@ public class HiveMetastores {
 
     for (URI uri : uris) {
       try {
-        ThriftHiveMetastore.Iface client = create(uri.getHost(), uri.getPort());
-        return client;
+        return create(uri.getHost(), uri.getPort());
       } catch (TTransportException e) {
         LOG.warn("Failed to connect to {}:{}", uri.getHost(), uri.getPort(), e);
       }
