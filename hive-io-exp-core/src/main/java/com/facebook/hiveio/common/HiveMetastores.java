@@ -31,10 +31,12 @@ import org.apache.thrift.transport.TTransportException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.facebook.hiveio.conf.HiveHooks;
 import com.google.common.annotations.VisibleForTesting;
 
 import java.lang.reflect.Field;
 import java.net.URI;
+import java.util.Collections;
 import java.util.List;
 
 import static java.util.concurrent.TimeUnit.SECONDS;
@@ -167,19 +169,28 @@ public class HiveMetastores {
   /**
    * Create Hive client from URIs in HiveConf
    *
-   * @param hiveConf HiveConf to use
+   * @param conf HiveConf to use
    * @return Thrift Hive client, or null if could not make one out of URIs
    */
-  private static ThriftHiveMetastore.Iface createFromURIs(HiveConf hiveConf) {
-    List<URI> uris = HiveUtils.getURIs(hiveConf,
-        HiveConf.ConfVars.METASTOREURIS);
+  private static ThriftHiveMetastore.Iface createFromURIs(HiveConf conf) {
+    List<URI> uris = HiveUtils.getURIs(conf, HiveConf.ConfVars.METASTOREURIS);
     if (uris.isEmpty()) {
-      LOG.warn("No Hive Metastore URIs to connect to");
-      return null;
+      // Sometimes the Hive hooks are the ones responsible for filling in
+      // the metastore URIs, so try to run them here.
+      HiveHooks.runDriverPreHooks(conf);
+      uris = HiveUtils.getURIs(conf, HiveConf.ConfVars.METASTOREURIS);
+      if (uris.isEmpty()) {
+        LOG.warn("No Hive Metastore URIs to connect to after running hooks");
+        return null;
+      }
     }
+
+    Collections.shuffle(uris);
+
     for (URI uri : uris) {
       try {
-        return create(uri.getHost(), uri.getPort());
+        ThriftHiveMetastore.Iface client = create(uri.getHost(), uri.getPort());
+        return client;
       } catch (TTransportException e) {
         LOG.warn("Failed to connect to {}:{}", uri.getHost(), uri.getPort(), e);
       }
