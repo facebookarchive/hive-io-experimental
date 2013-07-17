@@ -180,7 +180,7 @@ public class HiveMetastores {
       HiveHooks.runDriverPreHooks(conf);
       uris = HiveUtils.getURIs(conf, HiveConf.ConfVars.METASTOREURIS);
       if (uris.isEmpty()) {
-        LOG.warn("No Hive Metastore URIs to connect to after running hooks");
+        LOG.error("No Hive Metastore URIs to connect to after running hooks");
         return null;
       }
     }
