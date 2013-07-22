@@ -17,6 +17,8 @@
  */
 package org.apache.hadoop.mapred;
 
+import org.apache.hadoop.mapreduce.JobStatus;
+
 import java.io.IOException;
 
 /**
@@ -42,7 +44,7 @@ public class HackOutputCommitter extends org.apache.hadoop.mapreduce.OutputCommi
 
   @Override
   public void setupJob(org.apache.hadoop.mapreduce.JobContext context) throws IOException {
-    baseCommitter.setupJob(new HackJobContext(jobConf, context.getJobID()));
+    baseCommitter.setupJob(hackJobContext(context));
   }
 
   @Override
@@ -66,6 +68,22 @@ public class HackOutputCommitter extends org.apache.hadoop.mapreduce.OutputCommi
   public void abortTask(org.apache.hadoop.mapreduce.TaskAttemptContext context)
     throws IOException {
     baseCommitter.abortTask(hackTaskAttemptContext(context));
+  }
+
+  @Override
+  public void commitJob(org.apache.hadoop.mapreduce.JobContext context) throws IOException {
+    baseCommitter.commitJob(hackJobContext(context));
+  }
+
+  @Override
+  public void abortJob(org.apache.hadoop.mapreduce.JobContext context,
+      JobStatus.State state) throws IOException {
+    baseCommitter.abortJob(hackJobContext(context), state);
+  }
+
+  @Override
+  public void cleanupJob(org.apache.hadoop.mapreduce.JobContext context) throws IOException {
+    baseCommitter.cleanupJob(hackJobContext(context));
   }
 
   /**
