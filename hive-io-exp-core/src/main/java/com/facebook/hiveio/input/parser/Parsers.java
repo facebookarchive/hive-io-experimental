@@ -20,12 +20,11 @@ package com.facebook.hiveio.input.parser;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.hive.serde2.Deserializer;
-import org.apache.hadoop.hive.serde2.NullStructSerDe;
-import org.apache.hadoop.hive.serde2.SerDeException;
 import org.apache.hadoop.hive.serde2.columnar.BytesRefArrayWritable;
 import org.apache.hadoop.hive.serde2.objectinspector.ObjectInspector;
 import org.apache.hadoop.hive.serde2.objectinspector.PrimitiveObjectInspector;
 import org.apache.hadoop.hive.serde2.objectinspector.StructField;
+import org.apache.hadoop.hive.serde2.objectinspector.primitive.PrimitiveObjectInspectorFactory;
 import org.apache.hadoop.io.Writable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -62,11 +61,6 @@ public class Parsers {
   private static final Logger LOG = LoggerFactory.getLogger(Parsers.class);
 
   /**
-   * NullStructSerDe
-   */
-  private static final NullStructSerDe NULLSTRUCTSERDE = new NullStructSerDe();
-
-  /**
    * NullStructField
    */
   private static class NullStructField implements StructField {
@@ -77,13 +71,7 @@ public class Parsers {
 
     @Override
     public ObjectInspector getFieldObjectInspector() {
-      ObjectInspector nullStructSerDeObjectInspector = null;
-      try {
-        nullStructSerDeObjectInspector = NULLSTRUCTSERDE.getObjectInspector();
-      } catch (SerDeException e) {
-        e.printStackTrace();
-      }
-      return nullStructSerDeObjectInspector;
+      return PrimitiveObjectInspectorFactory.javaStringObjectInspector;
     }
 
     @Override
