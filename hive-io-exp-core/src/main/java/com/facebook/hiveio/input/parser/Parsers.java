@@ -40,7 +40,6 @@ import com.facebook.hiveio.input.parser.hive.DefaultParser;
 import com.facebook.hiveio.schema.HiveTableSchema;
 import com.google.common.collect.ImmutableSet;
 
-import java.util.List;
 import java.util.Set;
 
 /**
@@ -62,10 +61,14 @@ public class Parsers {
   /** Logger */
   private static final Logger LOG = LoggerFactory.getLogger(Parsers.class);
 
-  /** Don't construct */
-  private Parsers() { }
-
+  /**
+   * NullStructSerDe
+   */
   private static final NullStructSerDe NULLSTRUCTSERDE = new NullStructSerDe();
+
+  /**
+   * NullStructField
+   */
   private static class NullStructField implements StructField {
     @Override
     public String getFieldName() {
@@ -88,7 +91,14 @@ public class Parsers {
       return "";
     }
   }
+
+  /**
+   * NullStructField
+   */
   private static final NullStructField NULLSTRUCTFIELD = new NullStructField();
+
+  /** Don't construct */
+  private Parsers() { }
 
   /**
    * Choose the best parser available
@@ -112,8 +122,8 @@ public class Parsers {
     HiveTableDesc tableDesc = schema.getTableDesc();
 
     for (int i = 0; i < numColumns; ++i) {
-      data.structFields[i] = i < data.inspector.getAllStructFieldRefs().size()
-          ? data.inspector.getAllStructFieldRefs().get(i) : NULLSTRUCTFIELD;
+      data.structFields[i] = i < data.inspector.getAllStructFieldRefs().size() ?
+          data.inspector.getAllStructFieldRefs().get(i) : NULLSTRUCTFIELD;
       ObjectInspector fieldInspector = data.structFields[i].getFieldObjectInspector();
       data.hiveTypes[i] = HiveType.fromHiveObjectInspector(fieldInspector);
       if (data.hiveTypes[i].isPrimitive()) {
