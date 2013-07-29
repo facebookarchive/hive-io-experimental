@@ -20,9 +20,12 @@ package com.facebook.hiveio.input.parser;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.hive.serde2.Deserializer;
+import org.apache.hadoop.hive.serde2.NullStructSerDe;
+import org.apache.hadoop.hive.serde2.SerDeException;
 import org.apache.hadoop.hive.serde2.columnar.BytesRefArrayWritable;
 import org.apache.hadoop.hive.serde2.objectinspector.ObjectInspector;
 import org.apache.hadoop.hive.serde2.objectinspector.PrimitiveObjectInspector;
+import org.apache.hadoop.hive.serde2.objectinspector.StructField;
 import org.apache.hadoop.io.Writable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -37,6 +40,7 @@ import com.facebook.hiveio.input.parser.hive.DefaultParser;
 import com.facebook.hiveio.schema.HiveTableSchema;
 import com.google.common.collect.ImmutableSet;
 
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -61,6 +65,31 @@ public class Parsers {
   /** Don't construct */
   private Parsers() { }
 
+  private static final NullStructSerDe NULLSTRUCTSERDE = new NullStructSerDe();
+  private static class NullStructField implements StructField {
+    @Override
+    public String getFieldName() {
+      return null;
+    }
+
+    @Override
+    public ObjectInspector getFieldObjectInspector() {
+      ObjectInspector nullStructSerDeObjectInspector = null;
+      try {
+        nullStructSerDeObjectInspector = NULLSTRUCTSERDE.getObjectInspector();
+      } catch (SerDeException e) {
+        e.printStackTrace();
+      }
+      return nullStructSerDeObjectInspector;
+    }
+
+    @Override
+    public String getFieldComment() {
+      return "";
+    }
+  }
+  private static final NullStructField NULLSTRUCTFIELD = new NullStructField();
+
   /**
    * Choose the best parser available
    *
@@ -83,7 +112,8 @@ public class Parsers {
     HiveTableDesc tableDesc = schema.getTableDesc();
 
     for (int i = 0; i < numColumns; ++i) {
-      data.structFields[i] = data.inspector.getAllStructFieldRefs().get(i);
+      data.structFields[i] = i < data.inspector.getAllStructFieldRefs().size()
+          ? data.inspector.getAllStructFieldRefs().get(i) : NULLSTRUCTFIELD;
       ObjectInspector fieldInspector = data.structFields[i].getFieldObjectInspector();
       data.hiveTypes[i] = HiveType.fromHiveObjectInspector(fieldInspector);
       if (data.hiveTypes[i].isPrimitive()) {
