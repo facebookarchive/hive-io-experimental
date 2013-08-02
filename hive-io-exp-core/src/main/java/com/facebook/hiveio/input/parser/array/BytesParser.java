@@ -62,6 +62,10 @@ public class BytesParser implements RecordParser {
 
     for (int i = 0; i < columnIndexes.length; i++) {
       final int column = columnIndexes[i];
+      if (braw.size() <= column) {
+        arrayRecord.setNull(column, true);
+        continue;
+      }
       final BytesRefWritable fieldData = braw.unCheckedGet(column);
 
       final byte[] bytes = fieldData.getData();
