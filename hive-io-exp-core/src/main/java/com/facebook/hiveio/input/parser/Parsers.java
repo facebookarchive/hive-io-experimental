@@ -23,6 +23,8 @@ import org.apache.hadoop.hive.serde2.Deserializer;
 import org.apache.hadoop.hive.serde2.columnar.BytesRefArrayWritable;
 import org.apache.hadoop.hive.serde2.objectinspector.ObjectInspector;
 import org.apache.hadoop.hive.serde2.objectinspector.PrimitiveObjectInspector;
+import org.apache.hadoop.hive.serde2.objectinspector.StructField;
+import org.apache.hadoop.hive.serde2.objectinspector.primitive.PrimitiveObjectInspectorFactory;
 import org.apache.hadoop.io.Writable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -58,6 +60,31 @@ public class Parsers {
   /** Logger */
   private static final Logger LOG = LoggerFactory.getLogger(Parsers.class);
 
+  /**
+   * NullStructField
+   */
+  private static class NullStructField implements StructField {
+    @Override
+    public String getFieldName() {
+      return null;
+    }
+
+    @Override
+    public ObjectInspector getFieldObjectInspector() {
+      return PrimitiveObjectInspectorFactory.javaStringObjectInspector;
+    }
+
+    @Override
+    public String getFieldComment() {
+      return "";
+    }
+  }
+
+  /**
+   * NullStructField
+   */
+  private static final NullStructField NULL_STRUCT_FIELD = new NullStructField();
+
   /** Don't construct */
   private Parsers() { }
 
@@ -83,7 +110,8 @@ public class Parsers {
     HiveTableDesc tableDesc = schema.getTableDesc();
 
     for (int i = 0; i < numColumns; ++i) {
-      data.structFields[i] = data.inspector.getAllStructFieldRefs().get(i);
+      data.structFields[i] = i < data.inspector.getAllStructFieldRefs().size() ?
+          data.inspector.getAllStructFieldRefs().get(i) : NULL_STRUCT_FIELD;
       ObjectInspector fieldInspector = data.structFields[i].getFieldObjectInspector();
       data.hiveTypes[i] = HiveType.fromHiveObjectInspector(fieldInspector);
       if (data.hiveTypes[i].isPrimitive()) {

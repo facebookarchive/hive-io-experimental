@@ -72,6 +72,10 @@ public class ArrayParser implements RecordParser {
 
     for (int i = 0; i < parserData.columnIndexes.length; ++i) {
       int columnIndex = parserData.columnIndexes[i];
+      if (parserData.inspector.getAllStructFieldRefs().size() <= columnIndex) {
+        arrayRecord.setNull(columnIndex, true);
+        continue;
+      }
       StructField structField = parserData.structFields[columnIndex];
 
       Object fieldData = parserData.inspector.getStructFieldData(rowData, structField);
