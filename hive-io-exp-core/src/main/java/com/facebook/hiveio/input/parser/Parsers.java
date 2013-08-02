@@ -83,7 +83,7 @@ public class Parsers {
   /**
    * NullStructField
    */
-  private static final NullStructField NULLSTRUCTFIELD = new NullStructField();
+  private static final NullStructField NULL_STRUCT_FIELD = new NullStructField();
 
   /** Don't construct */
   private Parsers() { }
@@ -111,7 +111,7 @@ public class Parsers {
 
     for (int i = 0; i < numColumns; ++i) {
       data.structFields[i] = i < data.inspector.getAllStructFieldRefs().size() ?
-          data.inspector.getAllStructFieldRefs().get(i) : NULLSTRUCTFIELD;
+          data.inspector.getAllStructFieldRefs().get(i) : NULL_STRUCT_FIELD;
       ObjectInspector fieldInspector = data.structFields[i].getFieldObjectInspector();
       data.hiveTypes[i] = HiveType.fromHiveObjectInspector(fieldInspector);
       if (data.hiveTypes[i].isPrimitive()) {
