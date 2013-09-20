@@ -18,10 +18,13 @@
 
 package com.facebook.hiveio.output;
 
+import com.facebook.hiveio.common.BackoffRetryTask;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.hive.metastore.api.FieldSchema;
+import org.apache.hadoop.hive.metastore.api.MetaException;
+import org.apache.hadoop.hive.metastore.api.NoSuchObjectException;
 import org.apache.hadoop.hive.metastore.api.StorageDescriptor;
 import org.apache.hadoop.hive.metastore.api.Table;
 import org.apache.hadoop.hive.metastore.api.ThriftHiveMetastore;
@@ -103,7 +106,7 @@ public class HiveApiOutputFormat
    * @throws TException Hive Metastore issues
    */
   public void init(Configuration conf, HiveOutputDescription outputDesc)
-    throws TException {
+    throws TException, IOException {
     initProfile(conf, outputDesc, myProfileId);
   }
 
@@ -115,7 +118,7 @@ public class HiveApiOutputFormat
    * @throws TException Hive Metastore issues
    */
   public static void initDefaultProfile(Configuration conf,
-    HiveOutputDescription outputDesc) throws TException {
+    HiveOutputDescription outputDesc) throws TException, IOException {
     initProfile(conf, outputDesc, DEFAULT_PROFILE_ID);
   }
 
@@ -125,26 +128,35 @@ public class HiveApiOutputFormat
    * @param conf Configuration to use
    * @param outputDesc HiveOutputDescription
    * @param profileId Profile to use
-   * @throws TException Hive Metastore issues
+   * @throws IOException Hive Metastore issues
    */
-  public static void initProfile(Configuration conf,
-                                 HiveOutputDescription outputDesc,
-                                 String profileId)
-    throws TException {
-    String dbName = outputDesc.getTableDesc().getDatabaseName();
-    String tableName = outputDesc.getTableDesc().getTableName();
-
-    ThriftHiveMetastore.Iface client = outputDesc.metastoreClient(conf);
-
-    Table table = client.get_table(dbName, tableName);
+  public static void initProfile(final Configuration conf,
+                                 final HiveOutputDescription outputDesc,
+                                 final String profileId)
+    throws IOException {
+    BackoffRetryTask<Table> backoffRetryTask =
+        new BackoffRetryTask<Table>(conf) {
+          @Override
+          public Table idempotentTask() throws TException {
+            String dbName = outputDesc.getTableDesc().getDatabaseName();
+            String tableName = outputDesc.getTableDesc().getTableName();
+            ThriftHiveMetastore.Iface client = outputDesc.metastoreClient(conf);
+            return client.get_table(dbName, tableName);
+          }
+        };
+    Table table = backoffRetryTask.run();
     sanityCheck(table, outputDesc);
 
     OutputInfo outputInfo = new OutputInfo(table);
 
     String partitionPiece;
     if (outputInfo.hasPartitionInfo()) {
-      partitionPiece = HiveUtils.computePartitionPath(outputInfo.getPartitionInfo(),
-          outputDesc.getPartitionValues());
+      try {
+        partitionPiece = HiveUtils.computePartitionPath(
+            outputInfo.getPartitionInfo(), outputDesc.getPartitionValues());
+      } catch (MetaException e) {
+        throw new IOException(e);
+      }
     } else {
       partitionPiece = "_temp";
     }
@@ -240,18 +252,30 @@ public class HiveApiOutputFormat
    *
    * @param conf Configuration
    * @param description HiveOutputDescription
-   * @throws IOException
+   * @throws IOException When table does not exist
    */
-  private void checkTableExists(Configuration conf, HiveOutputDescription description)
+  private void checkTableExists(
+      final Configuration conf,
+      final HiveOutputDescription description)
     throws IOException
   {
-    ThriftHiveMetastore.Iface client;
-    try {
-      client = description.metastoreClient(conf);
-      client.get_table(description.getTableDesc().getDatabaseName(),
-          description.getTableDesc().getTableName());
-    } catch (TException e) {
-      throw new IOException(e);
+    BackoffRetryTask<Boolean> backoffRetryTask =
+        new BackoffRetryTask<Boolean>(conf) {
+          @Override
+          public Boolean idempotentTask() throws TException {
+            ThriftHiveMetastore.Iface client =
+                description.metastoreClient(conf);
+            try {
+              client.get_table(description.getTableDesc().getDatabaseName(),
+                  description.getTableDesc().getTableName());
+            } catch (NoSuchObjectException e) {
+              return false;
+            }
+            return true;
+          }
+        };
+    if (!backoffRetryTask.run()) {
+      throw new IOException("Table does not exist");
     }
   }
 
@@ -310,29 +334,39 @@ public class HiveApiOutputFormat
    * @param oti OutputInfo
    * @throws IOException Hadoop Filesystem issues
    */
-  private void checkPartitionDoesntExist(Configuration conf,
-    HiveOutputDescription description, OutputInfo oti)
+  private void checkPartitionDoesntExist(
+      final Configuration conf,
+      final HiveOutputDescription description,
+      final OutputInfo oti)
     throws IOException
   {
-    ThriftHiveMetastore.Iface client;
-    try {
-      client = description.metastoreClient(conf);
-    } catch (TException e) {
-      throw new IOException(e);
-    }
+    BackoffRetryTask<Boolean> backoffRetryTask =
+        new BackoffRetryTask<Boolean>(conf) {
+          @Override
+          public Boolean idempotentTask() throws TException {
+            ThriftHiveMetastore.Iface client =
+                description.metastoreClient(conf);
 
-    String db = description.getTableDesc().getDatabaseName();
-    String table = description.getTableDesc().getTableName();
+            String db = description.getTableDesc().getDatabaseName();
+            String table = description.getTableDesc().getTableName();
 
-    if (oti.hasPartitionInfo()) {
-      Map<String, String> partitionSpec = description.getPartitionValues();
-      List<String> partitionValues = listOfPartitionValues(
-          partitionSpec, oti.getPartitionInfo());
+            if (oti.hasPartitionInfo()) {
+              Map<String, String> partitionSpec =
+                  description.getPartitionValues();
+              List<String> partitionValues = listOfPartitionValues(
+                  partitionSpec, oti.getPartitionInfo());
 
-      if (partitionExists(client, db, table, partitionValues)) {
-        throw new IOException("Table " + db + ":" + table + " partition " +
-            partitionSpec + " already exists");
-      }
+              if (partitionExists(client, db, table, partitionValues)) {
+                LOG.error("Table " + db + ":" + table + " partition " +
+                    partitionSpec + " already exists");
+                return true;
+              }
+            }
+            return false;
+          }
+        };
+    if (backoffRetryTask.run()) {
+      throw new IOException("Table already exists");
     }
   }
 

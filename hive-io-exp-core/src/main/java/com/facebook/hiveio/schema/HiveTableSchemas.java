@@ -18,10 +18,12 @@
 
 package com.facebook.hiveio.schema;
 
+import com.facebook.hiveio.common.BackoffRetryTask;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.hive.conf.HiveConf;
 import org.apache.hadoop.hive.metastore.api.Table;
 import org.apache.hadoop.hive.metastore.api.ThriftHiveMetastore;
+import org.apache.thrift.TException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -30,6 +32,8 @@ import com.facebook.hiveio.common.HiveTableDesc;
 import com.facebook.hiveio.common.HiveUtils;
 import com.facebook.hiveio.common.Writables;
 import com.google.common.base.Function;
+
+import java.io.IOException;
 
 /**
  * Helpers for Hive schemas
@@ -109,20 +113,23 @@ public class HiveTableSchemas {
    * @param conf Configuration
    * @param tableName Hive table name
    * @return Hive table schema
+   * @throws IOException When there are metastore issues
    */
-  public static HiveTableSchema lookup(Configuration conf, HiveTableDesc tableName)
-  {
-    HiveConf hiveConf = HiveUtils.newHiveConf(conf, HiveTableSchemas.class);
-    ThriftHiveMetastore.Iface client;
-    Table table;
-    try {
-      client = HiveMetastores.create(hiveConf);
-      table = client.get_table(tableName.getDatabaseName(), tableName.getTableName());
-      // CHECKSTYLE: stop IllegalCatch
-    } catch (Exception e) {
-      // CHECKSTYLE: resume IllegalCatch
-      throw new IllegalStateException(e);
-    }
+  public static HiveTableSchema lookup(
+      Configuration conf,
+      final HiveTableDesc tableName) throws IOException {
+    final HiveConf hiveConf =
+        HiveUtils.newHiveConf(conf, HiveTableSchemas.class);
+    BackoffRetryTask<Table> backoffRetryTask =
+        new BackoffRetryTask<Table>(conf) {
+          @Override
+          public Table idempotentTask() throws TException {
+            ThriftHiveMetastore.Iface client = HiveMetastores.create(hiveConf);
+            return client.get_table(
+                tableName.getDatabaseName(), tableName.getTableName());
+          }
+        };
+    Table table = backoffRetryTask.run();
     return HiveTableSchemaImpl.fromTable(conf, table);
   }
 

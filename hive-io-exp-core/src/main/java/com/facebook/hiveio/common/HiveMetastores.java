@@ -189,6 +189,8 @@ public class HiveMetastores {
 
     for (URI uri : uris) {
       try {
+        LOG.info("Connecting to metastore at " +
+            uri.getHost() + ":" + uri.getPort());
         return create(uri.getHost(), uri.getPort());
       } catch (TTransportException e) {
         LOG.warn("Failed to connect to {}:{}", uri.getHost(), uri.getPort(), e);

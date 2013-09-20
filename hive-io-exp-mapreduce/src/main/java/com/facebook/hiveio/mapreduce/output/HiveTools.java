@@ -22,7 +22,6 @@ import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.MapWritable;
 import org.apache.hadoop.io.Writable;
-import org.apache.thrift.TException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -123,9 +122,9 @@ public class HiveTools {
     LOG.info("Writing to {}", outputDesc);
     try {
       HiveApiOutputFormat.initProfile(conf, outputDesc, SampleOutputFormat.SAMPLE_PROFILE_ID);
-    } catch (TException e) {
+    } catch (IOException e) {
       LOG.error("Failed to initialize profile {}", outputDesc);
-      throw new IOException(e);
+      throw e;
     }
   }
 
@@ -137,13 +136,17 @@ public class HiveTools {
    * @return hive record
    */
   public static HiveWritableRecord mapToHiveRecord(Configuration conf, MapWritable value) {
-    HiveTableSchema schema = HiveTableSchemas.lookup(conf, getHiveTableName());
-    HiveWritableRecord record = HiveRecordFactory.newWritableRecord(schema);
-    for (Map.Entry<Writable, Writable> entry : value.entrySet()) {
-      IntWritable intKey = (IntWritable) entry.getKey();
-      LongWritable longValue = (LongWritable) entry.getValue();
-      record.set(intKey.get(), longValue.get());
+    try {
+      HiveTableSchema schema = HiveTableSchemas.lookup(conf, getHiveTableName());
+      HiveWritableRecord record = HiveRecordFactory.newWritableRecord(schema);
+      for (Map.Entry<Writable, Writable> entry : value.entrySet()) {
+        IntWritable intKey = (IntWritable) entry.getKey();
+        LongWritable longValue = (LongWritable) entry.getValue();
+        record.set(intKey.get(), longValue.get());
+      }
+      return record;
+    } catch (IOException e) {
+      throw new IllegalStateException(e);
     }
-    return record;
   }
 }

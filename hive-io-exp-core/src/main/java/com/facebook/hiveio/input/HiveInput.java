@@ -108,10 +108,14 @@ public class HiveInput {
    * @return RowToBean
    */
   public static <X> RowToBean<X> rowToBean(HiveInputDescription inputDesc, Class<X> rowClass) {
-    HiveConf conf = HiveUtils.newHiveConf(HiveInput.class);
-    HiveTableSchema schema = HiveTableSchemas.lookup(conf, inputDesc.getTableDesc());
-    RowToBean<X> rowToBean = new UnsafeRowToBean<X>(rowClass, schema);
-    return rowToBean;
+    try {
+      HiveConf conf = HiveUtils.newHiveConf(HiveInput.class);
+      HiveTableSchema schema = HiveTableSchemas.lookup(conf, inputDesc.getTableDesc());
+      RowToBean<X> rowToBean = new UnsafeRowToBean<X>(rowClass, schema);
+      return rowToBean;
+    } catch (IOException e) {
+      throw new IllegalStateException(e);
+    }
   }
 
   /**

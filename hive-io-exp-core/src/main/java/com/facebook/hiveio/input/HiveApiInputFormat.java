@@ -18,6 +18,7 @@
 
 package com.facebook.hiveio.input;
 
+import com.facebook.hiveio.common.BackoffRetryTask;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.hive.metastore.api.Partition;
 import org.apache.hadoop.hive.metastore.api.Table;
@@ -148,55 +149,45 @@ public class HiveApiInputFormat
     return inputDesc;
   }
 
+  /**
+   * Pair containing a table schema and table's partitions.
+   */
+  private static class SchemaAndPartitions {
+    /** Table schema */
+    private HiveTableSchema tableSchema;
+    /** Partitions */
+    private List<InputPartition> partitions;
+  }
+
   @Override
   public List<InputSplit> getSplits(JobContext jobContext)
     throws IOException, InterruptedException
   {
-    Configuration conf = jobContext.getConfiguration();
-    HiveInputDescription inputDesc = readProfileInputDesc(conf);
+    final Configuration conf = jobContext.getConfiguration();
+    final HiveInputDescription inputDesc = readProfileInputDesc(conf);
 
-    ThriftHiveMetastore.Iface client;
-    try {
-      client = inputDesc.metastoreClient(conf);
-    } catch (TException e) {
-      throw new IOException(e);
-    }
+    BackoffRetryTask<SchemaAndPartitions> backoffRetryTask =
+        new BackoffRetryTask<SchemaAndPartitions>(conf) {
+          @Override
+          public SchemaAndPartitions idempotentTask() throws TException {
+            ThriftHiveMetastore.Iface client = inputDesc.metastoreClient(conf);
 
-    return getSplits(conf, inputDesc, client);
-  }
+            LOG.info("getSplits of " + inputDesc);
 
-  /**
-   * Get splits
-   *
-   * @param conf Configuration
-   * @param inputDesc Hive table input description
-   * @param client Metastore client
-   * @return list of input splits
-   * @throws IOException
-   */
-  public List<InputSplit> getSplits(Configuration conf,
-    HiveInputDescription inputDesc, ThriftHiveMetastore.Iface client)
-    throws IOException
-  {
-    LOG.info("getSplits of " + inputDesc);
+            HiveTableDesc tableDesc = inputDesc.getTableDesc();
+            Table table =
+                client.get_table(tableDesc.getDatabaseName(), tableDesc.getTableName());
 
-    HiveTableDesc tableDesc = inputDesc.getTableDesc();
-    Table table;
-    try {
-      table = client.get_table(tableDesc.getDatabaseName(), tableDesc.getTableName());
-      // CHECKSTYLE: stop IllegalCatch
-    } catch (Exception e) {
-      // CHECKSTYLE: resume IllegalCatch
-      throw new IOException(e);
-    }
-
-    final HiveTableSchema tableSchema = HiveTableSchemaImpl.fromTable(conf, table);
-    HiveTableSchemas.put(conf, myProfileId, tableSchema);
-
-    List<InputPartition> partitions = computePartitions(inputDesc, client, table);
-
-    List<InputSplit> splits = computeSplits(conf, inputDesc, tableSchema, partitions);
-
+            SchemaAndPartitions result = new SchemaAndPartitions();
+            result.tableSchema = HiveTableSchemaImpl.fromTable(conf, table);
+            HiveTableSchemas.put(conf, myProfileId, result.tableSchema);
+            result.partitions = computePartitions(inputDesc, client, table);
+            return result;
+          }
+        };
+    SchemaAndPartitions result = backoffRetryTask.run();
+    List<InputSplit> splits =
+        computeSplits(conf, inputDesc, result.tableSchema, result.partitions);
     return splits;
   }
 
@@ -275,7 +266,7 @@ public class HiveApiInputFormat
    * @throws IOException
    */
   private List<InputPartition> computePartitions(HiveInputDescription inputDesc,
-    ThriftHiveMetastore.Iface client, Table table) throws IOException
+    ThriftHiveMetastore.Iface client, Table table) throws TException
   {
     List<InputPartition> partitions = Lists.newArrayList();
 
@@ -286,14 +277,8 @@ public class HiveApiInputFormat
       // table with partitions, find matches to user filter.
       List<Partition> hivePartitions;
       HiveTableDesc tableDesc = inputDesc.getTableDesc();
-      try {
-        hivePartitions = client.get_partitions_by_filter(tableDesc.getDatabaseName(),
-            tableDesc.getTableName(), inputDesc.getPartitionFilter(), (short) -1);
-        // CHECKSTYLE: stop IllegalCatch
-      } catch (Exception e) {
-        // CHECKSTYLE: resume IllegalCatch
-        throw new IOException(e);
-      }
+      hivePartitions = client.get_partitions_by_filter(tableDesc.getDatabaseName(),
+          tableDesc.getTableName(), inputDesc.getPartitionFilter(), (short) -1);
       for (Partition hivePartition : hivePartitions) {
         partitions.add(InputPartition.newFromHivePartition(hivePartition));
       }

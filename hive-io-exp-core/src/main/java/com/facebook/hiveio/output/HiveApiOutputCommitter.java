@@ -18,9 +18,12 @@
 
 package com.facebook.hiveio.output;
 
+import com.facebook.hiveio.common.BackoffRetryTask;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
+import org.apache.hadoop.hive.metastore.api.AlreadyExistsException;
+import org.apache.hadoop.hive.metastore.api.InvalidObjectException;
 import org.apache.hadoop.hive.metastore.api.Partition;
 import org.apache.hadoop.hive.metastore.api.StorageDescriptor;
 import org.apache.hadoop.hive.metastore.api.Table;
@@ -29,6 +32,7 @@ import org.apache.hadoop.mapreduce.JobContext;
 import org.apache.hadoop.mapreduce.JobStatus;
 import org.apache.hadoop.mapreduce.OutputCommitter;
 import org.apache.hadoop.mapreduce.TaskAttemptContext;
+import org.apache.thrift.TException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -118,46 +122,47 @@ class HiveApiOutputCommitter extends OutputCommitter {
    * @param outputInfo Internal output information
    * @throws IOException
    */
-  private void registerPartitions(Configuration conf, HiveOutputDescription outputDesc,
-      OutputInfo outputInfo) throws IOException
+  private void registerPartitions(
+      final Configuration conf,
+      final HiveOutputDescription outputDesc,
+      final OutputInfo outputInfo) throws IOException
   {
-    String dbName = outputDesc.getTableDesc().getDatabaseName();
-    String tableName = outputDesc.getTableDesc().getTableName();
+    BackoffRetryTask<Void> backoffRetryTask = new BackoffRetryTask<Void>(conf) {
+      @Override
+      public Void idempotentTask() throws TException {
+        String dbName = outputDesc.getTableDesc().getDatabaseName();
+        String tableName = outputDesc.getTableDesc().getTableName();
 
-    ThriftHiveMetastore.Iface client;
-    Table hiveTable;
-    try {
-      client = outputDesc.metastoreClient(conf);
-      hiveTable = client.get_table(dbName, tableName);
-      // CHECKSTYLE: stop IllegalCatch
-    } catch (Exception e) {
-      // CHECKSTYLE: resume IllegalCatch
-      throw new IOException(e);
-    }
+        ThriftHiveMetastore.Iface client = outputDesc.metastoreClient(conf);
+        Table hiveTable = client.get_table(dbName, tableName);
 
-    Partition partition = new Partition();
-    partition.setDbName(dbName);
-    partition.setTableName(tableName);
-    partition.setParameters(outputInfo.getTableParams());
-    List<String> partitionValues = HiveUtils.orderedPartitionValues(
-        hiveTable.getPartitionKeys(), outputDesc.getPartitionValues());
-    partition.setValues(partitionValues);
+        Partition partition = new Partition();
+        partition.setDbName(dbName);
+        partition.setTableName(tableName);
+        partition.setParameters(outputInfo.getTableParams());
+        List<String> partitionValues = HiveUtils.orderedPartitionValues(
+            hiveTable.getPartitionKeys(), outputDesc.getPartitionValues());
+        partition.setValues(partitionValues);
 
-    StorageDescriptor sd = new StorageDescriptor(hiveTable.getSd());
-    sd.setParameters(outputInfo.getSerializerParams());
-    sd.setLocation(outputInfo.getFinalOutputPath());
-    sd.setCols(outputInfo.getColumnInfo());
-    partition.setSd(sd);
+        StorageDescriptor sd = new StorageDescriptor(hiveTable.getSd());
+        sd.setParameters(outputInfo.getSerializerParams());
+        sd.setLocation(outputInfo.getFinalOutputPath());
+        sd.setCols(outputInfo.getColumnInfo());
+        partition.setSd(sd);
 
-    LOG.info("Registering partition with values {} located at {}",
-        outputInfo.getSerializerParams(), outputInfo.getFinalOutputPath());
-    try {
-      client.add_partition(partition);
-      // CHECKSTYLE: stop IllegalCatch
-    } catch (Exception e) {
-      // CHECKSTYLE: resume IllegalCatch
-      throw new IOException(e);
-    }
+        LOG.info("Registering partition with values {} located at {}",
+            outputInfo.getSerializerParams(), outputInfo.getFinalOutputPath());
+        try {
+          client.add_partition(partition);
+        } catch (AlreadyExistsException e) {
+          LOG.info("Partition already exists; Giraph must have just created it");
+        } catch (InvalidObjectException e) {
+          throw new IllegalStateException(e);
+        }
+        return null;
+      }
+    };
+    backoffRetryTask.run();
   }
 
   /**
