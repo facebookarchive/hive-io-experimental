@@ -386,9 +386,7 @@ public class HiveApiOutputFormat
           partitionSpec, oti.getPartitionInfo());
 
       if (partitionExists(client, db, table, partitionValues)) {
-        if (LOG.isInfoEnabled()) {
-          LOG.info("Dropping partition " + partitionSpec + " from table " + db + ":" + table);
-        }
+        LOG.info("Dropping partition {} from table {}:{}", partitionSpec, db, table);
         return dropPartition(client, db, table, partitionValues);
       }
     }
