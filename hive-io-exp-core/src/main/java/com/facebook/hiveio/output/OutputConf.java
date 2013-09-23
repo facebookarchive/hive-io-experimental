@@ -51,6 +51,13 @@ public class OutputConf {
   public static final LongConfOption WRITE_RESET_TIMEOUT =
       new LongConfOption(PREFIX_KEY + ".write_reset_timeout", TimeUnit.SECONDS.toMillis(10));
 
+  /**
+   * False if we want to get an exception when trying to write data to partition which already
+   * exists, true if we want to drop partition in that case.
+   */
+  public static final BooleanConfOption DROP_PARTITION_IF_EXISTS =
+      new BooleanConfOption(PREFIX_KEY + ".drop_partition", false);
+
   /** Hadoop Configuration */
   private final Configuration conf;
   /** Profile ID */
@@ -98,6 +105,15 @@ public class OutputConf {
 
   public long getWriteResetTimeout() {
     return WRITE_RESET_TIMEOUT.get(conf);
+  }
+
+  /**
+   * Whether we should drop the partition which we are trying to write to if it already exists.
+   *
+   * @return True iff we should drop partition
+   */
+  public boolean shouldDropPartitionIfExists() {
+    return DROP_PARTITION_IF_EXISTS.get(conf);
   }
 
   /**
