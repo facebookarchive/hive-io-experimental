@@ -232,7 +232,7 @@ public class HiveApiOutputFormat
       LOG.error("OutputInfo is null in Configuration, nothing to check");
       return;
     }
-    checkPartitionInfo(conf, description, oti);
+    checkPartitionInfo(conf, description, oti, outputConf);
   }
 
   /**
@@ -261,15 +261,20 @@ public class HiveApiOutputFormat
    * @param conf Configuration
    * @param description HiveInputDescription
    * @param oti OutputInfo
+   * @param outputConf OutputConf
    * @throws IOException
    */
   private void checkPartitionInfo(Configuration conf,
-      HiveOutputDescription description, OutputInfo oti) throws IOException {
+      HiveOutputDescription description, OutputInfo oti, OutputConf outputConf) throws IOException {
     if (oti.hasPartitionInfo()) {
       if (!description.hasPartitionValues()) {
         throw new IOException("table is partitioned but user input isn't");
       }
-      checkPartitionDoesntExist(conf, description, oti);
+      if (outputConf.shouldDropPartitionIfExists()) {
+        dropPartitionIfExists(conf, description, oti);
+      } else {
+        checkPartitionDoesntExist(conf, description, oti);
+      }
     } else {
       if (description.hasPartitionValues()) {
         throw new IOException("table is not partitioned but user input is");
@@ -352,6 +357,60 @@ public class HiveApiOutputFormat
       return false;
     }
     return !partitionNames.isEmpty();
+  }
+
+  /**
+   * Drop partition which we will be writing to
+   * @param conf Configuration to use
+   * @param description HiveOutputDescription
+   * @param oti OutputInfo
+   * @return True iff partition was dropped
+   */
+  private boolean dropPartitionIfExists(Configuration conf,
+      HiveOutputDescription description, OutputInfo oti)
+    throws IOException
+  {
+    ThriftHiveMetastore.Iface client;
+    try {
+      client = description.metastoreClient(conf);
+    } catch (TException e) {
+      throw new IOException(e);
+    }
+
+    String db = description.getTableDesc().getDatabaseName();
+    String table = description.getTableDesc().getTableName();
+
+    if (oti.hasPartitionInfo()) {
+      Map<String, String> partitionSpec = description.getPartitionValues();
+      List<String> partitionValues = listOfPartitionValues(
+          partitionSpec, oti.getPartitionInfo());
+
+      if (partitionExists(client, db, table, partitionValues)) {
+        LOG.info("Dropping partition {} from table {}:{}", partitionSpec, db, table);
+        return dropPartition(client, db, table, partitionValues);
+      }
+    }
+    return false;
+  }
+
+  /**
+   * Query Hive metastore to drop a partition.
+   * @param client Hive client
+   * @param db Hive database name
+   * @param table Hive table name
+   * @param partitionValues list of partition values
+   * @return true if partition was dropped
+   */
+  private boolean dropPartition(
+      ThriftHiveMetastore.Iface client, String db, String table,
+      List<String> partitionValues) {
+    try {
+      return client.drop_partition(db, table, partitionValues, true);
+      // CHECKSTYLE: stop IllegalCatch
+    } catch (Exception e) {
+      // CHECKSTYLE: resume IllegalCatch
+      return false;
+    }
   }
 
   @Override
