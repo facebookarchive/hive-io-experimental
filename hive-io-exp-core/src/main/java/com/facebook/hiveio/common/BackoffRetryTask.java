@@ -18,6 +18,8 @@
 
 package com.facebook.hiveio.common;
 
+import com.facebook.hiveio.conf.IntConfOption;
+import com.facebook.hiveio.conf.LongConfOption;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.thrift.TException;
 import org.slf4j.Logger;
@@ -37,24 +39,16 @@ import java.io.IOException;
  */
 public abstract class BackoffRetryTask<T> {
   /**
-   * Key for the number of tries in a configuration.
+   * The number of tries.
    */
-  public static final String NUM_TRIES_CONF_KEY = "hive.io.numtries";
+  public static final IntConfOption NUM_TRIES =
+      new IntConfOption("hive.io.numtries", 5);
   /**
-   * Default number of tries.
+   * The initial retry delay. The value of delay should be low enough so that
+   * we do not need to call progress() throughout retries.
    */
-  public static final int NUM_TRIES_DEFAULT = 5;
-  /**
-   * Key for the initial retry delay in a configuration. The value of delay
-   * should be low enough so that we do not need to call progress() throughout
-   * retries.
-   */
-  public static final String INITIAL_RETRY_DELAY_MSEC_CONF_KEY =
-      "hive.io.initialretrydelaymsec";
-  /**
-   * Default retry delay.
-   */
-  public static final int RETRY_DELAY_MSEC_DEFAULT = 10000;
+  public static final LongConfOption INITIAL_RETRY_DELAY_MSEC =
+      new LongConfOption("hive.io.initialretrydelaymsec", 10000);
   /**
    * Logger
    */
@@ -75,10 +69,8 @@ public abstract class BackoffRetryTask<T> {
    * @param configuration Configuration
    */
   public BackoffRetryTask(Configuration configuration) {
-    numTries = configuration.getInt(
-        NUM_TRIES_CONF_KEY, NUM_TRIES_DEFAULT);
-    initialRetryDelayMsec = configuration.getLong(
-        INITIAL_RETRY_DELAY_MSEC_CONF_KEY, RETRY_DELAY_MSEC_DEFAULT);
+    numTries = NUM_TRIES.get(configuration);
+    initialRetryDelayMsec = INITIAL_RETRY_DELAY_MSEC.get(configuration);
   }
 
   /**
@@ -103,11 +95,12 @@ public abstract class BackoffRetryTask<T> {
         return idempotentTask();
       } catch (TException e) {
         if (triesLeft == 1) {
-          throw new IOException(e);
+          throw new IOException("No more retries left " + e);
         } else {
-          LOG.info("Failed, but will retry " + e);
           tryAgain = true;
           long randomDelayMsec = (long) (Math.random() * delayMsec);
+          LOG.info(
+              "Failed, but will retry in " + randomDelayMsec + " msec : " + e);
           try {
             Thread.sleep(randomDelayMsec);
           } catch (InterruptedException interrupted) {

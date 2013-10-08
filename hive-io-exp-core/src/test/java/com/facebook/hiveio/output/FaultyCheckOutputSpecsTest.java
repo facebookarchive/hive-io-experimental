@@ -41,10 +41,10 @@ public class FaultyCheckOutputSpecsTest extends HiveIOTestBase {
   @Test(expectedExceptions = IOException.class)
   public void testExceptionAfterTooManyRetriesWhenTableDoesNotExist()
     throws Exception {
-    HiveMetastores.setTestClient(
-        new FaultyThriftHiveMetastore(BackoffRetryTask.NUM_TRIES_DEFAULT));
+    HiveMetastores.setTestClient(new FaultyThriftHiveMetastore(
+        BackoffRetryTask.NUM_TRIES.getDefaultValue()));
     Configuration conf = new Configuration();
-    conf.setLong(BackoffRetryTask.INITIAL_RETRY_DELAY_MSEC_CONF_KEY, 100);
+    conf.setLong(BackoffRetryTask.INITIAL_RETRY_DELAY_MSEC.getKey(), 100);
     HiveOutputDescription outputDesc = new HiveOutputDescription();
     outputDesc.getTableDesc().setTableName("doesnt-exist");
     OutputConf outputConf = new OutputConf(conf, PROFILE_ID);
@@ -64,11 +64,11 @@ public class FaultyCheckOutputSpecsTest extends HiveIOTestBase {
   @Test
   public void testRecoveredFromFailuresAfterRetries()
       throws Exception {
-    FaultyThriftHiveMetastore metastore =
-        new FaultyThriftHiveMetastore(BackoffRetryTask.NUM_TRIES_DEFAULT - 1);
+    FaultyThriftHiveMetastore metastore = new FaultyThriftHiveMetastore(
+        BackoffRetryTask.NUM_TRIES.getDefaultValue() - 1);
 
     Configuration conf = new Configuration();
-    conf.setLong(BackoffRetryTask.INITIAL_RETRY_DELAY_MSEC_CONF_KEY, 100);
+    conf.setLong(BackoffRetryTask.INITIAL_RETRY_DELAY_MSEC.getKey(), 100);
     HiveOutputDescription outputDesc = new HiveOutputDescription();
     outputDesc.getTableDesc().setTableName("foo");
     OutputConf outputConf = new OutputConf(conf, PROFILE_ID);
@@ -84,6 +84,8 @@ public class FaultyCheckOutputSpecsTest extends HiveIOTestBase {
 
     outputFormat.checkOutputSpecs(jobContext);
 
-    assertEquals(BackoffRetryTask.NUM_TRIES_DEFAULT, metastore.getNumCalls());
+    assertEquals(
+        BackoffRetryTask.NUM_TRIES.getDefaultValue(),
+        metastore.getNumCalls());
   }
 }
