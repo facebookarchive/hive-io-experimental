@@ -21,6 +21,7 @@ package com.facebook.hiveio.common;
 import com.facebook.hiveio.conf.IntConfOption;
 import com.facebook.hiveio.conf.LongConfOption;
 import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.hive.metastore.api.MetaException;
 import org.apache.thrift.TException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -93,24 +94,46 @@ public abstract class BackoffRetryTask<T> {
     for (int triesLeft = numTries; tryAgain && triesLeft > 0; --triesLeft) {
       try {
         return idempotentTask();
-      } catch (TException e) {
-        if (triesLeft == 1) {
-          throw new IOException("No more retries left " + e);
-        } else {
-          tryAgain = true;
-          long randomDelayMsec = (long) (Math.random() * delayMsec);
+        // CHECKSTYLE: stop IllegalCatch
+      } catch (Exception e) {
+        // CHECKSTYLE: resume IllegalCatch
+        // TODO(malewicz): Sometimes idempotentTask() throws an exception
+        // other than TException. We log it here and rethrow. We will inspect
+        // jobs that fail, and identify which of these extra exceptions
+        // BackoffRetryTask should retry on. One already identified is
+        // MetaException.
+        if (!retriableException(e)) {
           LOG.info(
-              "Failed, but will retry in " + randomDelayMsec + " msec : " + e);
-          try {
-            Thread.sleep(randomDelayMsec);
-          } catch (InterruptedException interrupted) {
-            tryAgain = false;
+              "Caught an unexpected exception: " + e.getClass(), e);
+          throw new IllegalStateException(e);
+        } else {
+          if (triesLeft == 1) {
+            throw new IOException("No more retries left " + e);
+          } else {
+            tryAgain = true;
+            long randomDelayMsec = (long) (Math.random() * delayMsec);
+            LOG.info(
+                "Failed, but will retry in " + randomDelayMsec + " msec : " + e);
+            try {
+              Thread.sleep(randomDelayMsec);
+            } catch (InterruptedException interrupted) {
+              tryAgain = false;
+            }
+            // Exponential backoff.
+            delayMsec *= 2;
           }
-          // Exponential backoff.
-          delayMsec *= 2;
         }
       }
     }
     throw new IllegalStateException("We should never get here");
+  }
+
+  /**
+   * @param exception Exception
+   * @return True iff the idempotentTask() should be retried on this exception.
+   */
+  private static boolean retriableException(Exception exception) {
+    return exception instanceof TException ||
+        exception instanceof MetaException;
   }
 }
