@@ -55,8 +55,11 @@ import com.facebook.hiveio.record.HiveWritableRecord;
 import com.facebook.hiveio.schema.HiveTableSchema;
 import com.facebook.hiveio.schema.HiveTableSchemaImpl;
 import com.facebook.hiveio.schema.HiveTableSchemas;
+import com.facebook.hiveio.table.HiveTables;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
+
+import static com.google.common.base.Preconditions.checkNotNull;
 
 import java.io.IOException;
 import java.util.Collection;
@@ -81,6 +84,27 @@ public class HiveApiOutputFormat
   /** Which profile to lookup */
   private String myProfileId = DEFAULT_PROFILE_ID;
 
+  /**
+   * Initialize this output format
+   *
+   * @param outputDescription Output description
+   * @param profileId Profile id
+   * @param conf Configuration
+   */
+  public void initialize(HiveOutputDescription outputDescription, String profileId,
+      Configuration conf) {
+    checkNotNull(outputDescription, "inputDescription is null");
+    checkNotNull(profileId, "profileId is null");
+    checkNotNull(conf, "conf is null");
+    try {
+      setMyProfileId(profileId);
+      initProfile(conf, outputDescription, profileId);
+      HiveTableSchemas.initTableSchema(conf, profileId, outputDescription.getTableDesc());
+    } catch (IOException e) {
+      throw new IllegalStateException("initialize: IOException occurred", e);
+    }
+  }
+
   public String getMyProfileId() {
     return myProfileId;
   }
@@ -95,7 +119,7 @@ public class HiveApiOutputFormat
    * @return HiveTableSchema
    */
   public HiveTableSchema getTableSchema(Configuration conf) {
-    return HiveTableSchemas.get(conf, myProfileId);
+    return HiveTableSchemas.getFromConf(conf, myProfileId);
   }
 
   /**
@@ -134,17 +158,7 @@ public class HiveApiOutputFormat
                                  final HiveOutputDescription outputDesc,
                                  final String profileId)
     throws IOException {
-    BackoffRetryTask<Table> backoffRetryTask =
-        new BackoffRetryTask<Table>(conf) {
-          @Override
-          public Table idempotentTask() throws TException {
-            String dbName = outputDesc.getTableDesc().getDatabaseName();
-            String tableName = outputDesc.getTableDesc().getTableName();
-            ThriftHiveMetastore.Iface client = outputDesc.metastoreClient(conf);
-            return client.get_table(dbName, tableName);
-          }
-        };
-    Table table = backoffRetryTask.run();
+    Table table = HiveTables.getTable(conf, profileId, outputDesc);
     sanityCheck(table, outputDesc);
 
     OutputInfo outputInfo = new OutputInfo(table);
@@ -172,7 +186,7 @@ public class HiveApiOutputFormat
     }
 
     HiveTableSchema tableSchema = HiveTableSchemaImpl.fromTable(conf, table);
-    HiveTableSchemas.put(conf, profileId, tableSchema);
+    HiveTableSchemas.putToConf(conf, profileId, tableSchema);
 
     OutputConf outputConf = new OutputConf(conf, profileId);
     outputConf.writeOutputDescription(outputDesc);

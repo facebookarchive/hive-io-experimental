@@ -22,7 +22,8 @@ import org.apache.hadoop.hive.metastore.api.FieldSchema;
 import org.apache.hadoop.io.Writable;
 import org.apache.hadoop.io.WritableUtils;
 
-import com.google.common.base.Preconditions;
+import static com.google.common.base.Preconditions.checkArgument;
+import static com.google.common.base.Preconditions.checkNotNull;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -31,6 +32,9 @@ import java.io.DataInputStream;
 import java.io.DataOutput;
 import java.io.DataOutputStream;
 import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.Serializable;
 import java.lang.reflect.Array;
 import java.lang.reflect.Constructor;
 import java.util.Collection;
@@ -101,7 +105,7 @@ public class Writables {
     if (length > 0) {
       String readClassName = WritableUtils.readString(in);
       Class<?> readClass = Classes.classForName(readClassName);
-      Preconditions.checkArgument(klass.equals(readClass),
+      checkArgument(klass.equals(readClass),
           "Expected Enum class %s, read %s", klass.getName(), readClassName);
     }
     E[] enums = (E[]) Array.newInstance(klass, length);
@@ -452,5 +456,67 @@ public class Writables {
    */
   public static void readFieldsFromEncodedStr(String str, Writable writable) {
     readFieldsFromByteArray(decodeBytes(str), writable);
+  }
+
+  /**
+   * Write Serializable object to byte array
+   *
+   * @param object Object to write
+   * @return Byte array
+   */
+  public static byte[] writeObjectToByteArray(Serializable object) throws IOException {
+    checkNotNull(object, "object is null");
+    ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+    ObjectOutputStream objectOutputStream = new ObjectOutputStream(byteArrayOutputStream);
+    objectOutputStream.writeObject(object);
+    return byteArrayOutputStream.toByteArray();
+  }
+
+  /**
+   * Read Serializable object from byte array
+   *
+   * @param data Byte array to read the object from
+   * @param <T> Object class
+   * @return Object read
+   */
+  public static <T extends Serializable> T readObjectFromByteArray(byte[] data) throws IOException {
+    checkNotNull(data, "data is null");
+    ObjectInputStream objectInputStream = new ObjectInputStream(new ByteArrayInputStream(data));
+    try {
+      return (T) objectInputStream.readObject();
+    } catch (ClassNotFoundException e) {
+      throw new IllegalStateException("Error finding class for " + new String(data, "UTF-8"), e);
+    }
+  }
+
+  /**
+   * Write Serializable object to String
+   *
+   * @param object Object to write
+   * @return String
+   */
+  public static String writeObjectToString(Serializable object) {
+    checkNotNull(object, "object is null");
+    try {
+      return encodeBytes(writeObjectToByteArray(object));
+    } catch (IOException e) {
+      throw new IllegalStateException("writeObject: IOException", e);
+    }
+  }
+
+  /**
+   * Read Serializable object from String
+   *
+   * @param string String to read the object from
+   * @param <T> Object class
+   * @return Object read
+   */
+  public static <T extends Serializable> T readObjectFromString(String string) {
+    checkNotNull(string, "string is null");
+    try {
+      return (T) readObjectFromByteArray(decodeBytes(string));
+    } catch (IOException e) {
+      throw new IllegalStateException("readObject: IOException", e);
+    }
   }
 }

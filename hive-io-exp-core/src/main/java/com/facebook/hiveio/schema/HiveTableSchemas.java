@@ -33,6 +33,8 @@ import com.facebook.hiveio.common.HiveUtils;
 import com.facebook.hiveio.common.Writables;
 import com.google.common.base.Function;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 import java.io.IOException;
 
 /**
@@ -77,18 +79,40 @@ public class HiveTableSchemas {
   }
 
   /**
-   * Get schema for a profile
+   * Get table schema from Configuration, or if it is not present get it from metastore and set
+   * it in Configuration
+   *
+   * @param conf Configuration
+   * @param profile Profile id
+   * @param tableName Name of the table
+   * @return HiveTableSchema
+   */
+  public static HiveTableSchema initTableSchema(Configuration conf, String profile,
+      final HiveTableDesc tableName) throws IOException {
+    checkNotNull(conf, "conf is null");
+    checkNotNull(profile, "profile is null");
+    checkNotNull(tableName, "tableName is null");
+    HiveTableSchema hiveTableSchema = getFromConf(conf, profile);
+    if (hiveTableSchema == null) {
+      hiveTableSchema = lookup(conf, tableName);
+      putToConf(conf, profile, hiveTableSchema);
+    }
+    return hiveTableSchema;
+  }
+
+  /**
+   * Get schema for a profile from Configuration
    *
    * @param conf Configuration
    * @param profile Profile ID
-   * @return schema
+   * @return Schema, or null if it's not present in the Configuration
    */
-  public static HiveTableSchema get(Configuration conf, String profile)
+  public static HiveTableSchema getFromConf(Configuration conf, String profile)
   {
     String key = profileKey(profile);
     String value = conf.get(key);
     if (value == null) {
-      throw new NullPointerException("No HiveTableSchema with key " + key + " found");
+      return null;
     }
     HiveTableSchema hiveTableSchema = new HiveTableSchemaImpl();
     Writables.readFieldsFromEncodedStr(value, hiveTableSchema);
@@ -96,14 +120,14 @@ public class HiveTableSchemas {
   }
 
   /**
-   * Put schema for profile
+   * Put schema for a profile to Configuration
    *
    * @param conf Configuration
    * @param profile Profile ID
    * @param hiveTableSchema schema
    */
-  public static void put(Configuration conf, String profile,
-                         HiveTableSchema hiveTableSchema) {
+  public static void putToConf(Configuration conf, String profile,
+                               HiveTableSchema hiveTableSchema) {
     conf.set(profileKey(profile), Writables.writeToEncodedStr(hiveTableSchema));
   }
 

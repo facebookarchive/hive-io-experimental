@@ -54,6 +54,7 @@ import com.google.common.collect.Ranges;
 import java.io.IOException;
 import java.util.List;
 
+import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.Lists.transform;
 
 /**
@@ -72,6 +73,27 @@ public class HiveApiInputFormat
 
   /** Input observer */
   private HiveApiInputObserver observer;
+
+  /**
+   * Initialize this input format
+   *
+   * @param inputDescription Input description
+   * @param profileId Profile id
+   * @param conf Configuration
+   */
+  public void initialize(HiveInputDescription inputDescription, String profileId,
+      Configuration conf) {
+    checkNotNull(inputDescription, "inputDescription is null");
+    checkNotNull(profileId, "profileId is null");
+    checkNotNull(conf, "conf is null");
+    setMyProfileId(profileId);
+    setProfileInputDesc(conf, inputDescription, profileId);
+    try {
+      HiveTableSchemas.initTableSchema(conf, profileId, inputDescription.getTableDesc());
+    } catch (IOException e) {
+      throw new IllegalStateException("initialize: IOException occurred", e);
+    }
+  }
 
   /**
    * Get profile id
@@ -111,7 +133,7 @@ public class HiveApiInputFormat
    * @return HiveTableSchema
    */
   public HiveTableSchema getTableSchema(Configuration conf) {
-    return HiveTableSchemas.get(conf, myProfileId);
+    return HiveTableSchemas.getFromConf(conf, myProfileId);
   }
 
   /**
@@ -180,7 +202,7 @@ public class HiveApiInputFormat
 
             SchemaAndPartitions result = new SchemaAndPartitions();
             result.tableSchema = HiveTableSchemaImpl.fromTable(conf, table);
-            HiveTableSchemas.put(conf, myProfileId, result.tableSchema);
+            HiveTableSchemas.putToConf(conf, myProfileId, result.tableSchema);
             result.partitions = computePartitions(inputDesc, client, table);
             return result;
           }
