@@ -94,6 +94,10 @@ under the License.
       <artifactId>fastutil</artifactId>
     </dependency>
     <dependency>
+        <groupId>com.google.code.findbugs</groupId>
+        <artifactId>annotations</artifactId>
+    </dependency>
+    <dependency>
       <groupId>com.google.guava</groupId>
       <artifactId>guava</artifactId>
     </dependency>
