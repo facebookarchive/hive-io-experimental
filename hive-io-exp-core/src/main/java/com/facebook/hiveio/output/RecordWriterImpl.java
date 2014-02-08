@@ -38,7 +38,7 @@ import java.util.List;
 /**
  * RecordWriter for Hive
  */
-class RecordWriterImpl extends RecordWriter<WritableComparable, HiveWritableRecord> {
+public class RecordWriterImpl extends RecordWriter<WritableComparable, HiveWritableRecord> {
   /** Logger */
   private static final Logger LOG = LoggerFactory.getLogger(RecordWriterImpl.class);
 
