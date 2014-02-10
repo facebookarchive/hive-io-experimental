@@ -30,7 +30,7 @@ under the License.
   <groupId>com.facebook.hiveio</groupId>
   <artifactId>hive-io-exp-parent</artifactId>
   <packaging>pom</packaging>
-  <version>0.22-SNAPSHOT</version>
+  <version>0.22</version>
 
   <url>https://github.com/facebook/${repo.name}</url>
   <description>Library for reading / writing to Hive</description>
@@ -48,7 +48,7 @@ under the License.
     <connection>scm:git:git@github.com/facebook/${repo.name}.git</connection>
     <developerConnection>scm:git:git@github.com:facebook/${repo.name}.git</developerConnection>
     <url>https://github.com/facebook/${repo.name}</url>
-    <tag>HEAD</tag>
+    <tag>0.22</tag>
   </scm>
 
   <!-- ======================================================================== -->
