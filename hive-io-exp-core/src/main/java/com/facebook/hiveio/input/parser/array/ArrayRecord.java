@@ -205,7 +205,7 @@ public class ArrayRecord implements HiveRecord {
   public List<Object> getAllColumns() {
     List result = Lists.newArrayListWithCapacity(numColumns);
     for (int i = 0; i < numColumns(); ++i) {
-      result.set(i, get(i));
+      result.add(get(i));
     }
     return result;
   }
