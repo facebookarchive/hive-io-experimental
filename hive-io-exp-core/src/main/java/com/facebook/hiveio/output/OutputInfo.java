@@ -48,7 +48,7 @@ import java.util.Map;
 /**
  * Holds information for Hive output
  */
-class OutputInfo implements Writable {
+public class OutputInfo implements Writable {
   /** Logger */
   private static final Logger LOG = LoggerFactory.getLogger(OutputInfo.class);
 
