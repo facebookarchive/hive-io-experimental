@@ -32,6 +32,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.facebook.hiveio.conf.HiveHooks;
+import com.facebook.hiveio.conf.IntConfOption;
 import com.google.common.annotations.VisibleForTesting;
 
 import java.lang.reflect.Field;
@@ -45,8 +46,9 @@ import static java.util.concurrent.TimeUnit.SECONDS;
  * Wrapper around Thrift MetasStore client with helper methods.
  */
 public class HiveMetastores {
-  /** Connect timeout in milliseconds */
-  public static final int DEFAULT_TIMEOUT_MS = (int) SECONDS.toMillis(20);
+  /** Option for metastore timeout */
+  public static final IntConfOption METASTORE_TIMEOUT_MS =
+      new IntConfOption("hiveio.metastore.timeout.ms", (int) SECONDS.toMillis(60));
 
   /** Logger */
   private static final Logger LOG = LoggerFactory.getLogger(
@@ -84,7 +86,7 @@ public class HiveMetastores {
     if (TEST_CLIENT != null) {
       return TEST_CLIENT;
     }
-    return create(host, port, DEFAULT_TIMEOUT_MS);
+    return create(host, port, METASTORE_TIMEOUT_MS.getDefaultValue());
   }
 
   /**
@@ -119,7 +121,7 @@ public class HiveMetastores {
    * @return Hive Thrift Metastore client
    * @throws TTransportException Connection errors
    */
-  private static ThriftHiveMetastore.Iface create(String host, int port,
+  public static ThriftHiveMetastore.Iface create(String host, int port,
     int timeoutMillis) throws TTransportException
   {
     if (TEST_CLIENT != null) {
