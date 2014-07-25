@@ -69,7 +69,7 @@ public class MetastoreDesc implements Writable {
   {
     ThriftHiveMetastore.Iface client;
     if (hasHost()) {
-      client = HiveMetastores.create(host, port);
+      client = HiveMetastores.create(host, port, HiveMetastores.METASTORE_TIMEOUT_MS.get(conf));
     } else {
       HiveConf hiveConf = HiveUtils.newHiveConf(conf, HiveOutputDescription.class);
       client = HiveMetastores.create(hiveConf);
