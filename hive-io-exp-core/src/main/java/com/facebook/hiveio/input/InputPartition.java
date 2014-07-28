@@ -43,7 +43,7 @@ import java.util.List;
 /**
  * Internal partition information for reading
  */
-class InputPartition implements Writable {
+public class InputPartition implements Writable {
   /** Logger */
   private static final Logger LOG = LoggerFactory.getLogger(InputPartition.class);
 
