@@ -30,7 +30,7 @@ under the License.
   <groupId>com.facebook.hiveio</groupId>
   <artifactId>hive-io-exp-parent</artifactId>
   <packaging>pom</packaging>
-  <version>0.24-SNAPSHOT</version>
+  <version>0.26-SNAPSHOT</version>
 
   <url>https://github.com/facebook/${repo.name}</url>
   <description>Library for reading / writing to Hive</description>
@@ -119,7 +119,7 @@ under the License.
     <dep.plugin.findbugs.version>2.5.1</dep.plugin.findbugs.version>
     <dev.plugin.mavanagaiata.version>0.5.0</dev.plugin.mavanagaiata.version>
     <dep.plugin.rat.version>0.9</dep.plugin.rat.version>
-    <dep.plugin.release.version>2.4.1</dep.plugin.release.version>
+    <dep.plugin.release.version>2.5</dep.plugin.release.version>
     <dep.plugin.scm.version>1.8.1</dep.plugin.scm.version>
     <dep.plugin.site.version>3.3</dep.plugin.site.version>
     <dep.plugin.surefire.version>2.15</dep.plugin.surefire.version>
@@ -352,6 +352,7 @@ under the License.
             <pushChanges>false</pushChanges>
             <tagNameFormat>@{project.version}</tagNameFormat>
           </configuration>
+<dependencies> <dependency> <groupId>org.apache.maven.scm</groupId> <artifactId>maven-scm-api</artifactId> <version>1.7</version> </dependency> </dependencies>
         </plugin>
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
