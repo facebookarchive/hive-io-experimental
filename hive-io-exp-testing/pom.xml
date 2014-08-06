@@ -23,7 +23,7 @@ under the License.
   <parent>
     <groupId>com.facebook.hiveio</groupId>
     <artifactId>hive-io-exp-parent</artifactId>
-    <version>0.26</version>
+    <version>0.27-SNAPSHOT</version>
   </parent>
 
   <name>${project.artifactId}</name>
