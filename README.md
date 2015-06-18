@@ -1,3 +1,9 @@
+- - -
+
+**_This project is not actively maintained. Proceed at your own risk!_**
+
+- - -  
+
 # Overview #
 
 [![Build Status](https://travis-ci.org/facebook/hive-io-experimental.png?branch=master)](https://travis-ci.org/facebook/hive-io-experimental)
