@@ -43,7 +43,7 @@ import java.util.Map;
 /**
  * Data which is common to both input splits and input partitions
  */
-class InputSplitData implements Writable {
+public class InputSplitData implements Writable {
   /** Logger */
   private static final Logger LOG = LoggerFactory.getLogger(InputSplitData.class);
 
